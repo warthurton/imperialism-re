@@ -4457,7 +4457,8 @@
 "00626c0c": "CDocManager__dtor",
 "00626c7d": "AfxWinTerm",
 "0057f3c0": "TSimMgr_RunTradePhase",
-"0057da70": "TSimMgr_AdvancePhase"
+"0057da70": "TSimMgr_AdvancePhase",
+"004b2570": "TCity_Reset"
 },
 "vtables": {
 "00645fc8": "CDib_vtable",
