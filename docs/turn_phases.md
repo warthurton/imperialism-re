@@ -27,7 +27,7 @@ Confidence: **confirmed** = decoded from code; **likely** / **guess** as in `nam
 | 0x12 | 5 | map manager vf19; posts event | back to waiting | guess |
 | 0x64..0x72 | 4 | post an event each, then back to state 4 | one-shot events (messages) | guess |
 
-Open question: where production actually runs (TCity_BeginTurn, order execution). Not found among the states above yet.
+Open question resolved: see the production timing section at the end and `how_a_turn_works.md`. Sections below were written as the search went on; where they say "not found" they are superseded by that last section.
 
 ## Production (update)
 * The nation's TCityInteriorMinister (class of the production screen) has a per-turn function `vf62` (guess: RunTurnOrders) that walks the 9 industry slots (index 0x19-0x21) and 8 other slots (0x2b-0x32); every slot with a pending amount calls `vf67` (guess: FundOrder).
