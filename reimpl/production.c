@@ -1,0 +1,202 @@
+/*
+ * production.c -- a readable model of Imperialism's (1997) production orders, written from the decompile.
+ *
+ * This is original code that reproduces the *behaviour* read from Imperialism.exe; it is not decompiler output.
+ * Comments say where each rule comes from (function name @ address in the GOG build) and how sure we are:
+ *   [confirmed] the code does exactly this    [likely] consistent evidence, not every path checked
+ * Offsets (+0x..) are into the original objects, so you can look the rule up in the named decompile.
+ *
+ * Build and self-test:  clang -O1 -Wall -o production_test production.c && ./production_test
+ */
+#include <stdio.h>
+#include <string.h>
+
+/* ---- goods and capacity categories (docs/recipes.md, docs/trade_rows.txt) ---- */
+enum Good {
+    COTTON, WOOL, TIMBER, COAL, IRON, HORSES, OIL,               /* raw */
+    FOOD, FABRIC, LUMBER, PAPER, STEEL, FUEL,                    /* intermediate */
+    CLOTHING, FURNITURE, HARDWARE, ARMS,                         /* finished */
+    NUM_GOODS = 17,
+    NUM_STOCK = 23                                               /* the stock table has 23 shorts; 17 are goods */
+};
+enum Category { TEXTILE, CLOTHING_FACTORY, STEEL_MILL, METAL_WORKS, LUMBER_MILL, FURNITURE_FACTORY, REFINERY, NUM_CATS = 7 };
+
+/* ---- the nation's capital city: the only thing orders touch ---- */
+typedef struct City {
+    short stock[NUM_STOCK];     /* goods on hand                          city+0xb6   [confirmed] */
+    short arrivals[NUM_STOCK];  /* goods bought last turn, delivered now  city+0x2a6  [confirmed] */
+    short cap_max[NUM_CATS];    /* capacity per category                  city+0x1dc  [confirmed] */
+    short cap_left[NUM_CATS];   /* capacity unspent this turn             city+0x1fc  [confirmed] */
+    short labor;                /* labor units available                  labor+0x1c  [likely] */
+    int   score;                /* production score                       city+0x78   [confirmed] */
+    int   turn;                 /*                                        city+0xc */
+} City;
+
+/* ---- an order that turns inputs into one output good ---- */
+typedef enum { SINGLE, PAIR, EITHER } Kind;
+typedef struct Order {
+    Kind  kind;
+    short item;                 /* output good                    order+0x48 */
+    short in1, in2;             /* input goods (in2 = -1: none)   order+0x4e / +0x50 */
+    short cat;                  /* capacity category              order+0x52 */
+    short amount;               /* units ordered                  order+0x04 */
+    short reserved[NUM_STOCK];  /* inputs already taken from stock order+0x10 */
+    short binding;              /* which limit binds: 0 inputs, 1 labor, 2 capacity   order+0x40 */
+    int   produced_total;       /*                                order+0x44 */
+    City *city;
+} Order;
+
+static int min2(int a, int b) { return a < b ? a : b; }
+
+/* TItemOrder_GetMaxAmount @ 004b5310, TOrItemOrder_vf12 @ 004b58f0   [likely]
+ * Every unit costs 2 labor and 2 input items. The ceiling is the smallest of the three limits, each counted
+ * together with what this order already holds, so raising and lowering an order are symmetric. */
+int order_max_amount(Order *o)
+{
+    City *c = o->city;
+    int by_labor    = c->labor / 2 + o->amount;
+    int by_capacity = c->cap_left[o->cat] + o->amount;
+    int have1 = o->reserved[o->in1] + c->stock[o->in1];
+    int by_inputs;
+    if (o->kind == SINGLE) {
+        by_inputs = have1 / 2;                                   /* 2 of the one input per unit */
+    } else if (o->kind == PAIR) {
+        int have2 = o->reserved[o->in2] + c->stock[o->in2];
+        by_inputs = min2(have1, have2);                          /* 1 of each per unit */
+    } else {
+        int have2 = o->reserved[o->in2] + c->stock[o->in2];
+        by_inputs = (have1 + have2) / 2;                         /* any mix, 2 items per unit */
+    }
+    o->binding = 2; int max = by_capacity;
+    if (by_labor < max)  { o->binding = 1; max = by_labor; }
+    if (by_inputs < max) { o->binding = 0; max = by_inputs; }
+    return max;
+}
+
+/* Move n input items between stock and the order's reserve (negative n gives them back). */
+static void take(Order *o, int good, int n) { o->city->stock[good] -= n; o->reserved[good] += n; }
+
+/* TItemOrder_SetAmount @ 004b53d0, TOrItemOrder_vf11 @ 004b5990   [likely]
+ * Changes the order to `amount` units; refuses (returns 0) outside 0..max. Inputs, labor and capacity are
+ * charged at once and refunded if the order is lowered. */
+int order_set_amount(Order *o, int amount)
+{
+    City *c = o->city;
+    int delta = amount - o->amount;
+    if (amount < 0 || amount > order_max_amount(o)) return 0;
+    o->amount = (short)amount;
+    if (o->kind == SINGLE) {
+        take(o, o->in1, 2 * delta);
+    } else if (o->kind == PAIR) {
+        take(o, o->in1, delta);
+        take(o, o->in2, delta);
+    } else {
+        /* Prefer 1+1; if one input runs short, the other covers the rest. When refunding, return what was
+         * reserved, again preferring an even split. */
+        int a = delta < 0 ? -delta : delta;
+        int s1 = delta < 0 ? o->reserved[o->in1] : c->stock[o->in1];
+        int s2 = delta < 0 ? o->reserved[o->in2] : c->stock[o->in2];
+        int n1 = a, n2 = a;
+        if (s1 < a)      { n1 = s1; n2 = a + (a - s1); }
+        else if (s2 < a) { n2 = s2; n1 = a + (a - s2); }
+        if (delta < 0)   { n1 = -n1; n2 = -n2; }
+        take(o, o->in1, n1);
+        take(o, o->in2, n2);
+    }
+    c->labor        -= 2 * delta;
+    c->cap_left[o->cat] -= delta;
+    return 1;
+}
+
+/* TItemOrder_Complete @ 004b5580   [confirmed]
+ * Delivery: the output joins stock, capacity comes back, inputs held by the order are consumed. */
+void order_complete(Order *o)
+{
+    City *c = o->city;
+    c->stock[o->item]   += o->amount;
+    c->cap_left[o->cat] += o->amount;
+    c->score            += o->amount;      /* city+0x78 running total, folded into the score by begin_turn */
+    o->produced_total   += o->amount;
+    memset(o->reserved, 0, sizeof o->reserved);
+    o->amount = 0;                         /* TCity_BeginTurn clears the amounts for the new turn */
+}
+
+/* TCity_BeginTurn @ 004b3b40   [confirmed]
+ * 1. arrivals (last turn's purchases) join stock, then clear
+ * 2. every recipe order is completed (last turn's paid production arrives)
+ * 3. score = old*9/10 + (this turn's total)*10
+ * 4. stock is capped at 9,999 */
+void city_begin_turn(City *c, Order *orders, int n_orders)
+{
+    int i, old_score = c->score;
+    c->turn++;
+    for (i = 0; i < NUM_STOCK; i++) { c->stock[i] += c->arrivals[i]; c->arrivals[i] = 0; }
+    c->score = 0;
+    for (i = 0; i < n_orders; i++) order_complete(&orders[i]);
+    c->score = old_score * 9 / 10 + c->score * 10;
+    for (i = 0; i < NUM_STOCK; i++) if (c->stock[i] > 9999) c->stock[i] = 9999;
+}
+
+/* ---- the nine goods recipes, as set up in TCity_Reset @ 004b2570 (docs/recipes.md)   [likely] ---- */
+static void make_recipes(City *c, Order out[9])
+{
+    static const struct { Kind k; short item, in1, in2, cat; } R[9] = {
+        { EITHER, FABRIC,    WOOL,  COTTON, TEXTILE },
+        { SINGLE, LUMBER,    TIMBER, -1,    LUMBER_MILL },
+        { SINGLE, PAPER,     TIMBER, -1,    LUMBER_MILL },
+        { PAIR,   STEEL,     IRON,  COAL,   STEEL_MILL },
+        { SINGLE, FUEL,      OIL,   -1,     REFINERY },
+        { SINGLE, CLOTHING,  FABRIC, -1,    CLOTHING_FACTORY },
+        { SINGLE, FURNITURE, LUMBER, -1,    FURNITURE_FACTORY },
+        { SINGLE, HARDWARE,  STEEL, -1,     METAL_WORKS },
+        { SINGLE, ARMS,      STEEL, -1,     METAL_WORKS },
+    };
+    for (int i = 0; i < 9; i++) {
+        memset(&out[i], 0, sizeof out[i]);
+        out[i].kind = R[i].k; out[i].item = R[i].item; out[i].in1 = R[i].in1; out[i].in2 = R[i].in2;
+        out[i].cat = R[i].cat; out[i].city = c;
+    }
+}
+
+/* ---- self-test: the rules above, exercised end to end ---- */
+static int fails;
+#define CHECK(c) do { if (!(c)) { printf("FAIL line %d: %s\n", __LINE__, #c); fails++; } } while (0)
+
+int main(void)
+{
+    City c; Order o[9];
+    memset(&c, 0, sizeof c);
+    make_recipes(&c, o);
+    Order *steel = &o[3], *fabric = &o[0], *clothing = &o[5];
+
+    /* Steel = 1 Iron + 1 Coal per unit; limited by the scarcer input. */
+    c.stock[IRON] = 10; c.stock[COAL] = 6; c.labor = 100; c.cap_left[STEEL_MILL] = 8;
+    CHECK(order_max_amount(steel) == 6 && steel->binding == 0);
+    CHECK(order_set_amount(steel, 7) == 0);                     /* over the max is refused */
+    CHECK(order_set_amount(steel, 5) == 1);
+    CHECK(c.stock[IRON] == 5 && c.stock[COAL] == 1 && c.labor == 90 && c.cap_left[STEEL_MILL] == 3);
+    CHECK(order_set_amount(steel, 2) == 1);                     /* lowering refunds everything */
+    CHECK(c.stock[IRON] == 8 && c.stock[COAL] == 4 && c.labor == 96 && c.cap_left[STEEL_MILL] == 6);
+
+    /* Fabric takes any 2 of Wool/Cotton per unit, preferring 1+1; wool short -> cotton covers it. */
+    c.stock[WOOL] = 1; c.stock[COTTON] = 10; c.cap_left[TEXTILE] = 9;
+    CHECK(order_max_amount(fabric) == 5);
+    CHECK(order_set_amount(fabric, 3) == 1);
+    CHECK(c.stock[WOOL] == 0 && c.stock[COTTON] == 5);          /* 1 wool + 5 cotton = 6 items = 3 units */
+
+    /* Single-input recipe costs 2 per unit. */
+    c.stock[FABRIC] = 9; c.cap_left[CLOTHING_FACTORY] = 9;
+    CHECK(order_max_amount(clothing) == 4);
+
+    /* Production is delivered at the next turn start; capacity returns; inputs are consumed; stock capped. */
+    c.stock[STEEL] = 9998; c.arrivals[COAL] = 3; c.score = 100;
+    city_begin_turn(&c, o, 9);
+    CHECK(c.stock[STEEL] == 9999);                              /* 9998 + 2 capped */
+    CHECK(c.stock[COAL] == 7 && c.arrivals[COAL] == 0);
+    CHECK(c.stock[FABRIC] == 9 + 3);                            /* 3 fabric delivered */
+    CHECK(c.cap_left[STEEL_MILL] == 8 && steel->amount == 0);
+    CHECK(c.score == 100 * 9 / 10 + (2 + 3) * 10);
+
+    puts(fails ? "production model: FAILURES" : "production model: all checks pass");
+    return fails != 0;
+}

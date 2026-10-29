@@ -33,7 +33,7 @@ The game has four turns per year (turn/4 = year offset; guess), and the phase ma
 2. **Waiting for players (state 5, guess).** Humans plan; the AI runs `TSimMgr_RunNonHumanPowers` (guess), which makes the
    non-human powers choose their orders.
 3. **Planning orders.** Setting an amount (`TItemOrder_SetAmount`, likely) moves the inputs and labor from stock into the
-   order. Single-input recipes cost 2 inputs per unit, two-input recipes 1 + 1, labor is 2 per unit (likely). The maximum
+   order. Single-input recipes cost 2 inputs per unit, two-input recipes 1 + 1 (Steel), Fabric takes any mix of 2 Wool/Cotton, labor is 2 per unit (likely). `reimpl/production.c` is a runnable model of these rules. The maximum
    is the smallest of labor, capacity and inputs (`GetMaxAmount`, likely); the game records which limit binds.
 4. **End of the player's turn (`RunTurnOrders` / `FundOrder`, guess).** Every slot with a pending amount is paid for.
    Production is **not instant**: the paid orders finish at the next turn start (step 1).

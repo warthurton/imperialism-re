@@ -72,3 +72,8 @@ opens a pull request that auto-merges into `main` (merge commit, branch deleted 
 trade, mfc, crt, ...) using the rules in `names/groups.tsv`. Name rules go first, then a body rule (GDI calls = display),
 then unnamed functions sitting between two functions of the same group by address join that group. `src/` is git-ignored
 because it is derived from the game; only the rules and the script are tracked. Edit `groups.tsv` and rerun to regroup.
+
+## reimpl/
+
+Original, readable C that reproduces behaviour read from the game (not decompiler output). `reimpl/production.c` models the
+production orders (inputs, labor, capacity, delivery at turn start) and carries a self-test; build line is in its header.
