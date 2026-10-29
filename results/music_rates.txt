@@ -1,0 +1,14 @@
+start 10/29/2026 08:27:26
+[shim+patchON #1] map (later)            peak=0.361 loud=40/40
+[shim+patchON #2] map (later)            peak=0.659 loud=40/40
+[shim+patchON #3] map (later)            peak=0.659 loud=40/40
+[shim+patchON #4] map (later)            peak=0.724 loud=40/40
+[shim+patchOFF #1] map (later)            peak=0.659 loud=40/40
+[shim+patchOFF #2] map (later)            peak=0.724 loud=40/40
+[shim+patchOFF #3] map (later)            peak=0.724 loud=40/40
+[shim+patchOFF #4] map (later)            peak=0.719 loud=40/40
+[noshim #1] map (later)            peak=0.456 loud=40/40
+[noshim #2] map (later)            peak=0.347 loud=40/40
+[noshim #3] map (later)            peak=0.408 loud=40/40
+[noshim #4] map (later)            peak=0.408 loud=40/40
+done; shim present=True; ini present=False

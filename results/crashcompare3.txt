@@ -1,0 +1,7 @@
+[shim] run 1: OK (survived to the end)   [WER crash events: 0]   [winmm: applied (3/3 sites); slots recycled by new code=109, claims lost to the other thread=0]
+[shim] run 2: OK (survived to the end)   [WER crash events: 0]   [winmm: applied (3/3 sites); slots recycled by new code=196, claims lost to the other thread=0]
+[shim] run 3: OK (survived to the end)   [WER crash events: 0]   [winmm: applied (3/3 sites); slots recycled by new code=108, claims lost to the other thread=0]
+[shim] run 4: OK (survived to the end)   [WER crash events: 0]   [winmm: applied (3/3 sites); slots recycled by new code=196, claims lost to the other thread=0]
+[shim] run 5: OK (survived to the end)   [WER crash events: 0]   [winmm: applied (3/3 sites); slots recycled by new code=196, claims lost to the other thread=0]
+[shim] run 6: OK (survived to the end)   [WER crash events: 0]   [winmm: applied (3/3 sites); slots recycled by new code=196, claims lost to the other thread=0]
+SUMMARY [shim]: 6 crashes in 6 runs
