@@ -39,6 +39,11 @@ vt = {}
 for n, c in cls.items():
     body = bodies.get(c['real'], '')
     m = re.search(r'= &PTR_\w*?_([0-9a-f]{8});', body)
+    if not m:   # constructor not inlined into the factory: look inside the functions it calls
+        for cm in re.finditer(r'\b(?:thunk_)?FUN_([0-9a-f]{8})\(', body):
+            callee = res(int(cm[1], 16))
+            m = re.search(r'= &PTR_\w*?_([0-9a-f]{8});', bodies.get(callee, ''))
+            if m: break
     if m: vt[n] = int(m[1], 16)
 print(len(vt), 'classes with a vtable found of', len(cls))
 
@@ -70,7 +75,24 @@ if os.path.exists(RE + 'lib_names.json'):      # MFC / C runtime functions match
     for a, n in lib.items():
         ren[int(a, 16)] = n
     print(len(lib), 'library names applied')
-print(len(ren), 'functions named')
+print(len(ren), 'functions named (before hand-assigned names)')
+
+# Hand-assigned names (names/names.tsv): highest priority. addr column is a hex address or an existing generated
+# name such as TTradeMgr_vf11. kind = func | global. Every row carries a confidence and the evidence.
+inv = {}
+for a_, n_ in ren.items(): inv.setdefault(n_, a_)
+hand = {}; hand_globals = {}; notes = {}
+if os.path.exists(RE + 'names/names.tsv'):
+    for ln in open(RE + 'names/names.tsv', encoding='utf-8'):
+        if ln.startswith('#') or not ln.strip() or ln.startswith('addr\t'): continue
+        addr, name, kind, conf, note = (ln.rstrip('\n').split('\t') + ['', '', '', '', ''])[:5]
+        if kind == 'global':
+            hand_globals[addr] = (name, conf, note)
+        else:
+            a_ = int(addr, 16) if re.fullmatch(r'[0-9a-fA-F]{6,8}', addr) else inv.get(addr)
+            if a_ is None: print('names.tsv: cannot resolve', addr); continue
+            ren[a_] = name; hand[a_] = name; notes[a_] = (conf, note)
+print(len(hand), 'hand-assigned function names,', len(hand_globals), 'globals')
 json.dump({'funcs': {f'{k:08x}': v for k, v in ren.items()},
            'vtables': {f'{k:08x}': v for k, v in vtnames.items()}}, open(RE + 'renames.json', 'w'), indent=0)
 
@@ -91,5 +113,11 @@ with open(RE + 'imperialism_named.c', 'w', encoding='utf-8') as out:
         t = open(RE + fn, encoding='utf-8', errors='replace').read()
         t = re.sub(r'\b(thunk_FUN_|FUN_)([0-9a-f]{8})\b', f, t)
         t = re.sub(r'\bPTR_LAB_([0-9a-f]{8})\b', lambda m: vtnames.get(int(m[1], 16), m[0]), t)
+        for g, (gn, gc, gnote) in hand_globals.items():
+            t = re.sub(r'\b(?:PTR_)?DAT_' + g + r'\b', gn, t)
+        def hdr(m):   # annotate hand-named function headers with confidence and evidence
+            a_ = int(m[2], 16)
+            return m[0] + ('  [%s] %s' % notes[a_]) if a_ in notes else m[0]
+        t = re.sub(r'^// (\S+) @ ([0-9a-f]{8})(?=\r?$)', hdr, t, flags=re.M)
         out.write(t)
 print('replacements', cnt)

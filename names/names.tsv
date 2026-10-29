@@ -1,0 +1,41 @@
+# Hand-assigned names. Columns (tab separated): addr | name | kind | confidence | note
+#   addr: hex address, or an existing generated name (e.g. TTradeMgr_vf11) to rename a vtable slot
+#   kind: func | global
+#   confidence: confirmed (decoded or proven) | likely (consistent evidence) | guess (educated, revise freely)
+# When a guess is wrong or better evidence appears, edit the row (do not delete it: change the confidence/note) and
+# re-run  python -I tools/name_classes.py . Names appear in imperialism_named.c with [confidence] note on the header line.
+addr	name	kind	confidence	note
+006a43cc	g_TradeMgr	global	confirmed	instance whose TTradeMgr vtable slots are called (reset vf10, settle vf11, price vf19)
+006a43d0	g_DiplomacyMgr	global	likely	holds the nation x nation relation table at +0x79c; vf33 = IsHuman(nation); queried before every trade pairing
+006a43d4	g_MapMgr	global	likely	6480 tiles x 0x24 bytes walked by TRemoteMinor_vf42; vf53 gives per-tile production
+006a4310	g_Nations	global	likely	23 country pointers: 0-6 great powers, 7-22 minors (loops are hard-coded 7 and 16)
+006a4370	g_GreatPowers	global	likely	7 TGreatPower pointers (turn phases call per-nation methods through it)
+006a429c	g_Minors	global	guess	16 minor-nation objects used by TTradeMgr_vf28/29; vf31 = order lookup. May alias g_Nations[7..22]
+006a20f8	g_Game	global	guess	+0x2c = turn counter (turn/4 = year offset, four seasons per year); +0x44 = net mode (0 solo, 1 host, 2 client)
+006a21bc	g_Events	global	guess	dispatcher: vf19 (+0x4c) posts (msgId,arg); vf43 (+0xac) refresh after changes
+00695278	g_SaveSchema	global	likely	compared < 0x27 in TTradeMgr_vf6 to pick the old flat save layout
+0057f3c0	TSimMgr_RunTradePhase	func	likely	vtable slot 24 of TSimMgr: notify UI, each great power prepares orders, then trade mgr reset/collect/settle
+TTradeMgr_vf5	TTradeMgr_Save	func	likely	writes 17 rows x 160 bytes through the archive, then each per-commodity sub-object
+TTradeMgr_vf6	TTradeMgr_Load	func	likely	reads the same, byte-swaps shorts (big-endian save), schema < 0x27 reads one flat 0xAA0-byte block
+TTradeMgr_vf10	TTradeMgr_ResetTurn	func	confirmed	zeroes counts/totals/offer tables of all 17 rows, resets the 7+6+4 sub-objects
+TTradeMgr_vf11	TTradeMgr_SettleTrades	func	likely	pairs each positive offer with every allowed buyer (diplomacy checks) and posts deals
+TTradeMgr_vf13	TTradeMgr_UpdatePrice	func	confirmed	price formulas per commodity (fabric, lumber, paper, steel, fuel, arms derived; others by demand vs supply)
+TTradeMgr_vf16	TTradeMgr_GetPartnerRank	func	guess	returns a nation index, -1, or ftol of a relation value; 100 / 300 special codes
+TTradeMgr_vf24	TTradeMgr_ExecuteDeal	func	likely	moves goods between two nations, notifies humans, syncs over the network, counts deals per pair
+TTradeMgr_vf28	TTradeMgr_CollectMinorOrders	func	likely	per commodity row x 16 minors: buyers/sellers counts, supply index base^(q-1), year-dependent base 1.10..1.01
+TTradeMgr_vf29	TTradeMgr_CollectGreatPowerOrders	func	likely	same for the 7 great powers (steps 1.10,1.08,1.06,1.04,1.03,1.02,1.01)
+TRemoteMinor_vf28	TMinor_GetAvailableSupply	func	likely	production (+0x94) plus adjustment (+0xf0), clamped at 0
+TRemoteMinor_vf30	TMinor_GetProduction	func	likely	+0x94[commodity]
+TRemoteMinor_vf31	TMinor_GetOrder	func	likely	+0xc2[commodity]: positive = offer to sell, negative = bid to buy
+TRemoteMinor_vf42	TMinor_TallyMapResources	func	likely	walks all 6480 map tiles owned by this minor and totals resource production
+TRemoteMinor_vf43	TMinor_ChooseTradeOrders	func	likely	random picks: sells raws when price above thresholds, bids for 1-2 finished goods when cheap
+TRemoteMinor_vf20	TMinor_ChangeAllegiance	func	guess	status code at +0xe (-1 free, 100+n, 200+n) changes; sets relations (100 open, 300 closed) with every power
+TRemoteMinor_vf35	TMinor_HandleOffer	func	guess	dispatches on message ids 0x12d / 0x12f / 0x130 from a great power (treaty-like offers)
+TPopulationMgr_vf14	TPopulationMgr_SplitIntoLabor	func	likely	splits population into untrained/trained/expert labor, shortfall taken in a fixed order
+TItemOrder_vf11	TItemOrder_SetAmount	func	likely	moves inputs (2:1 single-input, 1+1 two-input) and labor from stock into the order; rejects if over max
+TItemOrder_vf12	TItemOrder_GetMaxAmount	func	likely	min of labor, capacity and input limits; stores which limit binds in +0x40
+TPowerPlantOrder_vf11	TPowerPlantOrder_SetAmount	func	likely	same shape as TItemOrder_SetAmount for power/capacity
+TFoodProcessingOrder_vf11	TFoodProcessingOrder_SetAmount	func	likely	even amounts only; two input stocks
+TCity_vf10	TCity_BeginTurn	func	likely	adds last turn's production/deliveries into stock (cap 9999), clears them, ticks 25+9+10 sub-objects
+TCityTask_vf10	TCityTask_AdvanceOneTurn	func	likely	subtracts this turn's contribution from the task countdown; completes the build when it reaches zero
+0057da70	TSimMgr_AdvancePhase	func	likely	switch on phase state at +4 (39 cases), each case sets the next phase at +4 and the previous at +8; run when a phase finishes
