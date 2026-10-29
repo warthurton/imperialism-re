@@ -1,401 +1,468 @@
-class	size	classVA	factoryStub	base	factoryReal	ghidraName
-TAdmiral	28	0x65c330	0x406875	TObject	0x5512d0	FUN_005512d0
-TAdorner	12	0x64bd90	0x405524	TObject	0x49d650	FUN_0049d650
-TAlwaysPictureButton	148	0x65e550	0x4036b1	TPictureButton	0x570950	FUN_00570950
-TAmbitApplication	84	0x64c0b8	0x406ed8	TApplication	0x49de40	FUN_0049de40
-TAmbitFileBasedDocument	4	0x64c0d0	0x402932	TFileBasedDocument	0x49e5a0	?
-TAmtBar	104	0x662f80	0x4034ae	TView	0x5884c0	FUN_005884c0
-TAmtBarCluster	136	0x662f50	0x402851	TUberCluster	0x586c40	FUN_00586c40
-TAnimation	44	0x64c1f0	0x402a54	TObject	0x49f020	?
-TAnimator	48	0x64c298	0x404d7c	TEventHandler	0x4a09f0	FUN_004a09f0
-TApplication	72	0x648af8	0x408be8	TCommandHandler	0x486680	FUN_00486680
-TArmoryView	172	0x651338	0x40404d	TBuildingView	0x4cece0	FUN_004cece0
-TArmsForeignMinister	128	0x659b28	0x40911f	TMinister	0x533f70	?
-TArmyBattle	120	0x669e18	0x406eb0	TTacticalBattle	0x5a4710	?
-TArmyBoyView	100	0x64dcb0	0x4012fd	TView	0x4aeae0	FUN_004aeae0
-TArmyCheckBox	148	0x64cb68	0x401b9a	TControl	0x4a9f20	FUN_004a9f20
-TArmyInfoView	144	0x663148	0x40280b	TPicture	0x591500	FUN_00591500
-TArmyMgr	936	0x64c828	0x40410b	TObject	0x4a1810	?
-TArmyMission	48	0x697a28	0x407293	TMission	0x53bfb0	FUN_0053bfb0
-TArmyPlacard	148	0x663088	0x407329	TPicture	0x58be30	FUN_0058be30
-TArmyPlayer	84	0x669488	0x40427d	TTacticalPlayer	0x59b110	?
-TArmyStack	28	0x64c840	0x406087	TObject	0x4a76a0	?
-TArmyStackList	32	0x64c858	0x40951b	TSortedList	0x4a83b0	FUN_004a83b0
-TArmyTacUnit	88	0x669e60	0x401cd5	TTacticalUnit	0x5a5ed0	?
-TArmyToolbar	140	0x6630d0	0x404336	TUnitToolbarCluster	0x58de40	FUN_0058de40
-TArmyUnitLine	20	0x64cb38	0x4031c5	TLineData	0x4a8ca0	FUN_004a8ca0
-TArmyUnitView	100	0x64cb50	0x403f8f	TView	0x4a9450	FUN_004a9450
-TArrowsControl	148	0x662db8	0x407b85	TPicture	0x5838b0	FUN_005838b0
-TAssetMgr	88	0x66f4c0	0x4078c9	TObject	0x5df1d0	FUN_005df1d0
-TAttackProvinceMission	52	0x697a40	0x4010dc	TArmyMission	0x53d670	FUN_0053d670
-TAutoGreatPower	2928	0x653f90	0x4031b6	TGreatPower	0x4e6a70	FUN_004e6a70
-TAutomatedPlayDialog	96	0x66b2c8	0x402833	TDialogView	0x5b45c0	FUN_005b45c0
-TBackgroundPicture	148	0x660628	0x402aea	TNoHilitePicture	0x572bd0	FUN_00572bd0
-TBatRepDetLine	24	0x64dd28	0x402e41	TLineData	0x4aff60	FUN_004aff60
-TBattleDetailBook	152	0x64dc98	0x402982	TBook	0x4ae9d0	FUN_004ae9d0
-TBattleReportView	9424	0x64dc80	0x402054	TDiplomacyMapView	0x4acaa0	FUN_004acaa0
-TBattleUnitsView	140	0x64dd40	0x402167	TMilitaryPageView	0x4b0630	FUN_004b0630
-TBeachheadMission	64	0x6979e0	0x406d3e	TControlSeaZoneMission	0x53a2d0	FUN_0053a2d0
-TBehavior	16	0x648cf8	0x40101e	TObject	0x487180	?
-TBillForeignMinister	132	0x659ac8	0x40848b	TMinister	0x531b30	?
-TBismarckMinister	148	0x654868	0x4043d6	TDefenseMinister	0x4ed740	FUN_004ed740
-TBlockadePortMission	64	0x6979f8	0x4025b8	TControlSeaZoneMission	0x53a990	FUN_0053a990
-TBook	152	0x65e170	0x401bdb	TPicture	0x56f4a0	FUN_0056f4a0
-TBoycottButton	144	0x662e60	0x406505	TToggleButton	0x5846e0	FUN_005846e0
-TBuildingConstructionView	156	0x651290	0x4045cf	TPicture	0x4c9d70	FUN_004c9d70
-TBuildingExpansionView	156	0x651320	0x40595c	TPicture	0x4ce480	FUN_004ce480
-TBuildingView	160	0x651230	0x4027ca	TNoHilitePicture	0x4c6df0	FUN_004c6df0
-TBullyMinister	148	0x6548b0	0x406f96	TDefenseMinister	0x4ee000	FUN_004ee000
-TButton	132	0x649630	0x405cea	TCtlMgr	0x48eb10	FUN_0048eb10
-TCancelGameOptionsCommand	24	0x65bf60	0x4096bf	TCommand	0x5424b0	FUN_005424b0
-TCapacityOrder	84	0x64f440	0x408175	TItemOrder	0x4b8c90	?
-TCheater	100	0x64ebe0	0x4047cd	TView	0x4b13a0	FUN_004b13a0
-TCity	724	0x64f338	0x4077de	TObject	0x4b2410	?
-TCityBarCluster	136	0x662f08	0x4030da	TUberCluster	0x586590	FUN_00586590
-TCityInteriorMinister	452	0x6506c8	0x40689d	TInteriorMinister	0x4be710	FUN_004be710
-TCityProductionView	396	0x64fb60	0x407662	TNoHilitePicture	0x4ba240	FUN_004ba240
-TCitySiteView	888	0x6589e0	0x401a96	TMapDialog	0x51bd60	FUN_0051bd60
-TCityTask	20	0x66a8c8	0x401b0e	TTask	0x5adcd0	?
-TCivAnimation	48	0x64c208	0x403477	TAnimation	0x49f450	?
-TCivAnimation2	48	0x64c220	0x407e05	TAnimation	0x49f600	?
-TCivDescription	368	0x663118	0x406997	TView	0x58f050	FUN_0058f050
-TCivMgr	12	0x6531f8	0x4088cd	TObject	0x4d2000	?
-TCivReport	144	0x663130	0x4012da	TPicture	0x590b90	FUN_00590b90
-TCivToolbar	140	0x663100	0x404eda	TCluster	0x58ea00	FUN_0058ea00
-TCivUnit	40	0x66ed58	0x406a0f	TUnit	0x5c2860	?
-TCivilianButton	160	0x663040	0x401d02	TRadioPictureButton	0x58b340	FUN_0058b340
-TClickZone	136	0x65e658	0x4069fb	TControl	0x572350	FUN_00572350
-TClientGreatPower	2404	0x65aff0	0x405a92	TGreatPower	0x541230	FUN_00541230
-TCloseButton	148	0x662e90	0x406631	TPictureButton	0x584a50	FUN_00584a50
-TCloseParentButton	132	0x662ea8	0x40885f	TButton	0x584bb0	FUN_00584bb0
-TClosePicture	148	0x662f38	0x4034fe	TPictureButton	0x586ad0	FUN_00586ad0
-TCluster	136	0x6496c0	0x4061e5	TControl	0x491300	FUN_00491300
-TColorFill	12	0x656618	0x403297	TAdorner	0x4ff0c0	FUN_004ff0c0
-TColorKeyButton	156	0x65e628	0x4058b2	TColorKeyPicture	0x571ed0	FUN_00571ed0
-TColorKeyPicture	152	0x660640	0x4071cb	TNoHilitePicture	0x572d20	FUN_00572d20
-TCombatReportView	160	0x6630b8	0x402905	TPicture	0x58c830	FUN_0058c830
-TCommand	24	0x648e08	0x40768a	TEvent	0x4877c0	?
-TCommandHandler	32	0x648ae0	0x4070c2	TEventHandler	0x486570	FUN_00486570
-TCommodityLine	20	0x66dcc0	0x407874	TLineData	0x5c1430	FUN_005c1430
-TControl	132	0x649600	0x405bfa	TView	0x48e430	FUN_0048e430
-TControlSeaZoneMission	60	0x6979b0	0x402063	TNavyMission	0x5386c0	FUN_005386c0
-TCouncilPanelView	100	0x654ff0	0x403558	TPanelView	0x4faf80	FUN_004faf80
-TCouncilTickerAnimation	44	0x64c250	0x407879	TAnimation	0x49fef0	?
-TCouncilView	9440	0x655020	0x402ba3	TDiplomacyMapView	0x4fb9d0	FUN_004fb9d0
-TCountingStream	12	0x6490f8	0x402fb8	TStream	0x4893c0	?
-TCountry	148	0x653670	0x403756	TObject	0x4d66a0	FUN_004d66a0
-TCreditsPicture	144	0x65de88	0x4098b3	TPicture	0x56edb0	FUN_0056edb0
-TCtlMgr	132	0x649618	0x40743c	TControl	0x48ea00	FUN_0048ea00
-TCzechBox	152	0x65e610	0x403391	TUpDownPictureButton	0x571b60	FUN_00571b60
-TDealBookPicture	180	0x66dbb8	0x40191a	TPicture	0x5bab00	FUN_005bab00
-TDealLine	24	0x66dca8	0x407e37	TLineData	0x5c0cf0	FUN_005c0cf0
-TDealList	24	0x66d888	0x40985e	TSortedPtrList	0x5ba130	FUN_005ba130
-TDealTabControl	148	0x66dbd0	0x407f59	TControl	0x5bc690	FUN_005bc690
-TDefendProvinceMission	48	0x697a58	0x407950	TArmyMission	0x53e5f0	FUN_0053e5f0
-TDefenderMinister	148	0x654898	0x407306	TDefenseMinister	0x4edd20	FUN_004edd20
-TDefenseMinister	148	0x654838	0x407adb	TMinister	0x4ec020	FUN_004ec020
-TDefenseMinisterView	104	0x654f00	0x406073	TMinisterView	0x4f3240	FUN_004f3240
-TDeluxeText	164	0x66c450	0x405907	TTEView	0x5b5ee0	FUN_005b5ee0
-TDialogBehavior	36	0x648d10	0x402ac7	TBehavior	0x487300	?
-TDialogView	96	0x64bda8	0x407e55	TView	0x49d6f0	FUN_0049d6f0
-TDipDlgCluster	136	0x662e18	0x406b18	TUberCluster	0x584040	FUN_00584040
-TDiplomacyMapView	9416	0x654f48	0x4070f9	TPicture	0x4f3ae0	FUN_004f3ae0
-TDiplomacyMgr	6364	0x654cd0	0x4052c2	TObject	0x4ee650	?
-TDiplomatForeignMinister	128	0x659ae0	0x402310	TMinister	0x5326e0	?
-TDisappearingButton	144	0x65c8b0	0x406c30	TPicture	0x568b20	FUN_00568b20
-TDisplayMgr	36	0x656600	0x404b15	TObject	0x4fe710	?
-TDlgWindow	160	0x656a48	0x404cc8	TWindow	0x500280	FUN_00500280
-TDocument	4	0x648a20	0x4059de	TObject	0x486320	?
-TDropShadowNumberText	176	0x66c420	0x407063	TPictureNumberText	0x5b5820	FUN_005b5820
-TDropShadowText	152	0x66c408	0x40622b	TPictureText	0x5b54a0	FUN_005b54a0
-TDropShadowTextBehavior	20	0x64ea78	0x402081	TBehavior	0x4b0fe0	FUN_004b0fe0
-TEditText	160	0x649690	0x407a9a	TStaticText	0x490210	FUN_00490210
-TEngineerDialog	108	0x651350	0x4016b3	TView	0x4d04b0	FUN_004d04b0
-TEscortMission	60	0x6979c8	0x401000	TNavyMission	0x539840	FUN_00539840
-TEvenCityMinister	452	0x650710	0x408139	TCityInteriorMinister	0x4c5f00	FUN_004c5f00
-TEvent	20	0x649570	0x4057c7	TObject	0x489f00	?
-TEventHandler	32	0x649588	0x405e75	TObject	0x48a0a0	?
-TExpansionOrder	84	0x64f458	0x4058e4	TItemOrder	0x4b8f50	?
-TFileBasedDocument	4	0x648a38	0x406d7a	TDocument	0x4863c0	?
-TFileStream	8	0x6490e0	0x404494	TStream	0x4890c0	?
-TFlagOptionsPicture	144	0x65de10	0x4024e1	TPicture	0x56b210	FUN_0056b210
-TFloatWindow	160	0x6496d8	0x401b4a	TWindow	0x491e00	FUN_00491e00
-TFocusAnimation	48	0x64c268	0x4029e1	TAnimation	0x4a0020	?
-TFoodProcessingOrder	76	0x64f3f8	0x40885a	TProductionOrder	0x4b7dc0	?
-TForeignMinister	128	0x659a98	0x405b3c	TMinister	0x52efd0	?
-TForeignMinisterView	104	0x654ee8	0x40969c	TMinisterView	0x4f2f20	FUN_004f2f20
-TFrameRadioView	132	0x655050	0x404953	TControl	0x4fded0	FUN_004fded0
-TFuzzySet	48	0x656958	0x40137f	TObject	0x4ff690	?
-TFuzzyVar	20	0x656940	0x4040de	TObject	0x4ff460	?
-TGPCheater	100	0x64ec10	0x405d17	TCheater	0x4b19b0	FUN_004b19b0
-TGPTreatyDialog	96	0x66b298	0x407185	TDialogView	0x5b3ae0	FUN_005b3ae0
-TGWorldButton	140	0x65e640	0x4018b6	TControl	0x572080	FUN_00572080
-TGWorldPartView	116	0x64dc50	0x405042	TView	0x4ac7d0	FUN_004ac7d0
-TGWorldPeeker	100	0x656630	0x4050bf	TView	0x4ff1f0	FUN_004ff1f0
-TGameInfoPicture	144	0x65de28	0x403896	TPicture	0x56b780	FUN_0056b780
-TGamePreferencesPicture	148	0x65ddf8	0x407748	TPicture	0x56a510	FUN_0056a510
-TGameScorePicture	148	0x661a70	0x405b64	TNoHilitePicture	0x57b000	FUN_0057b000
-TGameSetupDialog	96	0x66b220	0x40109b	TDialogView	0x5b2740	FUN_005b2740
-TGameSetupMultiplayerPicture	148	0x661998	0x405777	TNoHilitePicture	0x575e90	FUN_00575e90
-TGameSetupPicture	148	0x661980	0x407897	TNoHilitePicture	0x5757c0	FUN_005757c0
-TGameWindow	176	0x656a30	0x406267	TWindow	0x4ffb30	FUN_004ffb30
-TGarrisonView	144	0x64cb20	0x405132	TMilitaryPageView	0x4a8770	FUN_004a8770
-TGrantsView	100	0x654f90	0x4057f4	TPanelView	0x4f7fd0	FUN_004f7fd0
-TGreatPower	2404	0x653688	0x406b95	TCountry	0x4d8950	FUN_004d8950
-THQButton	156	0x663058	0x4019d3	TPicture	0x58b5c0	FUN_0058b5c0
-THandleStream	24	0x649110	0x405731	TStream	0x489580	?
-THelpMgr	48	0x656f68	0x408dc8	TObject	0x500550	?
-THelpPicture	152	0x656f80	0x408a6c	TPicture	0x503bd0	FUN_00503bd0
-THelpWindow	160	0x656f98	0x406e6f	TFloatWindow	0x504b50	FUN_00504b50
-THighScoresPicture	508	0x661968	0x407095	TNoHilitePicture	0x575280	FUN_00575280
-THostGreatPower	2408	0x65afd8	0x4059e3	TGreatPower	0x540e90	FUN_00540e90
-THotspotBehavior	16	0x64ea48	0x409818	TBehavior	0x4b0af0	FUN_004b0af0
-TIconBar	156	0x657970	0x40992b	TNoHilitePicture	0x505f50	FUN_00505f50
-TIconSlider	188	0x657988	0x4030df	TIconBar	0x5062d0	FUN_005062d0
-TIncludeView	116	0x6495d0	0x401492	TView	0x48cc40	FUN_0048cc40
-TIndexAndRankList	24	0x659b58	0x403427	TSortedPtrList	0x5347e0	FUN_005347e0
-TIndustryAmtBar	108	0x662fb0	0x408e90	TAmtBar	0x589110	FUN_00589110
-TIndustryCluster	144	0x662f98	0x402a18	TAmtBarCluster	0x588a30	FUN_00588a30
-TIndustryView	168	0x6512f0	0x4083be	TBuildingView	0x4cc6b0	FUN_004cc6b0
-TInfoBarBehavior	36	0x64ea60	0x40989a	TBehavior	0x4b0c90	FUN_004b0c90
-TInfoBarPictureText	180	0x66c438	0x406faa	TInfoBarText	0x5b5ac0	FUN_005b5ac0
-TInfoBarText	180	0x66c468	0x407c20	TDeluxeText	0x5b65a0	FUN_005b65a0
-TInfoPanelView	112	0x654fd8	0x402d7e	TPanelView	0x4f9f60	FUN_004f9f60
-TInteriorMinister	40	0x6506b0	0x402464	TMinister	0x4be0d0	FUN_004be0d0
-TInteriorMinisterView	104	0x654f18	0x4030bc	TMinisterView	0x4f35e0	FUN_004f35e0
-TInterruptusView	100	0x64dd10	0x40459d	TItemBoyView	0x4afcc0	FUN_004afcc0
-TInvadeMission	56	0x697a70	0x4024d7	TAttackProvinceMission	0x53f080	FUN_0053f080
-TItemBoyView	100	0x64dcf8	0x407789	TView	0x4af910	FUN_004af910
-TItemOrder	84	0x64f368	0x405349	TProductionOrder	0x4b51d0	?
-TJoinSelectorDialog	148	0x65c198	0x4012d0	TNoHilitePicture	0x54e690	FUN_0054e690
-TLaborPool	12	0x64f320	0x401325	TObject	0x4b20d0	?
-TLandSaleEvent	12	0x6536d0	0x40600f	TTurnStartEvent	0x4e66c0	?
-TLanguageMgr	52	0x658560	0x4078f1	TObject	0x507bc0	FUN_00507bc0
-TLineData	16	0x65e158	0x4073c9	TObject	0x56f360	?
-TList	32	0x648e80	0x409106	TSortedList	0x487e50	FUN_00487e50
-TLoadSavePicture	168	0x65de40	0x407fcc	TPicture	0x56bbd0	FUN_0056bbd0
-TLonelyTileView	100	0x656fe0	0x40768f	TView	0x505a50	FUN_00505a50
-TLoungeDialog	152	0x65c180	0x402e0a	TNoHilitePicture	0x54d650	FUN_0054d650
-TMacViewMgr	3460	0x658610	0x402aae	TObject	0x509c00	FUN_00509c00
-TMadnessButton	156	0x65c1b0	0x40531c	TCzechBox	0x54ea30	FUN_0054ea30
-TMapDialog	868	0x658998	0x402dbf	TWorldView	0x5199c0	FUN_005199c0
-TMapEditCluster	136	0x66b238	0x4017d0	TCluster	0x5b2880	FUN_005b2880
-TMapEditView	880	0x6589f8	0x4036a2	TMapDialog	0x51cab0	FUN_0051cab0
-TMapKey	148	0x655038	0x40104b	TPicture	0x4fc9c0	FUN_004fc9c0
-TMapMaker	680	0x6598a8	0x403ca6	TControl	0x525910	?
-TMapMgr	40	0x658788	0x403f3f	TObject	0x50e2f0	FUN_0050e2f0
-TMapPreviewView	112	0x6619f8	0x4095ed	TView	0x5787b0	FUN_005787b0
-TMapUberPicture	196	0x668c40	0x4033a0	TMapUberUberPicture	0x596900	FUN_00596900
-TMapUberUberPicture	148	0x668c28	0x4074eb	TOffLimitsPicture	0x596770	FUN_00596770
-TMegaPicture	172	0x660658	0x405317	TNoHilitePicture	0x5730d0	FUN_005730d0
-TMerchantBoyView	100	0x64dce0	0x40617c	TView	0x4af6a0	FUN_004af6a0
-TMilitaryPageView	136	0x65c838	0x4018f7	TPageView	0x564860	FUN_00564860
-TMilitaryUnit	68	0x66ed70	0x401d2f	TObject	0x5c2cb0	FUN_005c2cb0
-TMiniArmyLine	20	0x64cb98	0x403cd3	TLineData	0x4aa890	FUN_004aa890
-TMiniArmyView	136	0x64cbb0	0x404d77	TControl	0x4aad90	FUN_004aad90
-TMiniCivLine	20	0x64cbe0	0x4086a7	TLineData	0x4ab670	FUN_004ab670
-TMiniCivView	140	0x64cbf8	0x407261	TControl	0x4ab8c0	FUN_004ab8c0
-TMiniMapView	160	0x668c58	0x403aa8	TControl	0x59a290	FUN_0059a290
-TMiniShipLine	20	0x65c928	0x401703	TLineData	0x569bb0	FUN_00569bb0
-TMiniShipView	136	0x65c940	0x40882d	TControl	0x569dc0	FUN_00569dc0
-TMinister	16	0x659a80	0x40193d	TObject	0x52eb30	?
-TMinisterView	104	0x654ed0	0x409a89	TView	0x4f2bb0	FUN_004f2bb0
-TMinor	732	0x6536a0	0x405bff	TCountry	0x4e3660	FUN_004e3660
-TMinorRelationshipDialog	96	0x66b280	0x4030fd	TDialogView	0x5b3300	FUN_005b3300
-TMinorTradeBidsDialog	96	0x66b250	0x403d2d	TDialogView	0x5b29a0	FUN_005b29a0
-TMinorTreatyDialog	96	0x66b2b0	0x403b43	TDialogView	0x5b3f90	FUN_005b3f90
-TMission	20	0x697848	0x405fbf	TObject	0x534bc0	?
-TModalMessageCommand	32	0x66f2a8	0x407928	TCommand	0x5dcc90	FUN_005dcc90
-TMovieView	148	0x66f6e8	0x4024af	TPicture	0x5e2100	FUN_005e2100
-TMultiMessagePicture	144	0x65c1c8	0x40116d	TPicture	0x54ec20	FUN_0054ec20
-TMultiplayerMgr	248	0x65bf78	0x4017d5	TObject	0x5425d0	FUN_005425d0
-TMyNumberText	172	0x66c3a8	0x40776b	TNumberText	0x5b4f10	FUN_005b4f10
-TMyStaticText	148	0x66c3f0	0x4089fe	TStaticText	0x5b5380	FUN_005b5380
-TNapoleonMinister	148	0x654850	0x406a8c	TDefenseMinister	0x4ed400	FUN_004ed400
-TNavyAutoPlayer	48	0x6694d0	0x406762	TNavyPlayer	0x59f040	?
-TNavyBattle	148	0x669e30	0x403111	TTacticalBattle	0x5a5480	?
-TNavyBoyView	100	0x64dcc8	0x4021fd	TView	0x4aefd0	FUN_004aefd0
-TNavyHumanPlayer	48	0x6694b8	0x406a23	TNavyPlayer	0x59eef0	?
-TNavyMgr	16	0x65c360	0x40876f	TObject	0x556530	?
-TNavyMission	60	0x697998	0x409020	TMission	0x536390	FUN_00536390
-TNavyPlayer	48	0x6694a0	0x404cff	TTacticalPlayer	0x59eb80	?
-TNavyRoster	208	0x65c850	0x404971	TMilitaryPageView	0x564c30	FUN_00564c30
-TNavyTacUnit	64	0x669e78	0x40949e	TTacticalUnit	0x5a6240	?
-TNavyToolbarCluster	136	0x65c8f8	0x408742	TUberCluster	0x569430	FUN_00569430
-TNetGameSelectPicture	148	0x6619c8	0x4041dd	TNoHilitePicture	0x576aa0	FUN_00576aa0
-TNetMgr	4	0x66f978	0x40394f	TObject	0x5e3390	?
-TNetSelectPicture	148	0x6619b0	0x403021	TNoHilitePicture	0x576900	FUN_00576900
-TNewGameCommand	24	0x64c0a0	0x4016ef	TCommand	0x49dd40	FUN_0049dd40
-TNewTownView	100	0x64fba8	0x4086ed	TView	0x4bd7a0	FUN_004bd7a0
-TNewsMgr	3856	0x65c530	0x404174	TObject	0x55b670	?
-TNewspaperView	152	0x65c548	0x40536c	TPicture	0x55d160	FUN_0055d160
-TNextDiplomationCommand	24	0x654ce8	0x40162c	TCommand	0x4f28a0	FUN_004f28a0
-TNextMoveCommand	28	0x669e90	0x406a41	TCommand	0x5a64d0	FUN_005a64d0
-TNextTradeCommand	24	0x66d8a0	0x409110	TCommand	0x5ba370	FUN_005ba370
-TNoHilitePicture	148	0x660610	0x405196	TPicture	0x572a80	FUN_00572a80
-TNoHiliteText	148	0x66c480	0x407dd3	TStaticText	0x5b6960	FUN_005b6960
-TNominationView	144	0x655008	0x401a9b	TPicture	0x4fb6e0	FUN_004fb6e0
-TNumberText	172	0x6496a8	0x402176	TEditText	0x490ed0	FUN_00490ed0
-TNumberedArrowButton	136	0x6630a0	0x40501f	TControl	0x58c1e0	FUN_0058c1e0
-TNumberedIcon	176	0x6579b8	0x40808f	TMegaPicture	0x5072e0	FUN_005072e0
-TNumberedItem	176	0x6579d0	0x402ff4	TView	0x507700	FUN_00507700
-TObject	4	0x694eb8	0x404683	0x6706e0	0x485df0	?
-TOcean	24	0x65c630	0x403cc9	TObject	0x562100	?
-TOceanDialog	128	0x65c898	0x408760	TWorldView	0x565db0	FUN_00565db0
-TOffLimitsPicture	148	0x660670	0x404ad9	TPicture	0x573710	FUN_00573710
-TOfferDeskPicture	168	0x66dc90	0x4090e3	TPicture	0x5be4b0	FUN_005be4b0
-TOffersPanelView	112	0x654fc0	0x402cb6	TPanelView	0x4f8ec0	FUN_004f8ec0
-TOnOffRadioButton	152	0x65e5f8	0x4064d3	TPictureButton	0x571930	FUN_00571930
-TOneTimeAnimation	48	0x64c238	0x40788d	TAnimation	0x49fcc0	?
-TOrItemOrder	84	0x64f380	0x403e5e	TItemOrder	0x4b57b0	?
-TOrderView	104	0x6579a0	0x40425a	TView	0x5069d0	FUN_005069d0
-TOverlayRadioButton	188	0x6512a8	0x404304	TRadioPictureButton	0x4caa50	FUN_004caa50
-TPageCorner	152	0x65e188	0x404be7	TColorKeyPicture	0x56f7b0	FUN_0056f7b0
-TPageView	132	0x65e1a0	0x40673f	TView	0x56f8e0	FUN_0056f8e0
-TPanelView	100	0x654f60	0x4021e4	TView	0x4f78e0	FUN_004f78e0
-TPicture	144	0x649660	0x403ba2	TControl	0x48eeb0	FUN_0048eeb0
-TPictureButton	148	0x65e538	0x40649c	TPicture	0x570750	FUN_00570750
-TPictureLine	20	0x65e1b8	0x401ec9	TLineData	0x570030	?
-TPictureNumberText	172	0x66c3c0	0x405083	TNumberText	0x5b5120	FUN_005b5120
-TPictureRadioButton	144	0x65e580	0x4051d7	TToggleButton	0x570cc0	FUN_00570cc0
-TPictureText	148	0x66c3d8	0x407707	TStaticText	0x5b5260	FUN_005b5260
-TPirateMinister	148	0x654880	0x402bf8	TDefenseMinister	0x4eda30	FUN_004eda30
-TPlacard	148	0x663070	0x404ef8	TPicture	0x58b960	FUN_0058b960
-TPlaceCityDialog	148	0x651368	0x401c7b	TPicture	0x4d1760	FUN_004d1760
-TPopGrowthOrder	76	0x64f410	0x409a93	TProductionOrder	0x4b8110	?
-TPopulationMgr	80	0x64f398	0x4067fd	TObject	0x4b5b40	?
-TPortZone	76	0x65c618	0x40598e	TZone	0x5615e0	FUN_005615e0
-TPoseMessageDialog	28	0x65bf90	0x404255	TCommand	0x54b060	FUN_0054b060
-TPowerPlantOrder	80	0x64f3e0	0x402dab	TProductionOrder	0x4b79f0	?
-TProductionCluster	152	0x662f20	0x406203	TUberCluster	0x586840	FUN_00586840
-TProductionOrder	76	0x64f350	0x402036	TObject	0x4b4eb0	?
-TProvinceDesirabilityList	24	0x653658	0x4010b9	TSortedPtrList	0x4d6500	FUN_004d6500
-TProxyGreatPower	2404	0x65afc0	0x4043ef	TGreatPower	0x540840	FUN_00540840
-TPtrList	24	0x648eb0	0x402a59	TSortedPtrList	0x488400	FUN_00488400
-TPurchaseCluster	140	0x6512d8	0x40718f	TCluster	0x4cc300	FUN_004cc300
-TQueryFloater	144	0x65de70	0x40466a	TPicture	0x56e840	FUN_0056e840
-TRadio	132	0x649648	0x4033cd	TCtlMgr	0x48ece0	FUN_0048ece0
-TRadioPictureButton	152	0x65e5e0	0x4017b2	TUpDownPictureButton	0x571700	FUN_00571700
-TRadioText	156	0x661a10	0x404e94	TDropShadowText	0x5793f0	FUN_005793f0
-TRadioTextCluster	152	0x661a28	0x40562d	TCluster	0x5795b0	FUN_005795b0
-TRailAmtBar	108	0x662fe0	0x407630	TAmtBar	0x589ed0	FUN_00589ed0
-TRailCityMinister	452	0x650728	0x404340	TCityInteriorMinister	0x4c6210	FUN_004c6210
-TRailCluster	144	0x662fc8	0x4091d8	TAmtBarCluster	0x589660	FUN_00589660
-TRailheadDialog	100	0x64fb78	0x4057a9	TDialogView	0x4bcf40	FUN_004bcf40
-TRearFloatWindow	160	0x654f30	0x401e0b	TFloatWindow	0x4f3840	FUN_004f3840
-TRelationshipDialog	96	0x66b268	0x4048b3	TDialogView	0x5b2ca0	FUN_005b2ca0
-TRemoteGreatPower	2404	0x65b008	0x402a27	TGreatPower	0x5417c0	FUN_005417c0
-TRemoteMinor	732	0x65b020	0x406b59	TRemoteMinor	0x541c10	FUN_00541c10
-TRightLeftView	136	0x662e00	0x408a26	TControl	0x583e70	FUN_00583e70
-TScatteredShipsMission	60	0x697a10	0x402f27	TNavyMission	0x53ba60	FUN_0053ba60
-TScenarioChooser	352	0x661a40	0x40483b	TNoHilitePicture	0x579ae0	FUN_00579ae0
-TScoreGraph	96	0x655068	0x402f8b	TView	0x4fe1d0	FUN_004fe1d0
-TScrollBarView	148	0x661460	0x407a40	TControl	0x5743f0	FUN_005743f0
-TScrollView	104	0x661448	0x401d6b	TView	0x573c20	FUN_00573c20
-TScroller	96	0x6495b8	0x405f83	TView	0x48ca60	FUN_0048ca60
-TScrollerButton	148	0x661478	0x404ac0	TPictureButton	0x574ea0	FUN_00574ea0
-TSelectoText	148	0x661a88	0x406082	TStaticText	0x57b670	FUN_0057b670
-TSetupRandomMapPicture	168	0x6619e0	0x401c62	TNoHilitePicture	0x576ca0	FUN_00576ca0
-TShip	56	0x65c318	0x407a5e	TObject	0x54f460	FUN_0054f460
-TShipAmtBar	108	0x663010	0x40436d	TAmtBar	0x58aaa0	FUN_0058aaa0
-TShipBuilderCityMinister	452	0x6506f8	0x402603	TCityInteriorMinister	0x4c5c00	FUN_004c5c00
-TShipBuildingTask	24	0x66a8e0	0x403abc	TCityTask	0x5ae650	?
-TShipFractionCluster	152	0x65c8c8	0x4054ac	TCluster	0x568cd0	FUN_00568cd0
-TShipLine	28	0x65c868	0x409278	TLineData	0x565030	FUN_00565030
-TShipOrder	76	0x64f428	0x401a73	TProductionOrder	0x4b8470	?
-TShipPlacard	148	0x65c8e0	0x403256	TNoHilitePicture	0x5691d0	FUN_005691d0
-TShipView	104	0x65c880	0x402329	TView	0x565400	FUN_00565400
-TShipyardCluster	144	0x662ff8	0x401e83	TAmtBarCluster	0x58a4d0	FUN_0058a4d0
-TShipyardView	204	0x651278	0x401a64	TBuildingView	0x4c8200	FUN_004c8200
-TSidewaysArrow	152	0x662dd0	0x40234c	TUpDownPictureButton	0x583a90	FUN_00583a90
-TSimMgr	280	0x662960	0x404877	TObject	0x57b940	FUN_0057b940
-TSliderPicture	148	0x660688	0x4065d7	TNoHilitePicture	0x573970	FUN_00573970
-TSortByPriceList	24	0x659b40	0x401e15	TSortedPtrList	0x534680	FUN_00534680
-TSortedByRelationshipList	24	0x654cb8	0x401532	TSortedPtrList	0x4ee4b0	FUN_004ee4b0
-TSortedList	32	0x648e68	0x408ee0	TObject	0x487a90	FUN_00487a90
-TSortedPtrList	24	0x648e98	0x404219	0x672e80	0x488030	FUN_00488030
-TSoundPlayer	132	0x668a18	0x406780	TEventHandler	0x5932b0	FUN_005932b0
-TSpaceCommand	32	0x661950	0x40458e	TCommand	0x575180	FUN_00575180
-TSpecialQuitPicture	148	0x66b2e0	0x40708b	TPicture	0x5b4760	FUN_005b4760
-TStaticText	148	0x649678	0x4051f5	TControl	0x48f710	FUN_0048f710
-TStatusButton	132	0x662ef0	0x4033d2	TButton	0x586280	FUN_00586280
-TStatusPicture	192	0x668b90	0x4080da	TPicture	0x593e80	FUN_00593e80
-TSteelCityMinister	452	0x6506e0	0x407d01	TCityInteriorMinister	0x4c5900	FUN_004c5900
-TStratReportView	100	0x6630e8	0x405236	TView	0x58e330	FUN_0058e330
-TStream	4	0x6490c8	0x40468d	TObject	0x4889a0	?
-TSuperArmyRoster	136	0x64cb80	0x406f37	TPageView	0x4aa450	FUN_004aa450
-TSuperCivRoster	136	0x64cbc8	0x40456b	TPageView	0x4ab380	FUN_004ab380
-TSuperNavyRoster	140	0x65c910	0x4035c1	TPageView	0x5697d0	FUN_005697d0
-TSwapperDaddyView	100	0x64dc38	0x402739	TView	0x4ac5c0	FUN_004ac5c0
-TTEView	152	0x648a08	0x4023e2	TStaticText	0x485fb0	FUN_00485fb0
-TTacArmyView	220	0x66a298	0x406d75	TTacticalBattleView	0x5a9cf0	FUN_005a9cf0
-TTacMapUberPicture	152	0x66a2e0	0x401c1c	TMapUberUberPicture	0x5ad2e0	FUN_005ad2e0
-TTacNavyToolbar	152	0x66a2c8	0x407abd	TTacticalToolbar	0x5ad030	FUN_005ad030
-TTacticalAdiosPicture	144	0x66a2f8	0x404a5c	TPicture	0x5ad430	FUN_005ad430
-TTacticalBattle	120	0x669e00	0x4049c1	TObject	0x59f6d0	?
-TTacticalBattleView	216	0x66a280	0x406ce4	TView	0x5a82b0	FUN_005a82b0
-TTacticalHolaPicture	144	0x66a310	0x406f28	TPicture	0x5ad6c0	FUN_005ad6c0
-TTacticalPlayer	40	0x669470	0x407900	TObject	0x59ad40	?
-TTacticalToolbar	152	0x66a2b0	0x407e4b	TCluster	0x5ac780	FUN_005ac780
-TTacticalUnit	52	0x669e48	0x407d51	TObject	0x5a5d10	?
-TTask	8	0x66a8b0	0x406c5d	TObject	0x5adb40	?
-TTaskForce	52	0x65c348	0x402a90	TObject	0x552770	?
-TTaskList	32	0x66a8f8	0x4062c1	TList	0x5aeaf0	FUN_005aeaf0
-TTechCheater	100	0x64ebf8	0x408ae9	TCheater	0x4b1880	FUN_004b1880
-TTechHistoryView	96	0x66ae58	0x40792d	TView	0x5b2230	FUN_005b2230
-TTechItemLine	24	0x66ae28	0x4069bf	TLineData	0x5b1090	FUN_005b1090
-TTechItemView	104	0x66ae40	0x40821f	TView	0x5b1250	FUN_005b1250
-TTechMgr	1596	0x66ac98	0x4097e6	TObject	0x5aef30	?
-TTechStorePage	132	0x66ae10	0x406bdb	TPageView	0x5b0e70	FUN_005b0e70
-TTedForeignMinister	128	0x659ab0	0x4082ec	TMinister	0x531130	?
-TTerrainHelpPicture	172	0x656fc8	0x401ca3	TPicture	0x504df0	FUN_00504df0
-TTerrainHelpWindow	160	0x656fb0	0x4079e1	TFloatWindow	0x504ca0	FUN_00504ca0
-TTerrainInfoDialog	148	0x6589b0	0x404c69	TNoHilitePicture	0x51b0a0	FUN_0051b0a0
-TTextLine	32	0x65e1d0	0x402cd4	TLineData	0x5701d0	FUN_005701d0
-TTextList	4208	0x661a58	0x406d11	TView	0x57ab70	FUN_0057ab70
-TTextPictureButton	160	0x65e670	0x4018c5	TUpDownPictureButton	0x5724e0	FUN_005724e0
-TTextileForeignMinister	128	0x659af8	0x405862	TMinister	0x533070	?
-TToggleButton	144	0x65e598	0x405425	TPicture	0x571050	FUN_00571050
-TToolBarCluster	136	0x662ec0	0x409831	TCluster	0x584d80	FUN_00584d80
-TTown	80	0x66d780	0x4010cd	TObject	0x5b6c10	?
-TTownNameDialog	148	0x6589c8	0x403026	TNoHilitePicture	0x51ba70	FUN_0051ba70
-TTradeBidNationLine	20	0x66dc48	0x4031d4	TLineData	0x5bd950	FUN_005bd950
-TTradeBidNationView	100	0x66dc60	0x404110	TView	0x5bdb40	FUN_005bdb40
-TTradeBookView	120	0x66dc78	0x404543	TView	0x5bde30	FUN_005bde30
-TTradeCluster	140	0x662f68	0x4076cb	TAmtBarCluster	0x587010	FUN_00587010
-TTradeMgr	2800	0x66d870	0x405484	TObject	0x5b79d0	?
-TTradeOfferNationLine	20	0x66dc00	0x401a37	TLineData	0x5bcfc0	FUN_005bcfc0
-TTradeOfferNationView	100	0x66dc18	0x401d25	TView	0x5bd1f0	FUN_005bd1f0
-TTradeOrderPicture	144	0x662e48	0x409a66	TPicture	0x5843e0	FUN_005843e0
-TTradePageBuyView	136	0x66dc30	0x403a67	TPageView	0x5bd5f0	FUN_005bd5f0
-TTradePageSellView	136	0x66dbe8	0x406d39	TPageView	0x5bcb90	FUN_005bcb90
-TTradePanelView	100	0x654fa8	0x408a17	TPanelView	0x4f86d0	FUN_004f86d0
-TTradePolicyCluster	136	0x662e30	0x404f48	TUberCluster	0x584200	FUN_00584200
-TTradeSchoolView	168	0x651308	0x404fd9	TIndustryView	0x4cd760	FUN_004cd760
-TTradeScreenPicture	144	0x66dba0	0x408f49	TPicture	0x5ba680	FUN_005ba680
-TTradeTotalsLine	20	0x66dcd8	0x40364d	TLineData	0x5c1870	FUN_005c1870
-TTradeTotalsView	100	0x66dcf0	0x401c9e	TView	0x5c1a80	FUN_005c1a80
-TTraderAmtBar	104	0x663028	0x402671	TAmtBar	0x58ae30	FUN_0058ae30
-TTraderForeignMinister	128	0x659b10	0x4089d1	TMinister	0x533800	?
-TTrainingOrder	76	0x64f3b0	0x40935e	TProductionOrder	0x4b6a60	?
-TTransFocusAnimation	56	0x64c280	0x404dd6	TFocusAnimation	0x4a03f0	?
-TTransportPicture	156	0x663160	0x402716	TPicture	0x591d90	FUN_00591d90
-TTransportView	100	0x64fb90	0x40920a	TView	0x4bd300	FUN_004bd300
-TTreatiesView	100	0x654f78	0x405858	TPanelView	0x4f7a10	FUN_004f7a10
-TTurnStartEvent	8	0x6536b8	0x40542f	TObject	0x4e65e0	?
-TTwoPicSlider	152	0x65de58	0x4096ba	TControl	0x56e120	FUN_0056e120
-TUberCluster	136	0x65e5b0	0x406357	TCluster	0x5713c0	FUN_005713c0
-TUnit	36	0x66ed40	0x406bcc	TObject	0x5c2430	?
-TUnitOrder	92	0x64f3c8	0x401974	TProductionOrder	0x4b6f20	?
-TUnitToolbarCluster	136	0x662ed8	0x4028ab	TUberCluster	0x585f70	FUN_00585f70
-TUnitsView	160	0x651260	0x405cf9	TBuildingView	0x4c7f10	FUN_004c7f10
-TUniversityView	172	0x6512c0	0x40111d	TBuildingView	0x4caba0	FUN_004caba0
-TUpDownPictureButton	148	0x65e5c8	0x4070a9	TPicture	0x571500	FUN_00571500
-TUpDownView	136	0x662de8	0x40474b	TControl	0x583c90	FUN_00583c90
-TView	96	0x6495a0	0x40341d	TEventHandler	0x48a840	FUN_0048a840
-TViewMgr	252	0x66f0b8	0x4081c0	TObject	0x5d4fd0	?
-TWarehouseView	260	0x651248	0x402540	TBuildingView	0x4c71f0	FUN_004c71f0
-TWarningView	148	0x663178	0x405d08	TPicture	0x592860	FUN_00592860
-TWindow	160	0x6495e8	0x40319d	TView	0x48d090	FUN_0048d090
-TWorldView	124	0x668c10	0x4074d7	TView	0x594f20	FUN_00594f20
-TZone	72	0x65c600	0x40703b	TObject	0x55e660	FUN_0055e660
+class	size	classVA	factoryStub	base	factoryReal
+CAmbitDocument	84	0x63e7f8	0x40321f	CDocument	0x4793c0
+CAnimateCtrl	60	0x670dd8	-	CWnd	-
+CArchiveException	16	0x673700	-	CException	-
+CBitmap	8	0x672340	-	CGdiObject	-
+CBrush	8	0x672310	-	CGdiObject	-
+CButton	60	0x671ab8	-	CWnd	-
+CClientDC	20	0x672298	-	0x672280	-
+CCmdTarget	28	0x670640	-	CObject	-
+CComboBox	60	0x671ae8	-	CWnd	-
+CControlBar	120	0x670350	-	CWnd	-
+CCtrlView	72	0x672c18	-	CView	-
+CDialog	92	0x66fc00	-	CWnd	-
+CDib	56	0x694b48	0x40218f	CObject	0x479e40
+CDocManager	32	0x673240	-	CObject	-
+CDocTemplate	100	0x6733b8	-	CCmdTarget	-
+CDocument	80	0x6720e0	-	CCmdTarget	-
+CDragListBox	64	0x670d48	-	CListBox	-
+CEdit	60	0x671b00	-	CWnd	-
+CException	8	0x672688	-	CObject	-
+CFile	16	0x6727c0	-	CObject	-
+CFileDialog	504	0x6728a0	-	CDialog	-
+CFileException	20	0x672f28	-	CException	-
+CFont	8	0x672328	-	CGdiObject	-
+CFrameWnd	188	0x670320	0x622ab1	CWnd	0x622ab1
+CGdiObject	8	0x6722e0	0x623a62	CObject	0x623a62
+CHeaderCtrl	60	0x670da8	-	CWnd	-
+CHotKeyCtrl	60	0x670dc0	-	CWnd	-
+CImageList	8	0x670e68	0x623940	CObject	0x623940
+CIncludeView	148	0x6481c8	0x404787	CView	0x482850
+CListBox	60	0x671ad0	-	CWnd	-
+CListCtrl	60	0x670e20	-	CWnd	-
+CMainFrame	208	0x648628	0x4097af	CFrameWnd	0x484af0
+CMapPtrToPtr	28	0x6730c0	-	CObject	-
+CMapStringToPtr	28	0x6745d0	-	CObject	-
+CMcWindow	64	0x64b5d0	0x40507e	CWnd	0x4933d0
+CMemFile	40	0x672f50	-	CFile	-
+CMemoryException	152	0x6726a0	-	CException	-
+CMenu	8	0x673070	0x6242be	CObject	0x6242be
+CNotSupportedException	152	0x6726b8	-	CException	-
+CObject	4	0x6706e0	-	0x0	-
+CPaintDC	84	0x6722c8	-	0x672280	-
+CPalette	8	0x672358	-	CGdiObject	-
+CPen	8	0x6722f8	-	CGdiObject	-
+CProgressCtrl	60	0x670d90	-	CWnd	-
+CPtrArray	20	0x672e80	-	CObject	-
+CPtrList	28	0x672ec0	-	CObject	-
+CResourceException	152	0x672250	-	CException	-
+CRgn	8	0x672370	-	CGdiObject	-
+CRichEditCtrl	60	0x670e80	-	CWnd	-
+CScrollBar	60	0x671b18	-	CWnd	-
+CScrollView	108	0x673500	-	CView	-
+CSingleDocTemplate	104	0x670718	-	CDocTemplate	-
+CSliderCtrl	60	0x670d78	-	CWnd	-
+CSpinButtonCtrl	60	0x670d60	-	CWnd	-
+CSplitterWnd	196	0x672c00	-	CWnd	-
+CStatic	60	0x671aa0	-	CWnd	-
+CStatusBarCtrl	60	0x670e50	-	CWnd	-
+CTabCtrl	60	0x670df0	-	CWnd	-
+CToolBarCtrl	60	0x670e38	-	CWnd	-
+CToolTipCtrl	88	0x6744d0	-	CWnd	-
+CTreeCtrl	60	0x670e08	-	CWnd	-
+CUserException	152	0x672268	-	CException	-
+CView	64	0x670338	-	CWnd	-
+CWinApp	192	0x66fdc8	-	CWinThread	-
+CWinThread	104	0x6704a0	-	CCmdTarget	-
+CWindowDC	20	0x6722b0	-	0x672280	-
+CWnd	60	0x670b10	0x62343f	CCmdTarget	0x62343f
+TAdmiral	28	0x65c330	0x406875	TObject	0x5512d0
+TAdorner	12	0x64bd90	0x405524	TObject	0x49d650
+TAlwaysPictureButton	148	0x65e550	0x4036b1	TPictureButton	0x570950
+TAmbitApplication	84	0x64c0b8	0x406ed8	TApplication	0x49de40
+TAmbitFileBasedDocument	4	0x64c0d0	0x402932	TFileBasedDocument	0x49e5a0
+TAmtBar	104	0x662f80	0x4034ae	TView	0x5884c0
+TAmtBarCluster	136	0x662f50	0x402851	TUberCluster	0x586c40
+TAnimation	44	0x64c1f0	0x402a54	TObject	0x49f020
+TAnimator	48	0x64c298	0x404d7c	TEventHandler	0x4a09f0
+TApplication	72	0x648af8	0x408be8	TCommandHandler	0x486680
+TArmoryView	172	0x651338	0x40404d	TBuildingView	0x4cece0
+TArmsForeignMinister	128	0x659b28	0x40911f	TMinister	0x533f70
+TArmyBattle	120	0x669e18	0x406eb0	TTacticalBattle	0x5a4710
+TArmyBoyView	100	0x64dcb0	0x4012fd	TView	0x4aeae0
+TArmyCheckBox	148	0x64cb68	0x401b9a	TControl	0x4a9f20
+TArmyInfoView	144	0x663148	0x40280b	TPicture	0x591500
+TArmyMgr	936	0x64c828	0x40410b	TObject	0x4a1810
+TArmyMission	48	0x697a28	0x407293	TMission	0x53bfb0
+TArmyPlacard	148	0x663088	0x407329	TPicture	0x58be30
+TArmyPlayer	84	0x669488	0x40427d	TTacticalPlayer	0x59b110
+TArmyStack	28	0x64c840	0x406087	TObject	0x4a76a0
+TArmyStackList	32	0x64c858	0x40951b	TSortedList	0x4a83b0
+TArmyTacUnit	88	0x669e60	0x401cd5	TTacticalUnit	0x5a5ed0
+TArmyToolbar	140	0x6630d0	0x404336	TUnitToolbarCluster	0x58de40
+TArmyUnitLine	20	0x64cb38	0x4031c5	TLineData	0x4a8ca0
+TArmyUnitView	100	0x64cb50	0x403f8f	TView	0x4a9450
+TArrowsControl	148	0x662db8	0x407b85	TPicture	0x5838b0
+TAssetMgr	88	0x66f4c0	0x4078c9	TObject	0x5df1d0
+TAttackProvinceMission	52	0x697a40	0x4010dc	TArmyMission	0x53d670
+TAutoGreatPower	2928	0x653f90	0x4031b6	TGreatPower	0x4e6a70
+TAutomatedPlayDialog	96	0x66b2c8	0x402833	TDialogView	0x5b45c0
+TBackgroundPicture	148	0x660628	0x402aea	TNoHilitePicture	0x572bd0
+TBatRepDetLine	24	0x64dd28	0x402e41	TLineData	0x4aff60
+TBattleDetailBook	152	0x64dc98	0x402982	TBook	0x4ae9d0
+TBattleReportView	9424	0x64dc80	0x402054	TDiplomacyMapView	0x4acaa0
+TBattleUnitsView	140	0x64dd40	0x402167	TMilitaryPageView	0x4b0630
+TBeachheadMission	64	0x6979e0	0x406d3e	TControlSeaZoneMission	0x53a2d0
+TBehavior	16	0x648cf8	0x40101e	TObject	0x487180
+TBillForeignMinister	132	0x659ac8	0x40848b	TMinister	0x531b30
+TBismarckMinister	148	0x654868	0x4043d6	TDefenseMinister	0x4ed740
+TBlockadePortMission	64	0x6979f8	0x4025b8	TControlSeaZoneMission	0x53a990
+TBook	152	0x65e170	0x401bdb	TPicture	0x56f4a0
+TBoycottButton	144	0x662e60	0x406505	TToggleButton	0x5846e0
+TBuildingConstructionView	156	0x651290	0x4045cf	TPicture	0x4c9d70
+TBuildingExpansionView	156	0x651320	0x40595c	TPicture	0x4ce480
+TBuildingView	160	0x651230	0x4027ca	TNoHilitePicture	0x4c6df0
+TBullyMinister	148	0x6548b0	0x406f96	TDefenseMinister	0x4ee000
+TButton	132	0x649630	0x405cea	TCtlMgr	0x48eb10
+TCancelGameOptionsCommand	24	0x65bf60	0x4096bf	TCommand	0x5424b0
+TCapacityOrder	84	0x64f440	0x408175	TItemOrder	0x4b8c90
+TCheater	100	0x64ebe0	0x4047cd	TView	0x4b13a0
+TCity	724	0x64f338	0x4077de	TObject	0x4b2410
+TCityBarCluster	136	0x662f08	0x4030da	TUberCluster	0x586590
+TCityInteriorMinister	452	0x6506c8	0x40689d	TInteriorMinister	0x4be710
+TCityProductionView	396	0x64fb60	0x407662	TNoHilitePicture	0x4ba240
+TCitySiteView	888	0x6589e0	0x401a96	TMapDialog	0x51bd60
+TCityTask	20	0x66a8c8	0x401b0e	TTask	0x5adcd0
+TCivAnimation	48	0x64c208	0x403477	TAnimation	0x49f450
+TCivAnimation2	48	0x64c220	0x407e05	TAnimation	0x49f600
+TCivDescription	368	0x663118	0x406997	TView	0x58f050
+TCivMgr	12	0x6531f8	0x4088cd	TObject	0x4d2000
+TCivReport	144	0x663130	0x4012da	TPicture	0x590b90
+TCivToolbar	140	0x663100	0x404eda	TCluster	0x58ea00
+TCivUnit	40	0x66ed58	0x406a0f	TUnit	0x5c2860
+TCivilianButton	160	0x663040	0x401d02	TRadioPictureButton	0x58b340
+TClickZone	136	0x65e658	0x4069fb	TControl	0x572350
+TClientGreatPower	2404	0x65aff0	0x405a92	TGreatPower	0x541230
+TCloseButton	148	0x662e90	0x406631	TPictureButton	0x584a50
+TCloseParentButton	132	0x662ea8	0x40885f	TButton	0x584bb0
+TClosePicture	148	0x662f38	0x4034fe	TPictureButton	0x586ad0
+TCluster	136	0x6496c0	0x4061e5	TControl	0x491300
+TColorFill	12	0x656618	0x403297	TAdorner	0x4ff0c0
+TColorKeyButton	156	0x65e628	0x4058b2	TColorKeyPicture	0x571ed0
+TColorKeyPicture	152	0x660640	0x4071cb	TNoHilitePicture	0x572d20
+TCombatReportView	160	0x6630b8	0x402905	TPicture	0x58c830
+TCommand	24	0x648e08	0x40768a	TEvent	0x4877c0
+TCommandHandler	32	0x648ae0	0x4070c2	TEventHandler	0x486570
+TCommodityLine	20	0x66dcc0	0x407874	TLineData	0x5c1430
+TControl	132	0x649600	0x405bfa	TView	0x48e430
+TControlSeaZoneMission	60	0x6979b0	0x402063	TNavyMission	0x5386c0
+TCouncilPanelView	100	0x654ff0	0x403558	TPanelView	0x4faf80
+TCouncilTickerAnimation	44	0x64c250	0x407879	TAnimation	0x49fef0
+TCouncilView	9440	0x655020	0x402ba3	TDiplomacyMapView	0x4fb9d0
+TCountingStream	12	0x6490f8	0x402fb8	TStream	0x4893c0
+TCountry	148	0x653670	0x403756	TObject	0x4d66a0
+TCreditsPicture	144	0x65de88	0x4098b3	TPicture	0x56edb0
+TCtlMgr	132	0x649618	0x40743c	TControl	0x48ea00
+TCzechBox	152	0x65e610	0x403391	TUpDownPictureButton	0x571b60
+TDealBookPicture	180	0x66dbb8	0x40191a	TPicture	0x5bab00
+TDealLine	24	0x66dca8	0x407e37	TLineData	0x5c0cf0
+TDealList	24	0x66d888	0x40985e	TSortedPtrList	0x5ba130
+TDealTabControl	148	0x66dbd0	0x407f59	TControl	0x5bc690
+TDefendProvinceMission	48	0x697a58	0x407950	TArmyMission	0x53e5f0
+TDefenderMinister	148	0x654898	0x407306	TDefenseMinister	0x4edd20
+TDefenseMinister	148	0x654838	0x407adb	TMinister	0x4ec020
+TDefenseMinisterView	104	0x654f00	0x406073	TMinisterView	0x4f3240
+TDeluxeText	164	0x66c450	0x405907	TTEView	0x5b5ee0
+TDialogBehavior	36	0x648d10	0x402ac7	TBehavior	0x487300
+TDialogView	96	0x64bda8	0x407e55	TView	0x49d6f0
+TDipDlgCluster	136	0x662e18	0x406b18	TUberCluster	0x584040
+TDiplomacyMapView	9416	0x654f48	0x4070f9	TPicture	0x4f3ae0
+TDiplomacyMgr	6364	0x654cd0	0x4052c2	TObject	0x4ee650
+TDiplomatForeignMinister	128	0x659ae0	0x402310	TMinister	0x5326e0
+TDisappearingButton	144	0x65c8b0	0x406c30	TPicture	0x568b20
+TDisplayMgr	36	0x656600	0x404b15	TObject	0x4fe710
+TDlgWindow	160	0x656a48	0x404cc8	TWindow	0x500280
+TDocument	4	0x648a20	0x4059de	TObject	0x486320
+TDropShadowNumberText	176	0x66c420	0x407063	TPictureNumberText	0x5b5820
+TDropShadowText	152	0x66c408	0x40622b	TPictureText	0x5b54a0
+TDropShadowTextBehavior	20	0x64ea78	0x402081	TBehavior	0x4b0fe0
+TEditText	160	0x649690	0x407a9a	TStaticText	0x490210
+TEngineerDialog	108	0x651350	0x4016b3	TView	0x4d04b0
+TEscortMission	60	0x6979c8	0x401000	TNavyMission	0x539840
+TEvenCityMinister	452	0x650710	0x408139	TCityInteriorMinister	0x4c5f00
+TEvent	20	0x649570	0x4057c7	TObject	0x489f00
+TEventHandler	32	0x649588	0x405e75	TObject	0x48a0a0
+TExpansionOrder	84	0x64f458	0x4058e4	TItemOrder	0x4b8f50
+TFileBasedDocument	4	0x648a38	0x406d7a	TDocument	0x4863c0
+TFileStream	8	0x6490e0	0x404494	TStream	0x4890c0
+TFlagOptionsPicture	144	0x65de10	0x4024e1	TPicture	0x56b210
+TFloatWindow	160	0x6496d8	0x401b4a	TWindow	0x491e00
+TFocusAnimation	48	0x64c268	0x4029e1	TAnimation	0x4a0020
+TFoodProcessingOrder	76	0x64f3f8	0x40885a	TProductionOrder	0x4b7dc0
+TForeignMinister	128	0x659a98	0x405b3c	TMinister	0x52efd0
+TForeignMinisterView	104	0x654ee8	0x40969c	TMinisterView	0x4f2f20
+TFrameRadioView	132	0x655050	0x404953	TControl	0x4fded0
+TFuzzySet	48	0x656958	0x40137f	TObject	0x4ff690
+TFuzzyVar	20	0x656940	0x4040de	TObject	0x4ff460
+TGPCheater	100	0x64ec10	0x405d17	TCheater	0x4b19b0
+TGPTreatyDialog	96	0x66b298	0x407185	TDialogView	0x5b3ae0
+TGWorldButton	140	0x65e640	0x4018b6	TControl	0x572080
+TGWorldPartView	116	0x64dc50	0x405042	TView	0x4ac7d0
+TGWorldPeeker	100	0x656630	0x4050bf	TView	0x4ff1f0
+TGameInfoPicture	144	0x65de28	0x403896	TPicture	0x56b780
+TGamePreferencesPicture	148	0x65ddf8	0x407748	TPicture	0x56a510
+TGameScorePicture	148	0x661a70	0x405b64	TNoHilitePicture	0x57b000
+TGameSetupDialog	96	0x66b220	0x40109b	TDialogView	0x5b2740
+TGameSetupMultiplayerPicture	148	0x661998	0x405777	TNoHilitePicture	0x575e90
+TGameSetupPicture	148	0x661980	0x407897	TNoHilitePicture	0x5757c0
+TGameWindow	176	0x656a30	0x406267	TWindow	0x4ffb30
+TGarrisonView	144	0x64cb20	0x405132	TMilitaryPageView	0x4a8770
+TGrantsView	100	0x654f90	0x4057f4	TPanelView	0x4f7fd0
+TGreatPower	2404	0x653688	0x406b95	TCountry	0x4d8950
+THQButton	156	0x663058	0x4019d3	TPicture	0x58b5c0
+THandleStream	24	0x649110	0x405731	TStream	0x489580
+THelpMgr	48	0x656f68	0x408dc8	TObject	0x500550
+THelpPicture	152	0x656f80	0x408a6c	TPicture	0x503bd0
+THelpWindow	160	0x656f98	0x406e6f	TFloatWindow	0x504b50
+THighScoresPicture	508	0x661968	0x407095	TNoHilitePicture	0x575280
+THostGreatPower	2408	0x65afd8	0x4059e3	TGreatPower	0x540e90
+THotspotBehavior	16	0x64ea48	0x409818	TBehavior	0x4b0af0
+TIconBar	156	0x657970	0x40992b	TNoHilitePicture	0x505f50
+TIconSlider	188	0x657988	0x4030df	TIconBar	0x5062d0
+TIncludeView	116	0x6495d0	0x401492	TView	0x48cc40
+TIndexAndRankList	24	0x659b58	0x403427	TSortedPtrList	0x5347e0
+TIndustryAmtBar	108	0x662fb0	0x408e90	TAmtBar	0x589110
+TIndustryCluster	144	0x662f98	0x402a18	TAmtBarCluster	0x588a30
+TIndustryView	168	0x6512f0	0x4083be	TBuildingView	0x4cc6b0
+TInfoBarBehavior	36	0x64ea60	0x40989a	TBehavior	0x4b0c90
+TInfoBarPictureText	180	0x66c438	0x406faa	TInfoBarText	0x5b5ac0
+TInfoBarText	180	0x66c468	0x407c20	TDeluxeText	0x5b65a0
+TInfoPanelView	112	0x654fd8	0x402d7e	TPanelView	0x4f9f60
+TInteriorMinister	40	0x6506b0	0x402464	TMinister	0x4be0d0
+TInteriorMinisterView	104	0x654f18	0x4030bc	TMinisterView	0x4f35e0
+TInterruptusView	100	0x64dd10	0x40459d	TItemBoyView	0x4afcc0
+TInvadeMission	56	0x697a70	0x4024d7	TAttackProvinceMission	0x53f080
+TItemBoyView	100	0x64dcf8	0x407789	TView	0x4af910
+TItemOrder	84	0x64f368	0x405349	TProductionOrder	0x4b51d0
+TJoinSelectorDialog	148	0x65c198	0x4012d0	TNoHilitePicture	0x54e690
+TLaborPool	12	0x64f320	0x401325	TObject	0x4b20d0
+TLandSaleEvent	12	0x6536d0	0x40600f	TTurnStartEvent	0x4e66c0
+TLanguageMgr	52	0x658560	0x4078f1	TObject	0x507bc0
+TLineData	16	0x65e158	0x4073c9	TObject	0x56f360
+TList	32	0x648e80	0x409106	TSortedList	0x487e50
+TLoadSavePicture	168	0x65de40	0x407fcc	TPicture	0x56bbd0
+TLonelyTileView	100	0x656fe0	0x40768f	TView	0x505a50
+TLoungeDialog	152	0x65c180	0x402e0a	TNoHilitePicture	0x54d650
+TMacViewMgr	3460	0x658610	0x402aae	TObject	0x509c00
+TMadnessButton	156	0x65c1b0	0x40531c	TCzechBox	0x54ea30
+TMapDialog	868	0x658998	0x402dbf	TWorldView	0x5199c0
+TMapEditCluster	136	0x66b238	0x4017d0	TCluster	0x5b2880
+TMapEditView	880	0x6589f8	0x4036a2	TMapDialog	0x51cab0
+TMapKey	148	0x655038	0x40104b	TPicture	0x4fc9c0
+TMapMaker	680	0x6598a8	0x403ca6	TControl	0x525910
+TMapMgr	40	0x658788	0x403f3f	TObject	0x50e2f0
+TMapPreviewView	112	0x6619f8	0x4095ed	TView	0x5787b0
+TMapUberPicture	196	0x668c40	0x4033a0	TMapUberUberPicture	0x596900
+TMapUberUberPicture	148	0x668c28	0x4074eb	TOffLimitsPicture	0x596770
+TMegaPicture	172	0x660658	0x405317	TNoHilitePicture	0x5730d0
+TMerchantBoyView	100	0x64dce0	0x40617c	TView	0x4af6a0
+TMilitaryPageView	136	0x65c838	0x4018f7	TPageView	0x564860
+TMilitaryUnit	68	0x66ed70	0x401d2f	TObject	0x5c2cb0
+TMiniArmyLine	20	0x64cb98	0x403cd3	TLineData	0x4aa890
+TMiniArmyView	136	0x64cbb0	0x404d77	TControl	0x4aad90
+TMiniCivLine	20	0x64cbe0	0x4086a7	TLineData	0x4ab670
+TMiniCivView	140	0x64cbf8	0x407261	TControl	0x4ab8c0
+TMiniMapView	160	0x668c58	0x403aa8	TControl	0x59a290
+TMiniShipLine	20	0x65c928	0x401703	TLineData	0x569bb0
+TMiniShipView	136	0x65c940	0x40882d	TControl	0x569dc0
+TMinister	16	0x659a80	0x40193d	TObject	0x52eb30
+TMinisterView	104	0x654ed0	0x409a89	TView	0x4f2bb0
+TMinor	732	0x6536a0	0x405bff	TCountry	0x4e3660
+TMinorRelationshipDialog	96	0x66b280	0x4030fd	TDialogView	0x5b3300
+TMinorTradeBidsDialog	96	0x66b250	0x403d2d	TDialogView	0x5b29a0
+TMinorTreatyDialog	96	0x66b2b0	0x403b43	TDialogView	0x5b3f90
+TMission	20	0x697848	0x405fbf	TObject	0x534bc0
+TModalMessageCommand	32	0x66f2a8	0x407928	TCommand	0x5dcc90
+TMovieView	148	0x66f6e8	0x4024af	TPicture	0x5e2100
+TMultiMessagePicture	144	0x65c1c8	0x40116d	TPicture	0x54ec20
+TMultiplayerMgr	248	0x65bf78	0x4017d5	TObject	0x5425d0
+TMyNumberText	172	0x66c3a8	0x40776b	TNumberText	0x5b4f10
+TMyStaticText	148	0x66c3f0	0x4089fe	TStaticText	0x5b5380
+TNapoleonMinister	148	0x654850	0x406a8c	TDefenseMinister	0x4ed400
+TNavyAutoPlayer	48	0x6694d0	0x406762	TNavyPlayer	0x59f040
+TNavyBattle	148	0x669e30	0x403111	TTacticalBattle	0x5a5480
+TNavyBoyView	100	0x64dcc8	0x4021fd	TView	0x4aefd0
+TNavyHumanPlayer	48	0x6694b8	0x406a23	TNavyPlayer	0x59eef0
+TNavyMgr	16	0x65c360	0x40876f	TObject	0x556530
+TNavyMission	60	0x697998	0x409020	TMission	0x536390
+TNavyPlayer	48	0x6694a0	0x404cff	TTacticalPlayer	0x59eb80
+TNavyRoster	208	0x65c850	0x404971	TMilitaryPageView	0x564c30
+TNavyTacUnit	64	0x669e78	0x40949e	TTacticalUnit	0x5a6240
+TNavyToolbarCluster	136	0x65c8f8	0x408742	TUberCluster	0x569430
+TNetGameSelectPicture	148	0x6619c8	0x4041dd	TNoHilitePicture	0x576aa0
+TNetMgr	4	0x66f978	0x40394f	TObject	0x5e3390
+TNetSelectPicture	148	0x6619b0	0x403021	TNoHilitePicture	0x576900
+TNewGameCommand	24	0x64c0a0	0x4016ef	TCommand	0x49dd40
+TNewTownView	100	0x64fba8	0x4086ed	TView	0x4bd7a0
+TNewsMgr	3856	0x65c530	0x404174	TObject	0x55b670
+TNewspaperView	152	0x65c548	0x40536c	TPicture	0x55d160
+TNextDiplomationCommand	24	0x654ce8	0x40162c	TCommand	0x4f28a0
+TNextMoveCommand	28	0x669e90	0x406a41	TCommand	0x5a64d0
+TNextTradeCommand	24	0x66d8a0	0x409110	TCommand	0x5ba370
+TNoHilitePicture	148	0x660610	0x405196	TPicture	0x572a80
+TNoHiliteText	148	0x66c480	0x407dd3	TStaticText	0x5b6960
+TNominationView	144	0x655008	0x401a9b	TPicture	0x4fb6e0
+TNumberText	172	0x6496a8	0x402176	TEditText	0x490ed0
+TNumberedArrowButton	136	0x6630a0	0x40501f	TControl	0x58c1e0
+TNumberedIcon	176	0x6579b8	0x40808f	TMegaPicture	0x5072e0
+TNumberedItem	176	0x6579d0	0x402ff4	TView	0x507700
+TObject	4	0x694eb8	0x404683	CObject	0x485df0
+TOcean	24	0x65c630	0x403cc9	TObject	0x562100
+TOceanDialog	128	0x65c898	0x408760	TWorldView	0x565db0
+TOffLimitsPicture	148	0x660670	0x404ad9	TPicture	0x573710
+TOfferDeskPicture	168	0x66dc90	0x4090e3	TPicture	0x5be4b0
+TOffersPanelView	112	0x654fc0	0x402cb6	TPanelView	0x4f8ec0
+TOnOffRadioButton	152	0x65e5f8	0x4064d3	TPictureButton	0x571930
+TOneTimeAnimation	48	0x64c238	0x40788d	TAnimation	0x49fcc0
+TOrItemOrder	84	0x64f380	0x403e5e	TItemOrder	0x4b57b0
+TOrderView	104	0x6579a0	0x40425a	TView	0x5069d0
+TOverlayRadioButton	188	0x6512a8	0x404304	TRadioPictureButton	0x4caa50
+TPageCorner	152	0x65e188	0x404be7	TColorKeyPicture	0x56f7b0
+TPageView	132	0x65e1a0	0x40673f	TView	0x56f8e0
+TPanelView	100	0x654f60	0x4021e4	TView	0x4f78e0
+TPicture	144	0x649660	0x403ba2	TControl	0x48eeb0
+TPictureButton	148	0x65e538	0x40649c	TPicture	0x570750
+TPictureLine	20	0x65e1b8	0x401ec9	TLineData	0x570030
+TPictureNumberText	172	0x66c3c0	0x405083	TNumberText	0x5b5120
+TPictureRadioButton	144	0x65e580	0x4051d7	TToggleButton	0x570cc0
+TPictureText	148	0x66c3d8	0x407707	TStaticText	0x5b5260
+TPirateMinister	148	0x654880	0x402bf8	TDefenseMinister	0x4eda30
+TPlacard	148	0x663070	0x404ef8	TPicture	0x58b960
+TPlaceCityDialog	148	0x651368	0x401c7b	TPicture	0x4d1760
+TPopGrowthOrder	76	0x64f410	0x409a93	TProductionOrder	0x4b8110
+TPopulationMgr	80	0x64f398	0x4067fd	TObject	0x4b5b40
+TPortZone	76	0x65c618	0x40598e	TZone	0x5615e0
+TPoseMessageDialog	28	0x65bf90	0x404255	TCommand	0x54b060
+TPowerPlantOrder	80	0x64f3e0	0x402dab	TProductionOrder	0x4b79f0
+TProductionCluster	152	0x662f20	0x406203	TUberCluster	0x586840
+TProductionOrder	76	0x64f350	0x402036	TObject	0x4b4eb0
+TProvinceDesirabilityList	24	0x653658	0x4010b9	TSortedPtrList	0x4d6500
+TProxyGreatPower	2404	0x65afc0	0x4043ef	TGreatPower	0x540840
+TPtrList	24	0x648eb0	0x402a59	TSortedPtrList	0x488400
+TPurchaseCluster	140	0x6512d8	0x40718f	TCluster	0x4cc300
+TQueryFloater	144	0x65de70	0x40466a	TPicture	0x56e840
+TRadio	132	0x649648	0x4033cd	TCtlMgr	0x48ece0
+TRadioPictureButton	152	0x65e5e0	0x4017b2	TUpDownPictureButton	0x571700
+TRadioText	156	0x661a10	0x404e94	TDropShadowText	0x5793f0
+TRadioTextCluster	152	0x661a28	0x40562d	TCluster	0x5795b0
+TRailAmtBar	108	0x662fe0	0x407630	TAmtBar	0x589ed0
+TRailCityMinister	452	0x650728	0x404340	TCityInteriorMinister	0x4c6210
+TRailCluster	144	0x662fc8	0x4091d8	TAmtBarCluster	0x589660
+TRailheadDialog	100	0x64fb78	0x4057a9	TDialogView	0x4bcf40
+TRearFloatWindow	160	0x654f30	0x401e0b	TFloatWindow	0x4f3840
+TRelationshipDialog	96	0x66b268	0x4048b3	TDialogView	0x5b2ca0
+TRemoteGreatPower	2404	0x65b008	0x402a27	TGreatPower	0x5417c0
+TRemoteMinor	732	0x65b020	0x406b59	TRemoteMinor	0x541c10
+TRightLeftView	136	0x662e00	0x408a26	TControl	0x583e70
+TScatteredShipsMission	60	0x697a10	0x402f27	TNavyMission	0x53ba60
+TScenarioChooser	352	0x661a40	0x40483b	TNoHilitePicture	0x579ae0
+TScoreGraph	96	0x655068	0x402f8b	TView	0x4fe1d0
+TScrollBarView	148	0x661460	0x407a40	TControl	0x5743f0
+TScrollView	104	0x661448	0x401d6b	TView	0x573c20
+TScroller	96	0x6495b8	0x405f83	TView	0x48ca60
+TScrollerButton	148	0x661478	0x404ac0	TPictureButton	0x574ea0
+TSelectoText	148	0x661a88	0x406082	TStaticText	0x57b670
+TSetupRandomMapPicture	168	0x6619e0	0x401c62	TNoHilitePicture	0x576ca0
+TShip	56	0x65c318	0x407a5e	TObject	0x54f460
+TShipAmtBar	108	0x663010	0x40436d	TAmtBar	0x58aaa0
+TShipBuilderCityMinister	452	0x6506f8	0x402603	TCityInteriorMinister	0x4c5c00
+TShipBuildingTask	24	0x66a8e0	0x403abc	TCityTask	0x5ae650
+TShipFractionCluster	152	0x65c8c8	0x4054ac	TCluster	0x568cd0
+TShipLine	28	0x65c868	0x409278	TLineData	0x565030
+TShipOrder	76	0x64f428	0x401a73	TProductionOrder	0x4b8470
+TShipPlacard	148	0x65c8e0	0x403256	TNoHilitePicture	0x5691d0
+TShipView	104	0x65c880	0x402329	TView	0x565400
+TShipyardCluster	144	0x662ff8	0x401e83	TAmtBarCluster	0x58a4d0
+TShipyardView	204	0x651278	0x401a64	TBuildingView	0x4c8200
+TSidewaysArrow	152	0x662dd0	0x40234c	TUpDownPictureButton	0x583a90
+TSimMgr	280	0x662960	0x404877	TObject	0x57b940
+TSliderPicture	148	0x660688	0x4065d7	TNoHilitePicture	0x573970
+TSortByPriceList	24	0x659b40	0x401e15	TSortedPtrList	0x534680
+TSortedByRelationshipList	24	0x654cb8	0x401532	TSortedPtrList	0x4ee4b0
+TSortedList	32	0x648e68	0x408ee0	TObject	0x487a90
+TSortedPtrList	24	0x648e98	0x404219	CPtrArray	0x488030
+TSoundPlayer	132	0x668a18	0x406780	TEventHandler	0x5932b0
+TSpaceCommand	32	0x661950	0x40458e	TCommand	0x575180
+TSpecialQuitPicture	148	0x66b2e0	0x40708b	TPicture	0x5b4760
+TStaticText	148	0x649678	0x4051f5	TControl	0x48f710
+TStatusButton	132	0x662ef0	0x4033d2	TButton	0x586280
+TStatusPicture	192	0x668b90	0x4080da	TPicture	0x593e80
+TSteelCityMinister	452	0x6506e0	0x407d01	TCityInteriorMinister	0x4c5900
+TStratReportView	100	0x6630e8	0x405236	TView	0x58e330
+TStream	4	0x6490c8	0x40468d	TObject	0x4889a0
+TSuperArmyRoster	136	0x64cb80	0x406f37	TPageView	0x4aa450
+TSuperCivRoster	136	0x64cbc8	0x40456b	TPageView	0x4ab380
+TSuperNavyRoster	140	0x65c910	0x4035c1	TPageView	0x5697d0
+TSwapperDaddyView	100	0x64dc38	0x402739	TView	0x4ac5c0
+TTEView	152	0x648a08	0x4023e2	TStaticText	0x485fb0
+TTacArmyView	220	0x66a298	0x406d75	TTacticalBattleView	0x5a9cf0
+TTacMapUberPicture	152	0x66a2e0	0x401c1c	TMapUberUberPicture	0x5ad2e0
+TTacNavyToolbar	152	0x66a2c8	0x407abd	TTacticalToolbar	0x5ad030
+TTacticalAdiosPicture	144	0x66a2f8	0x404a5c	TPicture	0x5ad430
+TTacticalBattle	120	0x669e00	0x4049c1	TObject	0x59f6d0
+TTacticalBattleView	216	0x66a280	0x406ce4	TView	0x5a82b0
+TTacticalHolaPicture	144	0x66a310	0x406f28	TPicture	0x5ad6c0
+TTacticalPlayer	40	0x669470	0x407900	TObject	0x59ad40
+TTacticalToolbar	152	0x66a2b0	0x407e4b	TCluster	0x5ac780
+TTacticalUnit	52	0x669e48	0x407d51	TObject	0x5a5d10
+TTask	8	0x66a8b0	0x406c5d	TObject	0x5adb40
+TTaskForce	52	0x65c348	0x402a90	TObject	0x552770
+TTaskList	32	0x66a8f8	0x4062c1	TList	0x5aeaf0
+TTechCheater	100	0x64ebf8	0x408ae9	TCheater	0x4b1880
+TTechHistoryView	96	0x66ae58	0x40792d	TView	0x5b2230
+TTechItemLine	24	0x66ae28	0x4069bf	TLineData	0x5b1090
+TTechItemView	104	0x66ae40	0x40821f	TView	0x5b1250
+TTechMgr	1596	0x66ac98	0x4097e6	TObject	0x5aef30
+TTechStorePage	132	0x66ae10	0x406bdb	TPageView	0x5b0e70
+TTedForeignMinister	128	0x659ab0	0x4082ec	TMinister	0x531130
+TTerrainHelpPicture	172	0x656fc8	0x401ca3	TPicture	0x504df0
+TTerrainHelpWindow	160	0x656fb0	0x4079e1	TFloatWindow	0x504ca0
+TTerrainInfoDialog	148	0x6589b0	0x404c69	TNoHilitePicture	0x51b0a0
+TTextLine	32	0x65e1d0	0x402cd4	TLineData	0x5701d0
+TTextList	4208	0x661a58	0x406d11	TView	0x57ab70
+TTextPictureButton	160	0x65e670	0x4018c5	TUpDownPictureButton	0x5724e0
+TTextileForeignMinister	128	0x659af8	0x405862	TMinister	0x533070
+TToggleButton	144	0x65e598	0x405425	TPicture	0x571050
+TToolBarCluster	136	0x662ec0	0x409831	TCluster	0x584d80
+TTown	80	0x66d780	0x4010cd	TObject	0x5b6c10
+TTownNameDialog	148	0x6589c8	0x403026	TNoHilitePicture	0x51ba70
+TTradeBidNationLine	20	0x66dc48	0x4031d4	TLineData	0x5bd950
+TTradeBidNationView	100	0x66dc60	0x404110	TView	0x5bdb40
+TTradeBookView	120	0x66dc78	0x404543	TView	0x5bde30
+TTradeCluster	140	0x662f68	0x4076cb	TAmtBarCluster	0x587010
+TTradeMgr	2800	0x66d870	0x405484	TObject	0x5b79d0
+TTradeOfferNationLine	20	0x66dc00	0x401a37	TLineData	0x5bcfc0
+TTradeOfferNationView	100	0x66dc18	0x401d25	TView	0x5bd1f0
+TTradeOrderPicture	144	0x662e48	0x409a66	TPicture	0x5843e0
+TTradePageBuyView	136	0x66dc30	0x403a67	TPageView	0x5bd5f0
+TTradePageSellView	136	0x66dbe8	0x406d39	TPageView	0x5bcb90
+TTradePanelView	100	0x654fa8	0x408a17	TPanelView	0x4f86d0
+TTradePolicyCluster	136	0x662e30	0x404f48	TUberCluster	0x584200
+TTradeSchoolView	168	0x651308	0x404fd9	TIndustryView	0x4cd760
+TTradeScreenPicture	144	0x66dba0	0x408f49	TPicture	0x5ba680
+TTradeTotalsLine	20	0x66dcd8	0x40364d	TLineData	0x5c1870
+TTradeTotalsView	100	0x66dcf0	0x401c9e	TView	0x5c1a80
+TTraderAmtBar	104	0x663028	0x402671	TAmtBar	0x58ae30
+TTraderForeignMinister	128	0x659b10	0x4089d1	TMinister	0x533800
+TTrainingOrder	76	0x64f3b0	0x40935e	TProductionOrder	0x4b6a60
+TTransFocusAnimation	56	0x64c280	0x404dd6	TFocusAnimation	0x4a03f0
+TTransportPicture	156	0x663160	0x402716	TPicture	0x591d90
+TTransportView	100	0x64fb90	0x40920a	TView	0x4bd300
+TTreatiesView	100	0x654f78	0x405858	TPanelView	0x4f7a10
+TTurnStartEvent	8	0x6536b8	0x40542f	TObject	0x4e65e0
+TTwoPicSlider	152	0x65de58	0x4096ba	TControl	0x56e120
+TUberCluster	136	0x65e5b0	0x406357	TCluster	0x5713c0
+TUnit	36	0x66ed40	0x406bcc	TObject	0x5c2430
+TUnitOrder	92	0x64f3c8	0x401974	TProductionOrder	0x4b6f20
+TUnitToolbarCluster	136	0x662ed8	0x4028ab	TUberCluster	0x585f70
+TUnitsView	160	0x651260	0x405cf9	TBuildingView	0x4c7f10
+TUniversityView	172	0x6512c0	0x40111d	TBuildingView	0x4caba0
+TUpDownPictureButton	148	0x65e5c8	0x4070a9	TPicture	0x571500
+TUpDownView	136	0x662de8	0x40474b	TControl	0x583c90
+TView	96	0x6495a0	0x40341d	TEventHandler	0x48a840
+TViewMgr	252	0x66f0b8	0x4081c0	TObject	0x5d4fd0
+TWarehouseView	260	0x651248	0x402540	TBuildingView	0x4c71f0
+TWarningView	148	0x663178	0x405d08	TPicture	0x592860
+TWindow	160	0x6495e8	0x40319d	TView	0x48d090
+TWorldView	124	0x668c10	0x4074d7	TView	0x594f20
+TZone	72	0x65c600	0x40703b	TObject	0x55e660
