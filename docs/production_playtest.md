@@ -32,3 +32,30 @@ offers rejected, next turn.
 ## Not covered
 Multi-input recipes (Steel, Fabric) and the capacity-limit/labor-limit "binding" codes were not exercised in play; Food,
 training, power plant and unit orders were not exercised either. The turn phase seen was one full season.
+
+## Second run: Steel and Fabric (multi-input recipes)
+
+Steel Mill (the waterwheel building by the river) and Textile Mill (the farmhouse in the middle of the capital screen).
+Start state: Cotton 20, Wool 20, Coal 30, Iron 30, Steel 20, Fabric 20, labor 16.
+
+| Check | Predicted | Seen |
+|---|---|---|
+| Steel to 1 | Coal -1, Iron -1, labor -2, SteelMill capacity -1 | Coal 30->29, Iron 30->29, labor 16->14, capacity 2->1, order reserved {Coal 1, Iron 1} |
+| Steel to 2 | one more of each | Coal 28, Iron 28, labor 12, capacity 0 |
+| Steel to 3 | refused: capacity is 2 | slider stops at 2, nothing changes |
+| Steel back down to 1 | everything refunded | Coal 29, Iron 29, labor 14, capacity 1 |
+| Fabric to 1 | 1 Cotton + 1 Wool, labor -2, capacity -1 | Cotton 19, Wool 19, labor 12, capacity 1 (reserved {Cotton 1, Wool 1}) |
+| Fabric to 2 | again | Cotton 18, Wool 18, labor 10, capacity 0 |
+| Next turn start | Steel +1, Fabric +2, score = (1+2)*10 = 30, orders re-charged | Steel 20->21, Fabric 20->22, score 30; Cotton/Wool 18->16, Coal/Iron 29->28; labor 10 = 16 - 2 - 4 |
+
+Findings:
+* The Textile Mill screen draws "2 Cotton -or- 2 Wool", but the game takes **1 Cotton + 1 Wool per unit** (the preferred even
+  split in `TOrItemOrder_vf11`). The "or" only matters when one of them runs short; that branch was not exercised.
+* Steel needs both inputs in equal amounts, so the scarcer one limits it; capacity and labor limit it the same way as Lumber.
+* Raw arrivals vary per turn: this time Grain +2, Fish +3, Meat -1 (slots 17-20 are Grain, Fruit, Fish, Meat; confirmed
+  by the Warehouse screen: Fruit 5, Grain 10, Fish 0, Meat 5 at the start). Cotton/Wool got no arrival this turn.
+* Other screens seen while looking for the Textile Mill (all in the capital): Lumber Mill, Steel Mill, Clothing Factory
+  (2 labor + 2 Fabric), Furniture Factory (2 labor + 2 Lumber), Metalworks (2 labor + 2 Steel -> Hardware or Arms, one shared
+  capacity), Food Processing (2 labor + 2 Grain + 1 Fruit + Fish or Meat -> 2 Food), Trade School (1 Paper + $100, then
+  2 Paper + $1,000, confirming the training costs), Armory (a unit costs trained labor + 1 Arms + $200), University, Shipyard
+  (a Trader costs 2 Fabric + 4 Lumber), Warehouse, Railyard.
