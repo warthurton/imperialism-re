@@ -53,3 +53,9 @@ Open question resolved: see the production timing section at the end and `how_a_
 * `Complete` also adds each amount to a running total (city+0x78); `BeginTurn` then sets the **production score** `+0x78 = old*9/10 + (this turn's total)*10` (an exponential moving average, probably feeding the nation ranking screens).
 * Also in BeginTurn: stock (+0xb6) += arrivals (+0x2a6, imports/trade deliveries), arrivals cleared, stock capped at 9999, special reset of +0x1f2 to 999 when a flag is set.
 * `TCity_CompleteOrders` (vf12) therefore handles the extra reporting pass for the remaining 26 orders (training/unit/etc) at end of turn; its exact timing relative to BeginTurn is not yet known.
+
+## Callers traced through vtables (update)
+* `TSimMgr_RunNonHumanPowers` is `TSimMgr` vtable slot 21 (+0x54). The only caller is `TSimMgr_AdvancePhase` **case 8**, which calls it and moves on to phase 0xb (confirmed by scanning the exe: the stub 0x405092 is only referenced from the TSimMgr vtable at 0x662a58).
+* For each non-human great power it calls nation slots 56, 55, **50**, 54, 89. Slot 50 is `0x4dab20` for all five great-power classes; its first action is `city->CompleteOrders()` (city slot 12), so **CompleteOrders runs for AI powers during phase 8**.
+* `TCity_BeginTurn` completes the order groups at city+0xe4 (25), +0x16c (9) and +0x1b0 (10); `CompleteOrders` completes +0x148 (18, overlapping +0x16c's nine, so effectively the first 9 of them) and +0x190 (8, with a report to the owner). Together they cover every order.
+* **Still open:** no direct call to nation slot 50 exists for human powers (searched the whole decompile for `+200` / `+0xc8` receivers). Their unit/training completion must go through some other route (UI command, network message handler, or a call made from a different vtable); not found yet.
