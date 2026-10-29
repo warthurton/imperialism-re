@@ -40,7 +40,7 @@ Open question resolved: see the production timing section at the end and `how_a_
 
 ## Where production starts (update)
 * **State 0x12** (likely): sets next state 5, notifies UI/map/events, then for every great power calls its vf(+0x1fc) and **vf48 `BeginTurn` (+0xc0)**. vf48 runs the great power's pending items and then the production minister's slot 21, `TCityInteriorMinister_BeginTurn`, which calls `TCity_BeginTurn` (stock gains from last turn's deliveries, cap 9999) and zeroes all order amounts. So production orders are cleared and stocks credited at the *start* of each turn.
-* `FUN_0057f140` (guess, `TSimMgr_RunNonHumanPowers`) runs the same family of per-power calls (including vf56 -> minister slot 21 through the +0x98 field) for non-human powers: the AI's planning step.
+* `FUN_0057f140` (guess, `TSimMgr_RunLocalPowers`) runs the same family of per-power calls (including vf56 -> minister slot 21 through the +0x98 field) for non-human powers: the AI's planning step.
 * Order lifecycle so far: BeginTurn (state 0x12) -> player/AI sets amounts (`SetAmount`) -> `FundOrder` pays inputs -> `Complete` delivers into stock. Remaining gap: the call to `Complete` itself.
 
 ## End-of-turn completion (update)
@@ -55,7 +55,7 @@ Open question resolved: see the production timing section at the end and `how_a_
 * `TCity_CompleteOrders` (vf12) therefore handles the extra reporting pass for the remaining 26 orders (training/unit/etc) at end of turn; its exact timing relative to BeginTurn is not yet known.
 
 ## Callers traced through vtables (update)
-* `TSimMgr_RunNonHumanPowers` is `TSimMgr` vtable slot 21 (+0x54). The only caller is `TSimMgr_AdvancePhase` **case 8**, which calls it and moves on to phase 0xb (confirmed by scanning the exe: the stub 0x405092 is only referenced from the TSimMgr vtable at 0x662a58).
+* `TSimMgr_RunLocalPowers` is `TSimMgr` vtable slot 21 (+0x54). The only caller is `TSimMgr_AdvancePhase` **case 8**, which calls it and moves on to phase 0xb (confirmed by scanning the exe: the stub 0x405092 is only referenced from the TSimMgr vtable at 0x662a58).
 * For each non-human great power it calls nation slots 56, 55, **50**, 54, 89. Slot 50 is `0x4dab20` for all five great-power classes; its first action is `city->CompleteOrders()` (city slot 12), so **CompleteOrders runs for AI powers during phase 8**.
 * `TCity_BeginTurn` completes the order groups at city+0xe4 (25), +0x16c (9) and +0x1b0 (10); `CompleteOrders` completes +0x148 (18, overlapping +0x16c's nine, so effectively the first 9 of them) and +0x190 (8, with a report to the owner). Together they cover every order.
 * **Still open:** no direct call to nation slot 50 exists for human powers (searched the whole decompile for `+200` / `+0xc8` receivers). Their unit/training completion must go through some other route (UI command, network message handler, or a call made from a different vtable); not found yet.
