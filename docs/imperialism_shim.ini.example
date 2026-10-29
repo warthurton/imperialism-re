@@ -1,0 +1,4 @@
+[display]
+; 1 = never change the desktop resolution (default); 0 = let the game switch to 640x480
+block_mode_change=1
+fullscreen_integer_scale=1
