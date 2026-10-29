@@ -37,21 +37,44 @@ for i in range(len(blocks)):
         grp[i] = 'link_stubs'
 # The linker lays out each .cpp contiguously, so an unsorted function between two functions of the same group
 # (nearest classified neighbours by address) belongs to that group too.
-known = [i for i in order if grp[i] != 'unsorted']
-nxt, prv = {}, {}
-last = None
-for i in order:
-    if grp[i] != 'unsorted':
-        last = i
-    prv[i] = last
-last = None
-for i in reversed(order):
-    if grp[i] != 'unsorted':
-        last = i
-    nxt[i] = last
-for i in order:
-    if grp[i] == 'unsorted' and prv[i] is not None and nxt[i] is not None and grp[prv[i]] == grp[nxt[i]]:
-        grp[i] = grp[prv[i]]
+def sandwich():
+    nxt, prv = {}, {}
+    last = None
+    for i in order:
+        if grp[i] not in ('unsorted', 'link_stubs'):
+            last = i
+        prv[i] = last
+    last = None
+    for i in reversed(order):
+        if grp[i] not in ('unsorted', 'link_stubs'):
+            last = i
+        nxt[i] = last
+    for i in order:
+        if grp[i] == 'unsorted' and prv[i] is not None and nxt[i] is not None and grp[prv[i]] == grp[nxt[i]]:
+            grp[i] = grp[prv[i]]
+
+
+
+sandwich()
+
+# Call graph: an unsorted function whose classified callers all share one group joins it (repeat until stable).
+by_addr = {addr[i]: i for i in range(len(blocks))}
+callers = collections.defaultdict(set)
+for i in range(len(blocks)):
+    for m in re.finditer(r'(?:FUN_|thunk_FUN_)([0-9a-f]{8})', texts[i]):
+        j = by_addr.get(int(m[1], 16))
+        if j is not None and j != i:
+            callers[j].add(i)
+changed = True
+while changed:
+    changed = False
+    for i in order:
+        if grp[i] in ('unsorted',) and callers[i]:
+            gs = {grp[c] for c in callers[i] if grp[c] not in ('unsorted', 'link_stubs')}
+            if len(gs) == 1:
+                grp[i] = gs.pop()
+                changed = True
+    sandwich()
 
 out = collections.defaultdict(list)
 for i in order:
