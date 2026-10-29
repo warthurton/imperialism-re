@@ -1242,7 +1242,7 @@
 "004daa50": "TAutoGreatPower_vf47",
 "004daa80": "TAutoGreatPower_BeginTurn",
 "004dab00": "TAutoGreatPower_vf49",
-"004dab20": "TAutoGreatPower_vf50",
+"004dab20": "TGreatPower_EndOfTurn",
 "004dae70": "TAutoGreatPower_vf51",
 "004db7d0": "TAutoGreatPower_vf52",
 "004dbac0": "TAutoGreatPower_vf53",
