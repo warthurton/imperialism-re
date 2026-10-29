@@ -28,3 +28,8 @@ Confidence: **confirmed** = decoded from code; **likely** / **guess** as in `nam
 | 0x64..0x72 | 4 | post an event each, then back to state 4 | one-shot events (messages) | guess |
 
 Open question: where production actually runs (TCity_BeginTurn, order execution). Not found among the states above yet.
+
+## Production (update)
+* The nation's TCityInteriorMinister (class of the production screen) has a per-turn function `vf62` (guess: RunTurnOrders) that walks the 9 industry slots (index 0x19-0x21) and 8 other slots (0x2b-0x32); every slot with a pending amount calls `vf67` (guess: FundOrder).
+* `vf67` takes the order object at nation+0xe4+slot*4 (the TItemOrder family), clamps the wanted amount, and removes the inputs and labor from stock. So orders are paid for at the end of the player's turn, not at "production".
+* Still unknown: the caller of `TCity_BeginTurn` (virtual, slot 10) and the step that turns paid orders into goods. Next: look at TItemOrder vf+0x40 and vf+0x118 callees, and the TGreatPower per-turn methods.
