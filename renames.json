@@ -1240,7 +1240,7 @@
 "004da5e0": "TAutoGreatPower_vf45",
 "004daa10": "TAutoGreatPower_vf46",
 "004daa50": "TAutoGreatPower_vf47",
-"004daa80": "TAutoGreatPower_vf48",
+"004daa80": "TAutoGreatPower_BeginTurn",
 "004dab00": "TAutoGreatPower_vf49",
 "004dab20": "TAutoGreatPower_vf50",
 "004dae70": "TAutoGreatPower_vf51",
@@ -4458,7 +4458,8 @@
 "00626c7d": "AfxWinTerm",
 "0057f3c0": "TSimMgr_RunTradePhase",
 "0057da70": "TSimMgr_AdvancePhase",
-"004b2570": "TCity_Reset"
+"004b2570": "TCity_Reset",
+"0057f140": "TSimMgr_RunNonHumanPowers"
 },
 "vtables": {
 "00645fc8": "CDib_vtable",
