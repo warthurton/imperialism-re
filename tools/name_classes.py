@@ -64,6 +64,12 @@ for n in sorted(vt, key=depth):
         i += 1
 for n, c in cls.items():
     if c['real']: ren.setdefault(c['real'], n + '_Create')
+import os
+if os.path.exists(RE + 'lib_names.json'):      # MFC / C runtime functions matched against the original static libs
+    lib = json.load(open(RE + 'lib_names.json'))['funcs']
+    for a, n in lib.items():
+        ren[int(a, 16)] = n
+    print(len(lib), 'library names applied')
 print(len(ren), 'functions named')
 json.dump({'funcs': {f'{k:08x}': v for k, v in ren.items()},
            'vtables': {f'{k:08x}': v for k, v in vtnames.items()}}, open(RE + 'renames.json', 'w'), indent=0)

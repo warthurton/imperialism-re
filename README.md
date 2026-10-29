@@ -12,6 +12,7 @@ or third-party binaries (see `.gitignore`); everything excluded can be regenerat
 | `winmm/` | `build.sh`: rebuilds the music DLL from the maintained open-source ogg-winmm (pinned commit), linked against the game's own libvorbisfile. |
 | `tools/` | `patch_winmm_file.py` (binary-patches the three buffer races in GOG's stock winmm.dll; fallback if you keep GOG's DLL), class/vtable naming, string-table and resource dumpers. |
 | `ghidra/` | Headless-Ghidra scripts (`ExportC` = full decompile, `CreateEntries` = create functions Ghidra missed, `ExportNew`). |
+| `lib_matches.tsv`, `lib_names.json` | MFC 4.21 and C-runtime functions found in the exe by matching the original static libs (`tools/match_lib.py` + `apply_lib_names.py`): 1,183 named. Needs the VC++ 5.0 disc (see below). |
 | `classes.tsv`, `renames.json` | The game's ~400 `T*` classes (size, base, factory) and the 3,167 virtual methods named from them. |
 | `docs/` | Findings (trade table layout and price formulas, etc.). |
 | `harness/` | Windows PowerShell 5.1 test harness that drives the real game (clicks, keys, screenshots, per-process audio meter, crash counting). `test18.ps1` = stress run, `test21.ps1` = music at each stage, `test22.ps1` = fullscreen look. |
@@ -37,3 +38,14 @@ precious (user's word) but do not touch `Save\` deliberately.
 * `Remove-Item` on `C:\GOG ...` is blocked by a local guard; build to new filenames and `Move-Item` instead.
 * Python run with `-I` ignores the script directory: scripts insert their own path.
 * The shim and the music DLL are GPL-compatible work; ogg-winmm is GPLv2 (source in its repo at the pinned commit).
+
+## Reference material (not in git)
+
+`vendor_untrusted/` (git-ignored, proprietary, from archive.org images of discs the owner holds): Visual C++ 5.0 Enterprise CD3
+(`VSENT_CD3_Visual_C_5.0.iso`, md5 5bca897ceda88e2267d40cb2f0d49f4c) extracted to `vc50-extracted/` (MFC 4.21 source, headers,
+`NAFXCW.LIB`, `LIBC.LIB`), and Visual Studio 97 SP3 (`vs97-sp3`, md5 afdd3e3a9089a7a9f6396f9f628cf4de). The original RTM libs match
+the game better than SP3's (2,122 vs 2,018 functions), so the game was built with them. Regenerate the library names with:
+
+    D=vendor_untrusted/vc50-extracted/DEVSTUDIO/VC
+    python -I tools/match_lib.py $D/MFC/LIB/NAFXCW.LIB $D/LIB/LIBC.LIB
+    python -I tools/apply_lib_names.py && python -I tools/name_classes.py
