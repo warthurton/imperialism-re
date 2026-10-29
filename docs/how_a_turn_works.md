@@ -61,8 +61,14 @@ The game has four turns per year (turn/4 = year offset; guess), and the phase ma
 | Price formulas, supply weights, table layout | Minor-nation AI thresholds | Exact use of the production score |
 | Stock cap of 9,999; arrivals added at turn start | Network synchronisation points | Combat, transport and map phases (not yet read) |
 
+## Checked in play
+
+One season of a real game was checked against these rules (see `production_playtest.md`): costs, capacity, delivery at the
+next turn start, score and the turn counter all matched. It also showed that **orders repeat**: the amount you set is
+re-charged every turn until you change it, and labor is refilled each turn.
+
 ## How we know
 
-All of this was read from the code, not observed in play. The next step for confidence is to test: set an order in a real
+Almost all of this was read from the code; the production rules marked above were then checked in play. The next step for confidence is to test: set an order in a real
 game, end the turn, and watch the stock change at the next turn start (see `harness/`). Nothing here has been
 cross-checked against a running game yet.

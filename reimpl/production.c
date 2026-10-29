@@ -27,7 +27,8 @@ typedef struct City {
     short arrivals[NUM_STOCK];  /* goods bought last turn, delivered now  city+0x2a6  [confirmed] */
     short cap_max[NUM_CATS];    /* capacity per category                  city+0x1dc  [confirmed] */
     short cap_left[NUM_CATS];   /* capacity unspent this turn             city+0x1fc  [confirmed] */
-    short labor;                /* labor units available                  labor+0x1c  [likely] */
+    short labor;                /* labor units available                  labor+0x1c  [confirmed in play] */
+    short labor_total;          /* labor the nation has; labor is refilled to this each turn  [likely] */
     int   score;                /* production score                       city+0x78   [confirmed] */
     int   turn;                 /*                                        city+0xc */
 } City;
@@ -40,6 +41,7 @@ typedef struct Order {
     short in1, in2;             /* input goods (in2 = -1: none)   order+0x4e / +0x50 */
     short cat;                  /* capacity category              order+0x52 */
     short amount;               /* units ordered                  order+0x04 */
+    short remembered;           /* last amount the player set; re-applied every turn   order+0x4c  [confirmed in play] */
     short reserved[NUM_STOCK];  /* inputs already taken from stock order+0x10 */
     short binding;              /* which limit binds: 0 inputs, 1 labor, 2 capacity   order+0x40 */
     int   produced_total;       /*                                order+0x44 */
@@ -85,6 +87,7 @@ int order_set_amount(Order *o, int amount)
     int delta = amount - o->amount;
     if (amount < 0 || amount > order_max_amount(o)) return 0;
     o->amount = (short)amount;
+    o->remembered = (short)amount;
     if (o->kind == SINGLE) {
         take(o, o->in1, 2 * delta);
     } else if (o->kind == PAIR) {
@@ -118,14 +121,29 @@ void order_complete(Order *o)
     c->score            += o->amount;      /* city+0x78 running total, folded into the score by begin_turn */
     o->produced_total   += o->amount;
     memset(o->reserved, 0, sizeof o->reserved);
-    o->amount = 0;                         /* TCity_BeginTurn clears the amounts for the new turn */
+}
+
+/* TItemOrder_ResetAmount @ 004b5620   [confirmed in play: the order is charged again each turn]
+ * After delivery the order is emptied and the remembered amount is re-applied, so a standing order repeats every
+ * turn until the player changes it. If inputs (not labor or capacity) fall short, the largest affordable amount is
+ * taken but the remembered figure is kept for later turns. */
+void order_reset_amount(Order *o)
+{
+    int max = order_max_amount(o);
+    short r = o->remembered;
+    int inputs_bind = (o->binding == 0);
+    o->amount = 0;
+    if (max < r && inputs_bind) { order_set_amount(o, max); o->remembered = r; }
+    else                        order_set_amount(o, r);
 }
 
 /* TCity_BeginTurn @ 004b3b40   [confirmed]
  * 1. arrivals (last turn's purchases) join stock, then clear
  * 2. every recipe order is completed (last turn's paid production arrives)
  * 3. score = old*9/10 + (this turn's total)*10
- * 4. stock is capped at 9,999 */
+ * 4. stock is capped at 9,999
+ * 5. labor is refilled and every order is re-charged with its remembered amount (observed in play: a Lumber order of 1
+ *    set once is still 1, with its 2 Timber taken again, at the start of every following turn) */
 void city_begin_turn(City *c, Order *orders, int n_orders)
 {
     int i, old_score = c->score;
@@ -135,6 +153,8 @@ void city_begin_turn(City *c, Order *orders, int n_orders)
     for (i = 0; i < n_orders; i++) order_complete(&orders[i]);
     c->score = old_score * 9 / 10 + c->score * 10;
     for (i = 0; i < NUM_STOCK; i++) if (c->stock[i] > 9999) c->stock[i] = 9999;
+    c->labor = c->labor_total;
+    for (i = 0; i < n_orders; i++) order_reset_amount(&orders[i]);
 }
 
 /* ---- the nine goods recipes, as set up in TCity_Reset @ 004b2570 (docs/recipes.md)   [likely] ---- */
@@ -170,7 +190,7 @@ int main(void)
     Order *steel = &o[3], *fabric = &o[0], *clothing = &o[5];
 
     /* Steel = 1 Iron + 1 Coal per unit; limited by the scarcer input. */
-    c.stock[IRON] = 10; c.stock[COAL] = 6; c.labor = 100; c.cap_left[STEEL_MILL] = 8;
+    c.stock[IRON] = 10; c.stock[COAL] = 6; c.labor = c.labor_total = 100; c.cap_left[STEEL_MILL] = 8;
     CHECK(order_max_amount(steel) == 6 && steel->binding == 0);
     CHECK(order_set_amount(steel, 7) == 0);                     /* over the max is refused */
     CHECK(order_set_amount(steel, 5) == 1);
@@ -188,14 +208,18 @@ int main(void)
     c.stock[FABRIC] = 9; c.cap_left[CLOTHING_FACTORY] = 9;
     CHECK(order_max_amount(clothing) == 4);
 
-    /* Production is delivered at the next turn start; capacity returns; inputs are consumed; stock capped. */
+    /* Production is delivered at the next turn start; capacity returns; inputs are consumed; stock capped; then the
+     * standing orders are charged again from the new stock (Steel 2 remembered, Fabric 3 remembered). */
     c.stock[STEEL] = 9998; c.arrivals[COAL] = 3; c.score = 100;
     city_begin_turn(&c, o, 9);
     CHECK(c.stock[STEEL] == 9999);                              /* 9998 + 2 capped */
-    CHECK(c.stock[COAL] == 7 && c.arrivals[COAL] == 0);
     CHECK(c.stock[FABRIC] == 9 + 3);                            /* 3 fabric delivered */
-    CHECK(c.cap_left[STEEL_MILL] == 8 && steel->amount == 0);
     CHECK(c.score == 100 * 9 / 10 + (2 + 3) * 10);
+    CHECK(steel->amount == 2 && steel->remembered == 2);        /* standing order repeats */
+    CHECK(c.stock[IRON] == 6 && c.stock[COAL] == 5);            /* 8-2 and (4+3 arrivals)-2 */
+    CHECK(c.labor == 100 - 2 * (2 + 2) && c.cap_left[STEEL_MILL] == 6);   /* labor refilled, then 2+2 units charged */
+    CHECK(fabric->amount == 2 && fabric->remembered == 3);      /* only 5 cotton left = 2 units affordable; 3 kept */
+    CHECK(c.stock[COTTON] == 1 && c.stock[WOOL] == 0);
 
     puts(fails ? "production model: FAILURES" : "production model: all checks pass");
     return fails != 0;
