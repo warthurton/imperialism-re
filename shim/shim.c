@@ -67,6 +67,7 @@ static RECT g_dest;                 /* thumbnail rectangle in mirror client coor
 static POINT g_virt;                /* cursor position in frame "screen" coords */
 static BOOL g_virtActive, g_inMenu, g_mirrorCap, g_fullscreen, g_shown, g_tracking, g_laidOut, g_inSetCursor;
 static BOOL g_intScale = TRUE;      /* [display] fullscreen_integer_scale in the ini */
+static BOOL g_blockModeChange = TRUE;  /* [display] block_mode_change in the ini: never change the desktop resolution */
 #define BACKDROP_BROWN RGB(84, 46, 8)  /* the game's own frame backdrop colour (sampled from the stock game) */
 static HMENU g_menu;
 static LONG g_savedStyle;
@@ -578,7 +579,15 @@ static BOOL WINAPI w_LineTo(HDC dc, int x, int y)
 }
 static LONG WINAPI w_ChangeDisplaySettingsA(DEVMODEA *dm, DWORD flags)
 {
-    LONG r = ORIG(ChangeDisplaySettingsA, LONG (WINAPI *)(DEVMODEA*,DWORD))(dm, flags);
+    LONG r;
+    if (g_blockModeChange) {
+        /* The game asks for 640x480 (or restores the old mode on exit). We scale in a window instead, so pretend
+         * it worked and leave the desktop alone. */
+        LOGCALL(ChangeDisplaySettingsA, "%lux%lu flags=%lx -> blocked", dm ? dm->dmPelsWidth : 0,
+                dm ? dm->dmPelsHeight : 0, flags);
+        return DISP_CHANGE_SUCCESSFUL;
+    }
+    r = ORIG(ChangeDisplaySettingsA, LONG (WINAPI *)(DEVMODEA*,DWORD))(dm, flags);
     LOGCALL(ChangeDisplaySettingsA, "%lux%lu bpp=%lu flags=%lx -> %ld",
             dm ? dm->dmPelsWidth : 0, dm ? dm->dmPelsHeight : 0, dm ? dm->dmBitsPerPel : 0, flags, r);
     return r;
@@ -841,6 +850,7 @@ BOOL WINAPI DllMain(HINSTANCE inst, DWORD reason, LPVOID reserved)
             s = strrchr(ini, '\\');
             if (s) strcpy(s + 1, "imperialism_shim.ini");
             g_intScale = GetPrivateProfileIntA("display", "fullscreen_integer_scale", 1, ini) != 0;
+            g_blockModeChange = GetPrivateProfileIntA("display", "block_mode_change", 1, ini) != 0;
         }
         CreateThread(NULL, 0, summary_thread, NULL, 0, NULL);
     } else if (reason == DLL_PROCESS_DETACH && g_log) {
