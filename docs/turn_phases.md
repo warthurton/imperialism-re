@@ -37,3 +37,8 @@ Open question: where production actually runs (TCity_BeginTurn, order execution)
 * Not yet found: the loop that calls `Complete` for all orders at turn end (not in `TCityInteriorMinister_vf62`; probably in a TGreatPower method or a minister base class). Dead end noted: `FUN_005a9d90` is tactical-view UI drawing, unrelated.
 * `TCityInteriorMinister_vf21` (likely, `BeginTurn`) is the caller of `TCity_BeginTurn`: it zeroes all order amounts, runs the city's begin-turn (stock gains), then totals order amounts per output good. Its own caller (minister slot 21 = vtable +0x54) is invoked through `TAutoGreatPower_vf48/vf56` (+0x90c / +0x98 minister fields); still to confirm which phase state triggers those.
 * Dead end: `FUN_004f1760` is a nation ranking/statistics normaliser (scores out of 100), unrelated to production.
+
+## Where production starts (update)
+* **State 0x12** (likely): sets next state 5, notifies UI/map/events, then for every great power calls its vf(+0x1fc) and **vf48 `BeginTurn` (+0xc0)**. vf48 runs the great power's pending items and then the production minister's slot 21, `TCityInteriorMinister_BeginTurn`, which calls `TCity_BeginTurn` (stock gains from last turn's deliveries, cap 9999) and zeroes all order amounts. So production orders are cleared and stocks credited at the *start* of each turn.
+* `FUN_0057f140` (guess, `TSimMgr_RunNonHumanPowers`) runs the same family of per-power calls (including vf56 -> minister slot 21 through the +0x98 field) for non-human powers: the AI's planning step.
+* Order lifecycle so far: BeginTurn (state 0x12) -> player/AI sets amounts (`SetAmount`) -> `FundOrder` pays inputs -> `Complete` delivers into stock. Remaining gap: the call to `Complete` itself.
