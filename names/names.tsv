@@ -36,7 +36,7 @@ TItemOrder_vf11	TItemOrder_SetAmount	func	likely	moves inputs (2:1 single-input,
 TItemOrder_vf12	TItemOrder_GetMaxAmount	func	likely	min of labor, capacity and input limits; stores which limit binds in +0x40
 TPowerPlantOrder_vf11	TPowerPlantOrder_SetAmount	func	likely	same shape as TItemOrder_SetAmount for power/capacity
 TFoodProcessingOrder_vf11	TFoodProcessingOrder_SetAmount	func	likely	even amounts only; two input stocks
-TCity_vf10	TCity_BeginTurn	func	likely	adds last turn's production/deliveries into stock (cap 9999), clears them, ticks 25+9+10 sub-objects
+TCity_vf10	TCity_BeginTurn	func	confirmed	start of turn: turn counter +0xc, stock (+0xb6) += arrivals (+0x2a6) then cleared, calls Complete (order vf13) on order slots 0-24, then 9 more (+0x16c) and 10 more (+0x1b0); production score +0x78 = old*9/10 + new*10; caps stock at 9999; refreshes UI
 TCityTask_vf10	TCityTask_AdvanceOneTurn	func	likely	subtracts this turn's contribution from the task countdown; completes the build when it reaches zero
 0057da70	TSimMgr_AdvancePhase	func	likely	switch on phase state at +4 (39 cases), each case sets the next phase at +4 and the previous at +8; run when a phase finishes
 TCityInteriorMinister_vf62	TCityInteriorMinister_RunTurnOrders	func	guess	per-turn: applies queued task/build requests, then for each of 9 industry slots (0x19..0x21) and 8 other slots (0x2b..0x32) with a pending flag calls vf67 (+0x10c); treasury at nation+0x10 compared with a difficulty-dependent floor
