@@ -1,0 +1,16 @@
+TTradeMgr table rows (17), inferred from the 7/6/4 loop groups matched to string ids 17061-17077 in STR#ENU.GOB
+raw materials (rows 0-6):   0 Cotton, 1 Wool, 2 Timber, 3 Coal, 4 Iron, 5 Horses, 6 Oil
+intermediate (rows 7-12):   7 Food, 8 Fabric, 9 Lumber, 10 Paper, 11 Steel, 12 Fuel
+finished goods (rows 13-16): 13 Clothing, 14 Furniture, 15 Hardware, 16 Arms
+columns (23): nations 0-6 = Great Powers, 7-22 = minor nations (16)
+other string ids: 17078-17083 Grain, Fruit, Fish, Livestock, Gems, Gold (map resources, not trade rows)
+
+Row layout in TTradeMgr (160 bytes/row from +8, 17 rows; also save format, vf5 writes / vf6 reads, big-endian shorts, old-save fallback when schema < 0x27):
+ +0 short oldPrice, +2 short price, +4 short buyerCount, +6 short sellerCount, +8 double supplyIndex, +0x10 short totalSupply, +0x12 short basePrice(floor ref)
+ +0x14 short[23] offer(+)/bid(-) per nation, +0x42 short[23] running totals, +0x70 short[23] third table (unverified)
+Prices (TTradeMgr_vf13): derived goods are formula-priced from related goods:
+ Fabric=(Clothing/3 + 3*avg(Cotton,Wool))/2   Lumber=(Furniture/3 + 3*Timber)/2   Paper=3*Timber
+ Steel=(Hardware/3 + 3*avg(Coal,Iron))/2      Fuel=3*Oil                          Arms=(Hardware + 3*Steel)/2
+ other goods: price from buyerCount vs supplyIndex, floored relative to basePrice, clamped to 32000.
+Supply weights (vf28 minors, vf29 great powers): for a nation offering q units, weight = base^(q-1) (q capped at 24), base shrinks with game year (turn/4): 1.10 -> 1.01.
+vf10 = per-turn reset. vf24 = execute one deal (adjust both nations' stock, notify human players, network sync when multiplayer).
