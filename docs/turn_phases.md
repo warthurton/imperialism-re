@@ -46,3 +46,10 @@ Open question: where production actually runs (TCity_BeginTurn, order execution)
 ## End-of-turn completion (update)
 * `TCity_vf12` (likely, `TCity_CompleteOrders`) calls `TItemOrder_Complete` (slot 13) on the 18 orders at city+0x148 and the 8 at city+0x190 and first reports them to the owner. Those are slots 26-51 of the order table (training, units, capacity, power plant, growth...). The *goods recipes* (slots 7-16, city+0x100..0x124) are NOT in these loops, so goods are delivered by another path (not found yet; check callers of vtable slot 12 on TCity and the minister's `vf67` follow-ups).
 * Source file names survive in the exe's assert strings: `D:\Ambit\Cross\City.cpp`, `...\UTacViews.cpp` (the developer's tree was `Ambit\Cross`). `TCity_vf32` shows the check at City.cpp line 0x47f.
+
+## Production timing (CONFIRMED by reading TCity_BeginTurn)
+* **Goods are delivered at the START of the next turn.** `TCity_BeginTurn` (called from state 0x12 through the great power's `BeginTurn` and the production minister) calls `TItemOrder_Complete` on order slots 0-24 (this includes the goods recipes), then 9 orders at city+0x16c and 10 at city+0x1b0. Inputs were paid during the previous turn by `FundOrder`.
+* Order slot index = output good index for the recipes: slot 7 Food (0x100), 8 Fabric (0x104), 9 Lumber, 10 Paper, 11 Steel, 12 Fuel, 13 Clothing, 14 Furniture, 15 Hardware, 16 Arms (0x124).
+* `Complete` also adds each amount to a running total (city+0x78); `BeginTurn` then sets the **production score** `+0x78 = old*9/10 + (this turn's total)*10` (an exponential moving average, probably feeding the nation ranking screens).
+* Also in BeginTurn: stock (+0xb6) += arrivals (+0x2a6, imports/trade deliveries), arrivals cleared, stock capped at 9999, special reset of +0x1f2 to 999 when a flag is set.
+* `TCity_CompleteOrders` (vf12) therefore handles the extra reporting pass for the remaining 26 orders (training/unit/etc) at end of turn; its exact timing relative to BeginTurn is not yet known.
