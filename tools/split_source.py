@@ -31,6 +31,10 @@ texts = [''.join(l) for _, l in blocks]
 addr = [int(re.match(r'// \S+ @ ([0-9a-f]{8})', t)[1], 16) for t in texts]
 order = sorted(range(len(blocks)), key=lambda i: addr[i])
 grp = {i: group_of(blocks[i][0], texts[i]) for i in range(len(blocks))}
+# 0x401000-0x40c000 is the incremental-link jmp-stub region: keep it out of the real groups.
+for i in range(len(blocks)):
+    if grp[i] == 'unsorted' and addr[i] < 0x40c000:
+        grp[i] = 'link_stubs'
 # The linker lays out each .cpp contiguously, so an unsorted function between two functions of the same group
 # (nearest classified neighbours by address) belongs to that group too.
 known = [i for i in order if grp[i] != 'unsorted']
