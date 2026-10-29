@@ -38,6 +38,22 @@ nation+0x1fc. So the seven categories are: 0 textile mill (Fabric), 1 clothing f
   adds the difference to capacity-left. Starting values written there: 2 for categories 0, 2, 4 and 1 for 1, 3, 5
   (only when game option g_Game+0x40 < 2 and the nation flag +0xa0 is set; meaning of that flag is a guess).
 
+## The non-recipe orders (read from their SetAmount / Complete code)
+
+Goods stock is `nation+0xb6+2*good`; the byte offsets below are those slots (0xca = Paper, 0xce = Fuel, 0xc4 = Food).
+
+| Order | What it spends | What it delivers | Confidence |
+|---|---|---|---|
+| `TTrainingOrder` kind 1 (city+0x140) | 1 Paper and 100 cash per worker | one worker promoted a grade (via the labor object's vf at +0x4c) | likely |
+| `TTrainingOrder` kind 2 (city+0x144) | 2 Paper and 1,000 cash per worker | a further promotion | likely |
+| `TPowerPlantOrder` (city+0x1b4) | 1 Fuel per 6 units of power | raises the labor object's available labor (+0x1c) by the power amount; nation+0xb4 records it | likely |
+| `TFoodProcessingOrder` (city+0x100) | food inputs (several stocks) | `Complete` adds the amount to Food stock (good 7) | likely |
+| `TPopGrowthOrder` (city+0x1d4) | nothing in stock | `Complete` adds the amount to both population sub-pools (+4 of the objects at labor+0x10 and +0x14) and the total (labor+8) | likely |
+| `TExpansionOrder` / `TCapacityOrder` | see capacity section | raise max capacity of a category (item 0xe/0xf variants raise labor-related caps, derived from a nation figure /4 or /3 depending on game option +0x8d1 < '3') | guess |
+
+Reading: training and power plant are paid out of ordinary goods (Paper, Fuel), which is why Paper and Fuel matter even
+though they are intermediate goods.
+
 Consistent with the price formulas in trade_rows.txt (Fabric from Wool/Cotton, Steel from Iron/Coal, Clothing from
 Fabric, Lumber and Paper from Timber, Hardware and Arms from Steel, Fuel from Oil). The last argument is probably a
 UI/industry index; unconfirmed. Stock lives at city+0x1fc (23 shorts), per-turn reserved amounts at +0x1dc.
