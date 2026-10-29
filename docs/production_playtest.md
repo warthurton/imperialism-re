@@ -3,7 +3,7 @@
 Method: `harness/prod_nav.ps1` launches the game to the map; clicks go through the real UI (`prod_click.ps1`, with
 `focus.ps1` making sure the game has focus first); `tools/readcity.py` only *reads* the game's memory (the local human's
 `TCity`, found as the one great power in `g_GreatPowers` at 0x6a4370 whose vtable is not `TAutoGreatPower`'s 0x654088) and
-saves raw snapshots to `results/` (git-ignored). Nothing was written into the game's memory.
+saves raw snapshots to `results/city_*.json` (kept in the repo as evidence: a few hundred bytes of city state each, no game code or assets). Nothing was written into the game's memory.
 
 Setup: new game, Brosoptendall (power index 1), spring 1815. One order set in the Lumber Mill screen, then End Turn, trade
 offers rejected, next turn.
