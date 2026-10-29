@@ -30,3 +30,6 @@ src-oggwinmm/
 harness/shots/*
 !harness/shots/.gitkeep
 __pycache__/
+
+# Proprietary reference material (never commit)
+vendor_untrusted/
