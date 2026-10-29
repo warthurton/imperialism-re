@@ -1,6 +1,17 @@
 # Imperialism (1997) – reverse engineering and modernization workspace
 
-Work on the GOG install of *Imperialism* (`C:\GOG Games\Imperialism`): 32-bit MSVC 5 / MFC 4 / GDI-only game.
+An unofficial, non-commercial fan project. I did it for three reasons: I like the game, I could not find anything like
+it already out there, and it is a learning exercise in decompilation and reverse engineering.
+
+**This repository contains no game files.** No executables, assets, data files, music, decompiler output or
+third-party binaries are included. You need your own legal copy of the game (the notes here target the GOG release).
+Everything excluded can be regenerated from your copy with the scripts below. The project is not affiliated with or
+endorsed by the rights holders of *Imperialism*; the name belongs to them. If a rights holder objects to anything here,
+open an issue and it will be removed.
+
+What is here is original work: a display shim, build scripts, analysis tooling, and notes on how the game works
+(trade, turn phases, class layout), with every guess marked by a confidence level in `names/names.tsv`.
+
 This repo holds our own code, tools and notes. It deliberately does **not** hold game files, decompiler output
 or third-party binaries (see `.gitignore`); everything excluded can be regenerated with the scripts below.
 
