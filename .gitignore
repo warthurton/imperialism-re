@@ -1,0 +1,32 @@
+# Generated from the game binary / large / reproducible -- regenerate with the scripts
+imperialism_decomp.c
+imperialism_decomp_extra.c
+imperialism_named.c
+game_strings.txt
+fn.pkl
+pe_secs.json
+old_entries.txt
+missing_entries.txt
+class_names.txt
+analyze*.log
+
+# Ghidra project, crash dumps, toolchain downloads
+project/
+project_backup/
+dumps/
+toolchain/
+
+# Binaries: game files, build outputs, third-party clones
+original/
+fixed/
+build_ogg/
+src-oggwinmm/
+*.dll
+*.exe
+*.dmp
+*.bak
+
+# Test output
+harness/shots/*
+!harness/shots/.gitkeep
+__pycache__/
