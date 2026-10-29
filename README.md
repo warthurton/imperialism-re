@@ -65,3 +65,10 @@ the game better than SP3's (2,122 vs 2,018 functions), so the game was built wit
 
 Work happens on `topic/*` branches with several commits grouped per topic. `tools/ship.sh "title"` pushes the branch and
 opens a pull request that auto-merges into `main` (merge commit, branch deleted afterwards).
+
+## Grouped source (local only)
+
+`python tools/split_source.py` splits the decompiled `imperialism_named.c` into `src/<group>.c` (display, production,
+trade, mfc, crt, ...) using the rules in `names/groups.tsv`. Name rules go first, then a body rule (GDI calls = display),
+then unnamed functions sitting between two functions of the same group by address join that group. `src/` is git-ignored
+because it is derived from the game; only the rules and the script are tracked. Edit `groups.tsv` and rerun to regroup.

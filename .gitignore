@@ -33,3 +33,6 @@ __pycache__/
 
 # Proprietary reference material (never commit)
 vendor_untrusted/
+
+# Split decompiler output (tools/split_source.py) -- derived from the game, never commit
+src/
