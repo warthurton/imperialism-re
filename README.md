@@ -60,3 +60,8 @@ the game better than SP3's (2,122 vs 2,018 functions), so the game was built wit
     D=vendor_untrusted/vc50-extracted/DEVSTUDIO/VC
     python -I tools/match_lib.py $D/MFC/LIB/NAFXCW.LIB $D/LIB/LIBC.LIB
     python -I tools/apply_lib_names.py && python -I tools/name_classes.py
+
+## Contributing / workflow
+
+Work happens on `topic/*` branches with several commits grouped per topic. `tools/ship.sh "title"` pushes the branch and
+opens a pull request that auto-merges into `main` (merge commit, branch deleted afterwards).
