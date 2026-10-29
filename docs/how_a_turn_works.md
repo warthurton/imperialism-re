@@ -56,7 +56,7 @@ The game has four turns per year (turn/4 = year offset; guess), and the phase ma
 
 | Solid (confirmed) | Probable (likely) | Open |
 |---|---|---|
-| Production timing: paid last turn, delivered at turn start | Phase numbers and their meanings in `turn_phases.md` | The meaning of the last argument in each order's setup call |
+| Production timing: paid last turn, delivered at turn start | Phase numbers and their meanings in `turn_phases.md` | ~~Last argument of an order's setup call~~ = capacity category, see `recipes.md` |
 | Recipes and the "slot = output good" rule | Cost per unit of orders (2 / 1+1 / labor 2) | Whether `TCity_CompleteOrders` runs before or after `BeginTurn` |
 | Price formulas, supply weights, table layout | Minor-nation AI thresholds | Exact use of the production score |
 | Stock cap of 9,999; arrivals added at turn start | Network synchronisation points | Combat, transport and map phases (not yet read) |

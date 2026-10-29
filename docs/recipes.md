@@ -5,7 +5,7 @@ objects and stores them at city+0xe4+slot. Init call: `order.vf17(city, output, 
 trade-table rows (0 Cotton, 1 Wool, 2 Timber, 3 Coal, 4 Iron, 5 Horses, 6 Oil, 7 Food, 8 Fabric, 9 Lumber, 10 Paper,
 11 Steel, 12 Fuel, 13 Clothing, 14 Furniture, 15 Hardware, 16 Arms). -1 = no second input.
 
-| city+off | class | output | input 1 | input 2 | last arg (meaning unknown) | confidence |
+| city+off | class | output | input 1 | input 2 | last arg = capacity category | confidence |
 |---|---|---|---|---|---|---|
 | 0x104 | TOrItemOrder | Fabric (8) | Wool (1) | Cotton (0) | 0 | likely: "either/or" input class |
 | 0x108 | TItemOrder | Lumber (9) | Timber (2) | - | 4 | likely |
@@ -22,6 +22,21 @@ trade-table rows (0 Cotton, 1 Wool, 2 Timber, 3 Coal, 4 Iron, 5 Horses, 6 Oil, 7
 | 0x164 | TUnitOrder | military units | args 0x18,0x10,2,-1,0,5000,4,1 | | | guess |
 | 0x1b0 | TCapacityOrder | factory expansion | args 0xe,9,0xb | | | guess |
 | 0x1d4 | TPopGrowthOrder | population growth | | | | guess |
+
+## The last argument is the capacity category (confirmed from the code)
+
+`TItemOrder_vf17(city, item, in1, in2, cat)` stores `item` at +0x48, `in1`/`in2` at +0x4e/+0x50 and `cat` at +0x52.
+`cat` indexes two per-nation arrays of shorts: **max capacity** at nation+0x1dc and **capacity left this turn** at
+nation+0x1fc. So the seven categories are: 0 textile mill (Fabric), 1 clothing factory, 2 steel mill, 3 metal works
+(Hardware and Arms share it), 4 lumber mill (Lumber and Paper share it), 5 furniture factory, 6 refinery (Fuel).
+
+* `GetMaxAmount` = min(inputs, labor/2, capacity left); the code stored at order+0x40 says which one binds
+  (0 inputs, 1 labor, 2 capacity).
+* `SetAmount` subtracts the change from capacity-left (`nation+0x1fc[cat]`), and `Complete` adds the amount back, so
+  capacity is a per-turn budget that refills when the order is delivered.
+* `TCity_Reset` zeroes the max and shrinks capacity-left by it; `TExpansionOrder` completion sets the new max and
+  adds the difference to capacity-left. Starting values written there: 2 for categories 0, 2, 4 and 1 for 1, 3, 5
+  (only when game option g_Game+0x40 < 2 and the nation flag +0xa0 is set; meaning of that flag is a guess).
 
 Consistent with the price formulas in trade_rows.txt (Fabric from Wool/Cotton, Steel from Iron/Coal, Clothing from
 Fabric, Lumber and Paper from Timber, Hardware and Arms from Steel, Fuel from Oil). The last argument is probably a
