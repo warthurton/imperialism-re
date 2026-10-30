@@ -4459,7 +4459,16 @@
 "0057f3c0": "TSimMgr_RunTradePhase",
 "0057da70": "TSimMgr_AdvancePhase",
 "004b2570": "TCity_Reset",
-"0057f140": "TSimMgr_RunLocalPowers"
+"0057f140": "TSimMgr_RunLocalPowers",
+"005e5374": "DirectPlayLobbyCreateA",
+"005e537a": "DirectPlayEnumerateA",
+"005e5380": "DirectPlayCreate",
+"0047fb80": "TDirectPlay_CreateLobby",
+"0047fd90": "TDirectPlay_EnumProviders",
+"0047fe50": "TDirectPlay_Init",
+"00480030": "TDirectPlay_CreateSession",
+"004803d0": "TDirectPlay_JoinSession",
+"00480400": "TDirectPlay_Shutdown"
 },
 "vtables": {
 "00645fc8": "CDib_vtable",

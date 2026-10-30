@@ -1,13 +1,20 @@
 """Split imperialism_named.c into src/<group>.c using the rules in names/groups.tsv (src/ is git-ignored, like the input).
 Usage: python tools/split_source.py   (prints a function count per group)"""
-import os, re, collections
+import os, re, sys, collections
 
 RE = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + '/'
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from sdk_annotate import annotate_dp
 rules = []
+addr_rules = []
 for ln in open(RE + 'names/groups.tsv', encoding='utf-8'):
     if ln.startswith('#') or not ln.strip():
         continue
-    on, rx, grp = ln.rstrip('\n').split('\t')
+    on, rx, grp = ln.rstrip('\r\n').split('\t')
+    if on == 'addr':                       # explicit address range "start-end" (hex), e.g. SDK wrapper code
+        lo, hi = (int(x, 16) for x in rx.split('-'))
+        addr_rules.append((lo, hi, grp))
+        continue
     rules.append((on, re.compile(rx), grp))
 
 # Split into blocks: each starts at a "// name @ addr" comment; text before the first is the shared preamble.
@@ -31,6 +38,10 @@ texts = [''.join(l) for _, l in blocks]
 addr = [int(re.match(r'// \S+ @ ([0-9a-f]{8})', t)[1], 16) for t in texts]
 order = sorted(range(len(blocks)), key=lambda i: addr[i])
 grp = {i: group_of(blocks[i][0], texts[i]) for i in range(len(blocks))}
+for i in range(len(blocks)):               # explicit address ranges win over name rules
+    for lo, hi, g in addr_rules:
+        if lo <= addr[i] <= hi and addr[i] >= 0x410000:
+            grp[i] = g
 # 0x401000-0x40c000 is the incremental-link jmp-stub region: keep it out of the real groups.
 for i in range(len(blocks)):
     if grp[i] == 'unsorted' and addr[i] < 0x40c000:
@@ -118,7 +129,7 @@ while changed:
 
 out = collections.defaultdict(list)
 for i in order:
-    out[grp[i]].append(texts[i])
+    out[grp[i]].append(annotate_dp(texts[i]) if grp[i] == 'directplay' else texts[i])
 
 os.makedirs(RE + 'src', exist_ok=True)
 for f in os.listdir(RE + 'src'):
