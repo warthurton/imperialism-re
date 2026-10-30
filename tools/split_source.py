@@ -57,6 +57,27 @@ def sandwich():
 
 sandwich()
 
+# Original source files: the game's assert strings name the .cpp a function came from (D:\Ambit\<file>.cpp). Each file is one
+# contiguous address range, so an unsorted function inside exactly one file's range (first..last assert) joins that file's group.
+file_group = {}
+for ln in open(RE + 'names/source_files.tsv', encoding='utf-8'):
+    if ln.startswith('#') or not ln.strip():
+        continue
+    f, g = ln.rstrip('\r\n').split('\t')
+    file_group[f] = g
+anchors = collections.defaultdict(list)
+for i in range(len(blocks)):
+    if addr[i] < 0x410000:
+        continue                      # stub region holds copies of constructors etc., not the real file layout
+    for m in re.finditer(r's_D__Ambit_(\w+?)_cpp_', texts[i]):
+        anchors[m[1]].append(addr[i])
+ranges = {f: (min(a), max(a)) for f, a in anchors.items() if f in file_group}
+for i in order:
+    if grp[i] == 'unsorted':
+        inside = {file_group[f] for f, (lo, hi) in ranges.items() if lo <= addr[i] <= hi}
+        if len(inside) == 1:
+            grp[i] = inside.pop()
+
 # Call graph: an unsorted function whose classified callers all share one group joins it (repeat until stable).
 by_addr = {addr[i]: i for i in range(len(blocks))}
 callers = collections.defaultdict(set)
@@ -75,6 +96,25 @@ while changed:
                 grp[i] = gs.pop()
                 changed = True
     sandwich()
+
+# Callees: an unsorted function whose calls mostly land in one group (ignoring library code and stubs) joins that group.
+callees = collections.defaultdict(list)
+for j, cs in callers.items():
+    for c in cs:
+        callees[c].append(j)
+changed = True
+while changed:
+    changed = False
+    for i in order:
+        if grp[i] != 'unsorted' or not callees[i]:
+            continue
+        gs = collections.Counter(grp[j] for j in callees[i] if grp[j] not in ('unsorted', 'link_stubs', 'mfc', 'crt'))
+        tot = sum(gs.values())
+        if tot >= 2:
+            g, n = gs.most_common(1)[0]
+            if n * 10 >= tot * 7:
+                grp[i] = g
+                changed = True
 
 out = collections.defaultdict(list)
 for i in order:
