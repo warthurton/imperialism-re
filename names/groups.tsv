@@ -1,6 +1,7 @@
 # Which source file each decompiled function belongs to. First matching rule wins.
 # Columns (tab separated): on | regex | group     on = name (function name) or body (function text)
 addr	0047f870-004833b0	directplay
+name	^TScreenBuilder_	ui_layouts
 name	^(crt_|_?_?(mem|str|f|s|v)[a-z]+$)	crt
 name	^(~?C[A-Z][A-Za-z]*|DDX|AFX|FID)_	mfc
 name	^T(City|ItemOrder|OrItemOrder|TrainingOrder|PowerPlantOrder|FoodProcessingOrder|PopGrowthOrder|CapacityOrder|ExpansionOrder|UnitOrder|ShipOrder|ProductionOrder|LaborPool|PopulationMgr|CityInteriorMinister|EvenCityMinister|RailCityMinister|ShipBuilderCityMinister|SteelCityMinister|CityTask|ShipBuildingTask|InteriorMinister)_	production
