@@ -37,7 +37,7 @@ labor_obj = u32(city + 0x1d8)
 snap = {'nation_index': idx, 'nation': nat, 'city': city,
         'city_raw': rd(city, 0x300).hex(), 'labor_raw': rd(labor_obj, 0x40).hex()}
 orders = {}
-for slot in range(25):
+for slot in range(61):
     p = u32(city + 0xe4 + 4 * slot)
     if p:
         orders[slot] = {'ptr': p, 'raw': rd(p, 0x54).hex()}
@@ -54,6 +54,13 @@ print('arrivals +0x2a6 :', {G[i]: v for i, v in enumerate(shorts(city + 0x2a6, 1
 print('cap_max  +0x1dc :', dict(zip(CAT, shorts(city + 0x1dc, 7))))
 print('cap_left +0x1fc :', dict(zip(CAT, shorts(city + 0x1fc, 7))))
 print('labor obj +0x1c / +0x1e :', shorts(labor_obj + 0x1c, 2), ' pools +4/+6/+8:', shorts(labor_obj + 4, 3))
+owner = u32(city + 0xac)
+print('cash   owner+0x10 :', struct.unpack('<i', rd(owner + 0x10, 4))[0])
+try:
+    p1, p2 = u32(labor_obj + 0x10), u32(labor_obj + 0x14)
+    print('workers  untrained/trained(+4 of labor+0x10/+0x14) :', shorts(p1 + 4, 1)[0], shorts(p2 + 4, 1)[0], ' labor+8 total:', shorts(labor_obj + 8, 1)[0])
+except AssertionError:
+    pass
 print('score city+0x78 :', struct.unpack('<i', rd(city + 0x78, 4))[0])
 for slot, o in orders.items():
     r = bytes.fromhex(o['raw'])

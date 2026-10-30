@@ -91,3 +91,28 @@ amounts that survive a shortage and are re-applied when stock returns (`order_re
   (it did after a crash): the loader then takes the system `winmm.dll` instead of the player in the game folder. Removing that flag
   (keep `HIGHDPIAWARE`) brought the music back; `prod_nav.ps1` now removes it and `prod_music.ps1` checks the audio meter.
 * **Saves** can be loaded back (`harness/prod_load.ps1`); `saves/` holds named fixtures.
+
+## Fourth run: the non-recipe orders (training, Food, Metalworks, Armory, Railyard, Capitol)
+
+Same method (real UI; memory only read, except the stock fixtures noted). Costs are charged the moment the slider moves.
+
+| Order (screen) | Cost per step, as charged | Delivered | Seen |
+|---|---|---|---|
+| Trade School: untrained -> trained (slot 23) | 1 labor, 1 Paper, $100 | next turn start | Paper 20->19, cash 50,000->49,900, labor 16->15 |
+| Trade School: trained -> expert (slot 24) | 2 labor, 2 Paper, $1,000 | next turn start | Paper 19->17, cash 49,900->48,900, labor 15->13 |
+| Food Processing (slot 7), 1 step = 2 Food | 2 labor, 2 Grain, 1 Fruit, 1 Fish **or** Meat | next turn start, +2 Food per step | two steps: labor -4, Grain 10->6, Fruit 5->3, Meat 5->3; next turn Food 20->24 |
+| Metalworks: Hardware (slot 15) | 2 labor, 2 Steel | next turn, +1 Hardware (counts in the production score) | Steel -2, labor -2; Arms refused afterwards because the one capacity was used (binding code 2) |
+| Armory: Skirmishers (units, slot 25+) | 1 worker, 1 Arms, $200 | next turn start: newspaper popup "1 regiment of Skirmishers reporting for duty" | Arms 10->9, cash -200, total workers 7->6 (an untrained one) |
+| Railyard: rail car (slot 51) | 2 labor, 1 Lumber, 1 Steel | next turn (adds transport capacity, not a stock good) | reserved {Lumber 2, Steel 2} for 2 cars; no stock change at delivery |
+| Capitol: population growth (slot 60), capacity 2 | 1 Food, 1 Clothing, 1 Furniture, **no labor** | next turn: one more worker | Food/Clothing/Furniture 5->4 each; total workers 6->7 after the turn |
+
+Observations:
+* **Orders from different screens persist differently.** Recipe orders (items 8-16) remember their amount and are re-charged
+  every turn. Training, Food, unit, Railyard and Capitol orders did not come back after delivery (amount 0, remembered 0 or
+  stale); only a recipe order such as Hardware repeated (amount 1, Steel -2 again, score 19 = 10 x 0.9 + 1 x 10).
+* **The production score counts only recipe orders**: Food +4 and the training/unit deliveries did not change it.
+* The three worker grades after two promotions and one unit: untrained 2 -> 0, trained 3 -> 3, expert 2 -> 3 (left-hand column on
+  the capital screen), consistent with each order consuming one worker of its input grade.
+* **Power plant**: no screen in the capital offered a power-plant order, so `TPowerPlantOrder` stays untested (it may only
+  appear later in the game or through a technology).
+* **Stacked dialogs**: the dialogs' close buttons sometimes ignore a click; the back arrow (top-left) always leaves the screen.

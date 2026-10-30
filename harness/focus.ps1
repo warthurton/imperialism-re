@@ -13,9 +13,20 @@ function Test-GameForeground {
   $p = 0; [FG.Api]::GetWindowThreadProcessId([FG.Api]::GetForegroundWindow(), [ref]$p) | Out-Null
   return ($pid_ -and $p -eq $pid_)
 }
+# Wake-Game: tell the idle watcher "I am about to interact" (named event), then wait until the window is large.
+# If no watcher is running, restore the size directly.
+function Wake-Game {
+  try { $ev = [Threading.EventWaitHandle]::OpenExisting('Global\ImperialismWake'); $ev.Set() | Out-Null; $ev.Dispose() } catch {}
+  for ($i = 0; $i -lt 10; $i++) {
+    $r = Get-GameRect; if (($r.R - $r.L) -ge 1200) { return }
+    Start-Sleep -Milliseconds 200
+  }
+  Dock-Large
+}
+
 function Ensure-Focus {
   Set-Content -Path "$PSScriptRoot\shots\.last_input" -Value (Get-Date).Ticks
-  Dock-Large
+  Wake-Game
   if (Test-GameForeground) { return }
   Write-Host 'focus lost -> restoring'
   $m = Mirror
