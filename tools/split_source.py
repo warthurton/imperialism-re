@@ -27,10 +27,17 @@ for ln in open(RE + 'imperialism_named.c', encoding='utf-8', errors='replace'):
     (cur[1] if cur else pre).append(ln)
 
 
+CLASS_GETTER = re.compile(r'\n\{\s*return &PTR_s_(\w+?)_[0-9a-f]{8};\s*\}')   # MFC GetThisClass()/GetRuntimeClass() stubs
+
+
 def group_of(name, text):
     for on, rx, grp in rules:
         if rx.search(name if on == 'name' else text):
             return grp
+    m = CLASS_GETTER.search(text)
+    if m:                                  # belongs wherever the class it describes belongs
+        g = group_of(m[1] + '_x', '')
+        return 'mfc' if m[1].startswith('C') and g == 'unsorted' else g
     return 'unsorted'
 
 
@@ -117,6 +124,13 @@ while changed:
             if len(gs) == 1:
                 grp[i] = gs.pop()
                 changed = True
+                continue
+            votes = collections.Counter(grp[c] for c in callers[i] if grp[c] not in ('unsorted', 'link_stubs', 'mfc', 'crt'))
+            if votes:                      # library callers don't count; a 70% majority of the rest decides
+                g, n = votes.most_common(1)[0]
+                if n * 10 >= sum(votes.values()) * 7:
+                    grp[i] = g
+                    changed = True
     sandwich()
 
 # Callees: an unsorted function whose calls mostly land in one group (ignoring library code and stubs) joins that group.
