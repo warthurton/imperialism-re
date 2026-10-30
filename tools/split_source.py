@@ -7,6 +7,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from sdk_annotate import annotate_dp
 rules = []
 addr_rules = []
+late_rules = []                            # "late" rows: body regex tried only on functions every other pass left unsorted
 for ln in open(RE + 'names/groups.tsv', encoding='utf-8'):
     if ln.startswith('#') or not ln.strip():
         continue
@@ -15,7 +16,7 @@ for ln in open(RE + 'names/groups.tsv', encoding='utf-8'):
         lo, hi = (int(x, 16) for x in rx.split('-'))
         addr_rules.append((lo, hi, grp))
         continue
-    rules.append((on, re.compile(rx), grp))
+    (late_rules if on == 'late' else rules).append((on, re.compile(rx), grp))
 
 # Split into blocks: each starts at a "// name @ addr" comment; text before the first is the shared preamble.
 blocks, cur, pre = [], None, []
@@ -151,6 +152,13 @@ while changed:
             if n * 10 >= tot * 7:
                 grp[i] = g
                 changed = True
+
+for i in order:
+    if grp[i] == 'unsorted':
+        for _, rx, g in late_rules:
+            if rx.search(texts[i]):
+                grp[i] = g
+                break
 
 # Applied last so these tiny functions still act as neighbours for the passes above, then split out of whatever group absorbed them.
 for i in range(len(blocks)):
