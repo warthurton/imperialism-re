@@ -16,3 +16,9 @@ name	^T(AutoGreatPower|ClientGreatPower|RemoteGreatPower|ProxyGreatPower|HostGre
 name	^T(Stream|FileStream|HandleStream|CountingStream|Object|List|PtrList|SortedList|SortedPtrList|Event|EventHandler|Command|CommandHandler|Document|AmbitFileBasedDocument|FileBasedDocument|Application|AmbitApplication|SoundPlayer|MultiplayerMgr|NetMgr|HelpMgr|LanguageMgr|AssetMgr|MapMaker|MapMgr)_	framework
 body	\b(BitBlt|StretchBlt|StretchDIBits|SetDIBitsToDevice|CreateCompatibleDC|CreateCompatibleBitmap|SelectPalette|RealizePalette|CreatePalette|PatBlt|TextOutA|DrawTextA|SetCursor|LoadCursorA|CreateDIBSection|BeginPaint|InvalidateRect|FillRect|SetBkColor|SetTextColor)\b	display
 addr	005c4000-005d4c5f	name_gen
+body	s_script_006972f8	framework
+addr	005241b0-00525fff	display
+late	\bg_MapMgr\b	map_sim
+late	\bg_DiplomacyMgr\b	nations_sim
+late	\b(TTaskList|TProvinceDesirabilityList)_vtable\b	military_ai
+late	\b(CPlex__Create|g_SaveSchema)\b	framework
