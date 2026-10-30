@@ -30,8 +30,8 @@ The game has four turns per year (turn/4 = year offset; guess), and the phase ma
    * caps every stock at 9,999;
    * updates the **production score** as `old x 0.9 + this turn's output x 10` (a moving average; use unconfirmed);
    * clears all order amounts for the new turn.
-2. **Waiting for players (state 5, guess).** Humans plan; the AI runs `TSimMgr_RunLocalPowers` (guess), which makes the
-   non-human powers choose their orders.
+2. **Waiting for players (state 5, guess).** Humans plan their orders and the AI plans its own.
+   (`TSimMgr_RunLocalPowers` is *not* part of this step: it is phase 8, see step 7.)
 3. **Planning orders.** Setting an amount (`TItemOrder_SetAmount`, likely) moves the inputs and labor from stock into the
    order. Single-input recipes cost 2 inputs per unit, two-input recipes 1 + 1 (Steel), Fabric takes any mix of 2 Wool/Cotton, labor is 2 per unit (likely). `reimpl/production.c` is a runnable model of these rules. The maximum
    is the smallest of labor, capacity and inputs (`GetMaxAmount`, likely); the game records which limit binds.
@@ -52,12 +52,17 @@ The game has four turns per year (turn/4 = year offset; guess), and the phase ma
 6. **Bookkeeping and reports (states 9, 10, 0x14, 0x15, 0xf, 0x11; guess).** Diplomacy follow-ups, news text,
    statistics (nation rankings are normalized to a score out of 100), then back to state 0x12 for the next turn.
 
+7. **End of turn (state 8, confirmed).** `TSimMgr_RunLocalPowers` visits every great power simulated on this machine
+   (AI, host and the **local human**; not remote or proxy players) and runs its end-of-turn slots. Slot 50
+   (`TGreatPower_EndOfTurn`) first calls `TCity_CompleteOrders`, which finishes the training/unit/capacity/power/growth
+   orders and reports them to the owner. Goods recipes are delivered later, at the next `TCity_BeginTurn` (step 1).
+
 ## What is solid and what is not
 
 | Solid (confirmed) | Probable (likely) | Open |
 |---|---|---|
 | Production timing: paid last turn, delivered at turn start | Phase numbers and their meanings in `turn_phases.md` | ~~Last argument of an order's setup call~~ = capacity category, see `recipes.md` |
-| Recipes and the "slot = output good" rule | Cost per unit of orders (2 / 1+1 / labor 2) | Whether `TCity_CompleteOrders` runs before or after `BeginTurn` |
+| Recipes and the "slot = output good" rule | Cost per unit of orders (2 / 1+1 / labor 2) | ~~Whether `TCity_CompleteOrders` runs before or after `BeginTurn`~~ = before: end of turn in phase 8 for every locally simulated power, human included; `BeginTurn` is phase 0x12 |
 | Price formulas, supply weights, table layout | Minor-nation AI thresholds | Exact use of the production score |
 | Stock cap of 9,999; arrivals added at turn start | Network synchronisation points | Combat, transport and map phases (not yet read) |
 
