@@ -43,3 +43,7 @@ results/city_*.json
 !results/city_i_after.json
 !results/city_m_before2.json
 !results/city_m_after.json
+imperialism_decomp_extra2.c
+exported_all.txt
+new_entries.txt
+analyze3.log

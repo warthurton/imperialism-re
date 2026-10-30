@@ -19,7 +19,7 @@ def res(v):  # follow an incremental-link jmp stub
     return v + 5 + struct.unpack_from('<i', b, o + 1)[0] if b[o] == 0xE9 else v
 
 
-FILES = ('imperialism_decomp.c', 'imperialism_decomp_extra.c')
+FILES = ('imperialism_decomp.c', 'imperialism_decomp_extra.c', 'imperialism_decomp_extra2.c')
 bodies = {}
 for fn in FILES:
     cur = None; buf = []
