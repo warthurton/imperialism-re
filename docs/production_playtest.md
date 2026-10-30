@@ -59,3 +59,35 @@ Findings:
   capacity), Food Processing (2 labor + 2 Grain + 1 Fruit + Fish or Meat -> 2 Food), Trade School (1 Paper + $100, then
   2 Paper + $1,000, confirming the training costs), Armory (a unit costs trained labor + 1 Arms + $200), University, Shipyard
   (a Trader costs 2 Fabric + 4 Lumber), Warehouse, Railyard.
+
+## Third run: shortage branches (stock set up with `tools/poke_stock.py`, orders always set through the real UI)
+
+The fixture only writes goods stock or labor into memory to create the shortage; the game's own `SetAmount` / `Complete` code does
+everything else. Binding code = order+0x40 (0 inputs, 1 labor, 2 capacity).
+
+| Case | Predicted | Seen |
+|---|---|---|
+| Fabric with Wool 1, Cotton 10: unit 1 | 1 Cotton + 1 Wool | Cotton 10->9, reserved {Cotton 1, Wool 1} |
+| ...unit 2 (no Wool left) | Cotton covers both: 2 Cotton | Cotton 7, reserved {Cotton 3, Wool 1}, amount 2 |
+| ...lower back to 1 | refund evenly | Cotton 8, Wool 1 given back; the order now holds {Cotton 2} (so the refund is taken from what the order holds, first input first) |
+| Steel with Coal 1, Iron 10: unit 1 then a second click | 2nd refused, binding 0 | stays at 1, binding 0; the dialog shows a red x under Coal |
+| Lumber with Timber 3: 1 unit then a second | refused (2 Timber left of 3 is 1 < 2) | Timber 1, stays at 1, binding 0 |
+| Paper with labor 3: unit 1 then a second | refused, binding 1 (labor) | labor 3->1, stays at 1, binding 1 |
+| Next turn with Wool, Cotton and Coal at 0 | Fabric and Steel orders cannot be re-charged: amount 0, remembered kept | Fabric amount 0 / remembered 2, Steel amount 0 / remembered 1; capacity back to 2 for both; the Interior Minister warned "idle workers" |
+| The turn after, with Wool, Cotton and Coal at 1 | orders come back as far as stock allows | Fabric amount 1 (remembered 2), Steel amount 1 (remembered 1); Paper/Lumber orders unaffected |
+
+So the model is right on every branch tested: costs, the either/or fill-in, refunds, the three limits and their codes, and remembered
+amounts that survive a shortage and are re-applied when stock returns (`order_reset_amount` in `reimpl/production.c`).
+
+## Things learned about the game and the test setup
+
+* **Hot keys work in the real game** (readme section XI): `1`..`5` open the transport/industry/trade/diplomacy/technology screens,
+  `Esc` returns to the map, `Esc` rejects a trade offer sheet (10 offers rejected with 10 key presses), `Return` accepts one.
+  `Return` does not press OK on a confirmation dialog, and `Esc` did not dismiss the diplomacy alliance offer.
+* **Preferences** are stored in the registry (`HKCU\Software\SSI\Imperialism\Settings`): `Pref2` effects volume (0-100),
+  `Pref3` music volume (0-255), `Pref8` minister warnings, `Pref10` minister briefings. A new game switches briefings back on, so
+  `harness/prod_prefs.ps1` turns them off again through the Preferences screen.
+* **Music silently disappears** when Windows' compatibility assistant adds `IgnoreFreeLibrary` to the exe's compatibility layers
+  (it did after a crash): the loader then takes the system `winmm.dll` instead of the player in the game folder. Removing that flag
+  (keep `HIGHDPIAWARE`) brought the music back; `prod_nav.ps1` now removes it and `prod_music.ps1` checks the audio meter.
+* **Saves** can be loaded back (`harness/prod_load.ps1`); `saves/` holds named fixtures.
