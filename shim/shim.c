@@ -67,6 +67,7 @@ static RECT g_dest;                 /* thumbnail rectangle in mirror client coor
 static POINT g_virt;                /* cursor position in frame "screen" coords */
 static BOOL g_virtActive, g_inMenu, g_mirrorCap, g_fullscreen, g_shown, g_tracking, g_laidOut, g_inSetCursor;
 static BOOL g_intScale = TRUE;      /* [display] fullscreen_integer_scale in the ini */
+static BOOL g_brownTitle = TRUE;   /* [display] brown_titlebar in the ini: tint the title bar to match the backdrop (Windows 11) */
 static BOOL g_blockModeChange = TRUE;  /* [display] block_mode_change in the ini: never change the desktop resolution */
 #define BACKDROP_BROWN RGB(84, 46, 8)  /* the game's own frame backdrop colour (sampled from the stock game) */
 static HMENU g_menu;
@@ -419,6 +420,16 @@ static void mirror_init(HWND frame)
     RegisterClassExA(&wc);
     g_mirror = CreateWindowExA(0, wc.lpszClassName, "Imperialism", WS_OVERLAPPEDWINDOW,
                                CW_USEDEFAULT, 0, 656, 539, frame, NULL, wc.hInstance, NULL);
+    if (g_brownTitle) {
+        /* DWMWA_CAPTION_COLOR 35, DWMWA_TEXT_COLOR 36, DWMWA_BORDER_COLOR 34, DWMWA_USE_IMMERSIVE_DARK_MODE 20:
+         * only honoured on Windows 11 build 22000+; older systems just return an error and keep the normal bar. */
+        COLORREF cap = BACKDROP_BROWN, txt = RGB(236, 214, 160);
+        BOOL dark = TRUE;
+        DwmSetWindowAttribute(g_mirror, 20, &dark, sizeof dark);   /* light caption buttons on the dark bar */
+        DwmSetWindowAttribute(g_mirror, 35, &cap, sizeof cap);
+        DwmSetWindowAttribute(g_mirror, 34, &cap, sizeof cap);
+        DwmSetWindowAttribute(g_mirror, 36, &txt, sizeof txt);
+    }
     g_frameProc = (WNDPROC)SetWindowLongA(frame, GWL_WNDPROC, (LONG)FrameProc);
     g_msgHook = SetWindowsHookExA(WH_GETMESSAGE, msg_hook, NULL, GetCurrentThreadId());
     logf_("mirror created %p (frame %p) hook=%p", g_mirror, frame, g_msgHook);
@@ -851,6 +862,7 @@ BOOL WINAPI DllMain(HINSTANCE inst, DWORD reason, LPVOID reserved)
             if (s) strcpy(s + 1, "imperialism_shim.ini");
             g_intScale = GetPrivateProfileIntA("display", "fullscreen_integer_scale", 1, ini) != 0;
             g_blockModeChange = GetPrivateProfileIntA("display", "block_mode_change", 1, ini) != 0;
+            g_brownTitle = GetPrivateProfileIntA("display", "brown_titlebar", 1, ini) != 0;
         }
         CreateThread(NULL, 0, summary_thread, NULL, 0, NULL);
     } else if (reason == DLL_PROCESS_DETACH && g_log) {
