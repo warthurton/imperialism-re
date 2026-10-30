@@ -48,7 +48,7 @@ G = ['Cotton', 'Wool', 'Timber', 'Coal', 'Iron', 'Horses', 'Oil', 'Food', 'Fabri
 CAT = ['Textile', 'ClothFact', 'SteelMill', 'MetalWks', 'LumberMill', 'FurnFact', 'Refinery']
 st = shorts(city + 0xb6, 23)
 print('turn counter city+0xc :', shorts(city + 0xc, 1)[0])
-print('stock    +0xb6 :', {G[i]: st[i] for i in range(17) if st[i]}, 'other', st[17:])
+print('stock    +0xb6 :', {G[i]: st[i] for i in range(17) if st[i]}, 'grain/fruit/fish/meat', st[17:21], 'other', st[21:])
 print('+0x7e (AI bonus?) :', {G[i]: v for i, v in enumerate(shorts(city + 0x7e, 17)) if v})
 print('arrivals +0x2a6 :', {G[i]: v for i, v in enumerate(shorts(city + 0x2a6, 17)) if v})
 print('cap_max  +0x1dc :', dict(zip(CAT, shorts(city + 0x1dc, 7))))
@@ -60,8 +60,9 @@ for slot, o in orders.items():
     amt = struct.unpack_from('<h', r, 4)[0]; item = struct.unpack_from('<h', r, 0x48)[0]
     resv = struct.unpack_from('<23h', r, 0x10) if len(r) >= 0x10 + 46 else ()
     if amt or any(resv):
-        print('order slot %d item %d amount %d reserved %s remembered(+0x4c) %d' % (
-            slot, item, amt, {G[i]: v for i, v in enumerate(resv[:17]) if v}, struct.unpack_from('<h', r, 0x4c)[0]))
+        print('order slot %d item %d amount %d reserved %s remembered(+0x4c) %d binding(+0x40) %d' % (
+            slot, item, amt, {G[i]: v for i, v in enumerate(resv[:17]) if v}, struct.unpack_from('<h', r, 0x4c)[0],
+            struct.unpack_from('<h', r, 0x40)[0]))
 label = sys.argv[1] if len(sys.argv) > 1 else 'snap'
 os.makedirs(RE + 'results', exist_ok=True)
 json.dump(snap, open(RE + 'results/city_%s.json' % label, 'w'))

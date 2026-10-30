@@ -14,6 +14,8 @@ function Test-GameForeground {
   return ($pid_ -and $p -eq $pid_)
 }
 function Ensure-Focus {
+  Set-Content -Path "$PSScriptRoot\shots\.last_input" -Value (Get-Date).Ticks
+  Dock-Large
   if (Test-GameForeground) { return }
   Write-Host 'focus lost -> restoring'
   $m = Mirror
@@ -26,3 +28,28 @@ function Ensure-Focus {
   }
   throw 'could not give the game focus; not sending input'
 }
+
+# Docking: tests click in the large window (the 1296x999-ish layout all click coordinates are calibrated for); when idle the
+# window sits small in the top-right corner so it stays out of the user's way. The shim keeps the picture's aspect ratio and
+# will not go below its minimum (672x578 here), so "small" is that minimum.
+function Get-GameRect { $r = New-Object GW+RECT; [GW]::GetWindowRect((Mirror), [ref]$r) | Out-Null; $r }
+function Dock-Large {
+  Add-Type -AssemblyName System.Windows.Forms
+  $b = [System.Windows.Forms.Screen]::PrimaryScreen.Bounds
+  $r = Get-GameRect
+  if (($r.R - $r.L) -ge 1200) { return }
+  $w = 1296; $h = [Math]::Min(999, $b.Height - 40)
+  [GW]::SetWindowPos((Mirror), [IntPtr]::Zero, [int](($b.Width - $w) / 2), [int](($b.Height - $h) / 2), $w, $h, 0x0004) | Out-Null
+  Start-Sleep -Milliseconds 1200
+}
+function Dock-Small {
+  Add-Type -AssemblyName System.Windows.Forms
+  $b = [System.Windows.Forms.Screen]::PrimaryScreen.Bounds
+  $m = Mirror
+  [GW]::SetWindowPos($m, [IntPtr]::Zero, $b.Right - 672, $b.Top, 672, 578, 0x0004) | Out-Null
+  Start-Sleep -Milliseconds 800
+  $r = Get-GameRect
+  [GW]::SetWindowPos($m, [IntPtr]::Zero, $b.Right - ($r.R - $r.L), $b.Top, 0, 0, 0x0005) | Out-Null   # NOSIZE: anchor to the right edge
+  Start-Sleep -Milliseconds 400
+}
+function Place-GameWindow { Dock-Small }
