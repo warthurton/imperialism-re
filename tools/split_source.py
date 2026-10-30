@@ -27,10 +27,17 @@ for ln in open(RE + 'imperialism_named.c', encoding='utf-8', errors='replace'):
     (cur[1] if cur else pre).append(ln)
 
 
+CLASS_GETTER = re.compile(r'\n\{\s*return &PTR_s_(\w+?)_[0-9a-f]{8};\s*\}')   # MFC GetThisClass()/GetRuntimeClass() stubs
+
+
 def group_of(name, text):
     for on, rx, grp in rules:
         if rx.search(name if on == 'name' else text):
             return grp
+    m = CLASS_GETTER.search(text)
+    if m:                                  # belongs wherever the class it describes belongs
+        g = group_of(m[1] + '_x', '')
+        return 'mfc' if m[1].startswith('C') and g == 'unsorted' else g
     return 'unsorted'
 
 
@@ -46,6 +53,17 @@ for i in range(len(blocks)):               # explicit address ranges win over na
 for i in range(len(blocks)):
     if grp[i] == 'unsorted' and addr[i] < 0x40c000:
         grp[i] = 'link_stubs'
+# C++ global constructors: no params, only stores of constants (or __ftol of a constant) into globals, optionally an atexit.
+INIT_STMT = re.compile(r'(\w+(\._\d_\d_)? = (0|0x[0-9a-f]+|-?\d+(\.\d+)?f?|__ftol\(\)|&\w+);|crt_atexit\(&LAB_[0-9a-f]{8}\);)')
+
+
+def is_static_init(text):
+    lines = [l.strip() for l in text.split('\n') if l.strip() and not l.startswith(('//', '/*'))]
+    if len(lines) < 4 or not re.match(r'void FUN_[0-9a-f]{8}\(void\)$', lines[0]) or lines[1] != '{' or lines[-2:] != ['return;', '}']:
+        return False
+    return all(INIT_STMT.fullmatch(l) for l in lines[2:-2])
+
+
 # The linker lays out each .cpp contiguously, so an unsorted function between two functions of the same group
 # (nearest classified neighbours by address) belongs to that group too.
 def sandwich():
@@ -106,6 +124,13 @@ while changed:
             if len(gs) == 1:
                 grp[i] = gs.pop()
                 changed = True
+                continue
+            votes = collections.Counter(grp[c] for c in callers[i] if grp[c] not in ('unsorted', 'link_stubs', 'mfc', 'crt'))
+            if votes:                      # library callers don't count; a 70% majority of the rest decides
+                g, n = votes.most_common(1)[0]
+                if n * 10 >= sum(votes.values()) * 7:
+                    grp[i] = g
+                    changed = True
     sandwich()
 
 # Callees: an unsorted function whose calls mostly land in one group (ignoring library code and stubs) joins that group.
@@ -126,6 +151,11 @@ while changed:
             if n * 10 >= tot * 7:
                 grp[i] = g
                 changed = True
+
+# Applied last so these tiny functions still act as neighbours for the passes above, then split out of whatever group absorbed them.
+for i in range(len(blocks)):
+    if grp[i] not in ('link_stubs', 'mfc', 'crt', 'directplay') and is_static_init(texts[i]):
+        grp[i] = 'static_init'
 
 out = collections.defaultdict(list)
 for i in order:

@@ -15,3 +15,4 @@ name	^T(Mission|[A-Za-z]*Mission|Task|TaskForce|Behavior|FuzzySet|FuzzyVar|[A-Za
 name	^T(AutoGreatPower|ClientGreatPower|RemoteGreatPower|ProxyGreatPower|HostGreatPower|GreatPower|DiplomacyMgr|CivMgr|TechMgr|Country|NewsMgr|SimMgr|Town)_	nations_sim
 name	^T(Stream|FileStream|HandleStream|CountingStream|Object|List|PtrList|SortedList|SortedPtrList|Event|EventHandler|Command|CommandHandler|Document|AmbitFileBasedDocument|FileBasedDocument|Application|AmbitApplication|SoundPlayer|MultiplayerMgr|NetMgr|HelpMgr|LanguageMgr|AssetMgr|MapMaker|MapMgr)_	framework
 body	\b(BitBlt|StretchBlt|StretchDIBits|SetDIBitsToDevice|CreateCompatibleDC|CreateCompatibleBitmap|SelectPalette|RealizePalette|CreatePalette|PatBlt|TextOutA|DrawTextA|SetCursor|LoadCursorA|CreateDIBSection|BeginPaint|InvalidateRect|FillRect|SetBkColor|SetTextColor)\b	display
+addr	005c4000-005d4c5f	name_gen
