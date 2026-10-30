@@ -116,3 +116,15 @@ Observations:
 * **Power plant**: no screen in the capital offered a power-plant order, so `TPowerPlantOrder` stays untested (it may only
   appear later in the game or through a technology).
 * **Stacked dialogs**: the dialogs' close buttons sometimes ignore a click; the back arrow (top-left) always leaves the screen.
+
+## Food Processing shortage (fixture: Fish and Meat set through memory, order through the real UI)
+
+| Case | Seen |
+|---|---|
+| Fish 0, Meat 0, Grain 10, Fruit 5, labor 16: one step | refused; the screen draws a red x under the Fish/Meat icon; nothing charged |
+| Meat 1: one step | accepted: Meat 1->0, Grain 10->8, Fruit 5->4, labor 16->14, order amount 2 Food |
+| Fish 0, Meat 0 again: a second step | refused (stays at 2) |
+| Fish 1: a second step | accepted: Fish 1->0, Grain 8->6, Fruit 4->3, labor 14->12, order amount 4 Food |
+
+So the Fish-or-Meat input is one unit of either, taken from whichever is available. The power plant remains untested: it needs the
+oil-drilling technology (not available at the start of a game; the game text says it also enables Refinery and Power Plant).
