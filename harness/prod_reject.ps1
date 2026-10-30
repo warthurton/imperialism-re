@@ -1,4 +1,4 @@
-# Reject trade offers (tick "no more offers of X" first) for as long as the red REJECT seal is on screen.
+# Reject trade offers with the Esc hot key for as long as the red REJECT seal is on screen.
 $root = $PSScriptRoot
 . "$root\gw.ps1"
 . "$root\focus.ps1"
@@ -18,9 +18,9 @@ function Click1($ix, $iy) {   # image coords in a 1251x956 screenshot
   [GW]::Click([int]($r.L + $ix / 1251.0 * ($r.R - $r.L)), [int]($r.T + $iy / 956.0 * ($r.B - $r.T)))
 }
 $n = 0
-while ($n -lt 20 -and (Seal)) {
-  Click1 190 716; Start-Sleep -Milliseconds 400     # tick "no more offers of X"
-  Click1 193 800; Start-Sleep -Seconds 3            # REJECT
+while ($n -lt 25 -and (Seal)) {
+  Ensure-Focus
+  [GW]::Key(0x1B); Start-Sleep -Seconds 2        # Esc = Reject (readme hot keys: Esc rejects offers, Return accepts)
   $n++
 }
 "rejected $n offers"
