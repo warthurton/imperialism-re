@@ -66,7 +66,7 @@ function Wait-Dialog([bool]$Present = $true, [double]$Max = 3) {
 
 # control positions inside a dialog, in game pixels from the dialog's top-left (measured on the Steel Mill, Refinery and Power Plant dialogs)
 $script:DLG = @{
-  production = @{ close = @(262, 12); plus = @(241, 123); minus = @(77, 122); expand = @(229, 47) }
+  production = @{ close = @(262, 12); plus = @(241, 123); minus = @(77, 122); expand = @(229, 47); knob = @(76, 123); end = @(236, 123) }
   construct  = @{ ok = @(273, 301); cancel = @(39, 301) }
 }
 function Dialog-Click([string]$Control) {
@@ -86,4 +86,37 @@ function Post-Key([int]$Vk) {
     [GW]::PostMessage($h, 0x100, [IntPtr]$Vk, [IntPtr]0x40001) | Out-Null; Start-Sleep -Milliseconds 50
     [GW]::PostMessage($h, 0x101, [IntPtr]$Vk, [IntPtr]([int64]0xC0040001)) | Out-Null
   }
+}
+
+# ---- current screen id, read straight from the game's memory in-process (view manager at global 0x6a21bc, short at +4) ----
+Add-Type -TypeDefinition @'
+using System; using System.Runtime.InteropServices;
+public static class GMem {
+  [DllImport("kernel32.dll")] static extern IntPtr OpenProcess(uint a, bool i, int pid);
+  [DllImport("kernel32.dll")] static extern bool ReadProcessMemory(IntPtr h, IntPtr addr, byte[] buf, int n, out int got);
+  static IntPtr h; static int pid;
+  public static int Read(int p, uint addr, int n) {
+    if (pid != p || h == IntPtr.Zero) { h = OpenProcess(0x0010 | 0x0400, false, p); pid = p; }
+    var b = new byte[4]; int got;
+    if (!ReadProcessMemory(h, (IntPtr)addr, b, n, out got) || got != n) return -1;
+    return n == 2 ? BitConverter.ToUInt16(b, 0) : BitConverter.ToInt32(b, 0);
+  }
+}
+'@ -ErrorAction SilentlyContinue
+function Get-ScreenId {
+  $pid_ = (Get-Process Imperialism -ErrorAction SilentlyContinue | Select-Object -First 1).Id
+  if (-not $pid_) { return -1 }
+  $mgr = [GMem]::Read($pid_, 0x6a21bc, 4); if ($mgr -le 0) { return -1 }
+  return [GMem]::Read($pid_, [uint32]($mgr + 4), 2)
+}
+
+function Close-DialogIfAny { $d = Get-Dialog; if ($d) { if ($d.Kind -eq 'construct') { Dialog-Click 'cancel' } else { Dialog-Click 'close' }; Wait-Dialog $false | Out-Null } }
+
+function Dialog-Drag([string]$From, [string]$To) {   # drag between two named controls of the open dialog (e.g. the slider knob to its end)
+  $d = Get-Dialog; if (-not $d) { throw 'no dialog open' }
+  $a = $script:DLG[$d.Kind][$From]; $b = $script:DLG[$d.Kind][$To]
+  Ensure-Focus
+  $p0 = Mirror-Px ($script:MIR_X0 + ($d.X + $a[0]) * $script:MIR_S) ($script:MIR_Y0 + ($d.Y + $a[1]) * $script:MIR_S)
+  $p1 = Mirror-Px ($script:MIR_X0 + ($d.X + $b[0]) * $script:MIR_S) ($script:MIR_Y0 + ($d.Y + $b[1]) * $script:MIR_S)
+  [GW]::Drag($p0[0], $p0[1], $p1[0], $p1[1]); Wait-Stable -Max 3
 }
