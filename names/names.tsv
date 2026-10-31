@@ -6,7 +6,7 @@
 # re-run  python -I tools/name_classes.py . Names appear in imperialism_named.c with [confidence] note on the header line.
 addr	name	kind	confidence	note
 006a43cc	g_TradeMgr	global	confirmed	instance whose TTradeMgr vtable slots are called (reset vf10, settle vf11, price vf19)
-006a43d0	g_DiplomacyMgr	global	likely	holds the nation x nation relation table at +0x79c; vf33 = IsHuman(nation); queried before every trade pairing
+006a43d0	g_DiplomacyMgr	global	likely	TDiplomacyMgr (global 0x6a43d0, 6364 bytes). Three symmetric 23x23 short matrices: +0x79c relationship score 0..255, +0xbbe treaty status code (4 peace, 6 war, 2 alliance), +0xfe0 turn of last status change; nations 0-6 are the Great Powers, 7-22 the Minor Nations. Methods named TDiplomacyMgr_*. Consulates and embassies are NOT in these matrices (where they live is unknown)
 006a43d4	g_MapMgr	global	likely	6480 tiles x 0x24 bytes walked by TRemoteMinor_vf42; vf53 gives per-tile production
 006a4310	g_Nations	global	likely	23 country pointers: 0-6 great powers, 7-22 minors (loops are hard-coded 7 and 16)
 006a4370	g_GreatPowers	global	likely	7 TGreatPower pointers (turn phases call per-nation methods through it)
@@ -30,7 +30,7 @@ TRemoteMinor_vf31	TMinor_GetOrder	func	likely	+0xc2[commodity]: positive = offer
 TRemoteMinor_vf42	TMinor_TallyMapResources	func	likely	walks all 6480 map tiles owned by this minor and totals resource production
 TRemoteMinor_vf43	TMinor_ChooseTradeOrders	func	likely	random picks: sells raws when price above thresholds, bids for 1-2 finished goods when cheap
 TRemoteMinor_vf20	TMinor_ChangeAllegiance	func	guess	status code at +0xe (-1 free, 100+n, 200+n) changes; sets relations (100 open, 300 closed) with every power
-TRemoteMinor_vf35	TMinor_HandleOffer	func	guess	dispatches on message ids 0x12d / 0x12f / 0x130 from a great power (treaty-like offers)
+TRemoteMinor_vf35	TMinor_HandleOffer	func	guess	Minor Nation response to offers from a Great Power, by message id: 0x12d (aid or bribe: asks the nation, may set a status, charges -amount), 0x12f (SetStatus(minor, power, 3), charges the amount), 0x130 (SetStatus(minor, power, 4), charges the amount); only when the nation is not owned (+0xe == -1). Costs seen in play: Trade Consulate $500, Embassy $5,000, charged when the overture is ordered, War free
 TPopulationMgr_vf14	TPopulationMgr_SplitIntoLabor	func	likely	splits population into untrained/trained/expert labor, shortfall taken in a fixed order
 TItemOrder_vf11	TItemOrder_SetAmount	func	likely	moves inputs (2:1 single-input, 1+1 two-input) and labor from stock into the order; rejects if over max
 TItemOrder_vf12	TItemOrder_GetMaxAmount	func	likely	min of labor, capacity and input limits; stores which limit binds in +0x40
@@ -81,3 +81,15 @@ TCity_vf32	TCity_CheckNoNegativeStock	func	likely	asserts no stock entry (city+0
 004601b0	TScreenBuilder_BoardOfTrade	func	guess	one of the 17 screen builders registered by CAmbitDocument's constructor (FUN_00479480); builds the Board of Trade (trade) screen: 13.8k lines, strings Board of Trade / Commodity / Price / Available / Quantity to Offer / Orders; Ghidra's batch export gave up at its 60 s limit, ghidra/Probe.java with a 15 min limit decompiles it in ~6 min (Ghidra had no function there)
 0046fd10	TScreenBuilder_LedgerTransport	func	likely	one of the 17 screen builders registered by CAmbitDocument's constructor (FUN_00479480); builds a whole screen's controls; strings 'Ledger', 'Transport'
 004749a0	TScreenBuilder_004749a0	func	guess	one of the 17 screen builders registered by CAmbitDocument's constructor (FUN_00479480); builds a whole screen's controls; strings 'Level 1' and edit-control reads; 2057 lines
+
+TDiplomacyMgr_vf10	TDiplomacyMgr_SetRelationship	func	confirmed	SetRelationship(a,b,value): writes the symmetric 23x23 score at +0x79c; value clamped to 0..255 (255 only when a==b), and below 50 only while at war (otherwise raised to 50); then tells human Great Powers. Relation scores changed in play after trades (+1) and a war declaration (-50/-40/-9)
+TDiplomacyMgr_vf17	TDiplomacyMgr_IsAtWar	func	confirmed	true when both nations exist and GetStatus(a,b) == 6. Status 6 = war was seen in play: declaring war on Pram turned G2-M11 from 4 to 6
+TDiplomacyMgr_vf18	TDiplomacyMgr_IsAtWarAndSettled	func	guess	IsAtWar(a,b) and the turn stamp at +0xfe0 differs from the current turn (war already in effect, not declared this turn)
+TDiplomacyMgr_vf19	TDiplomacyMgr_IsAtWarWithAnyone	func	likely	loops over the 23 nations calling IsAtWar(a,i)
+TDiplomacyMgr_vf28	TDiplomacyMgr_GetStatus	func	confirmed	reads the treaty status code from the symmetric 23x23 matrix at +0xbbe. Seen in play: 4 = default/peace for every pair at the start, 6 = war
+TDiplomacyMgr_vf29	TDiplomacyMgr_SetStatusEx	func	likely	SetStatus(a,b,code,flag): writes both halves of the matrix at +0xbbe, stamps the game turn into +0xfe0 (seen: 2), notifies Great Powers (nation slot 0x2a8) and switches on the code: 2 alliance (event 0x1a, then falls through), 3 relation +10, 4 relation raised to at least 50, 5 relation = 255, 6 war (event 0x19, nation slot 18 gets 300)
+TDiplomacyMgr_vf30	TDiplomacyMgr_SetStatus	func	likely	SetStatusEx(a,b,code,1)
+TDiplomacyMgr_vf31	TDiplomacyMgr_MakePeace	func	guess	SetStatus(a,b,4) then posts event 0x18 to nation b; used by the peace overture
+TDiplomacyMgr_vf33	TDiplomacyMgr_IsGreatPower	func	confirmed	index < 7 (the seven Great Powers are nations 0-6, the sixteen Minor Nations 7-22). The old note calling this IsHuman was wrong
+TDiplomacyMgr_vf35	TDiplomacyMgr_CountAllies	func	likely	number of the seven Great Powers whose status with nation n is 2 (alliance)
+TDiplomacyMgr_vf36	TDiplomacyMgr_NthAlly	func	likely	index of the n-th Great Power allied (status 2) with nation m
