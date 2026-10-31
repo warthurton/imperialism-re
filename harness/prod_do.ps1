@@ -9,6 +9,7 @@
 # Dialog steps use the dialog's real position, read from its window (fast.ps1 Get-Dialog), so they work wherever it opened:
 #   dlg            print the open dialog (position, size, kind)         dwait [gone]   wait for a dialog to appear (or vanish)
 #   dplus [N]      slider arrow right N times (production dialogs)       dminus [N]     slider arrow left
+#   dexpand        the expand-capacity button of a production dialog
 #   dclose         X button of a production dialog                       dok / dcancel  OK / Cancel of a construction dialog
 param([Parameter(Mandatory = $true)][string]$Steps)
 $root = $PSScriptRoot
@@ -31,6 +32,7 @@ foreach ($raw in $Steps.Split(';')) {
     'dwait' { $ok = Wait-Dialog ($t.Count -lt 2); if (-not $ok) { "dwait: timed out" } }
     'dplus' { 1..$(if ($t.Count -gt 1) { [int]$t[1] } else { 1 }) | ForEach-Object { Dialog-Click 'plus' } }
     'dminus' { 1..$(if ($t.Count -gt 1) { [int]$t[1] } else { 1 }) | ForEach-Object { Dialog-Click 'minus' } }
+    'dexpand' { Dialog-Click 'expand' }
     'dclose' { Dialog-Click 'close'; Wait-Dialog $false | Out-Null }
     'dok'    { Dialog-Click 'ok'; Wait-Dialog $false | Out-Null }
     'dcancel' { Dialog-Click 'cancel'; Wait-Dialog $false | Out-Null }
