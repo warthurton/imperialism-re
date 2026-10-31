@@ -222,10 +222,13 @@ saves), which a fresh game randomises. The title screen has no load option (its 
 still needs a launch and a new game first (`prod_nav.ps1`, about 35 s) and then `prod_load.ps1 <name>` (about 20 s); the saving is in
 skipping setup, not in the launch. Use a fixture whenever a test needs the oil-age state or a mid-game situation.
 
-## Power Plant slider limits (first look, 2026-10-31)
+## Power Plant limits (resolved, 2026-10-31)
 
-With 150 Fuel in stock, clicking the right end of the slider track set the plant to **141** and then **142** units of fuel (Fuel 150 -> 9 -> 8,
-labor 16 -> 862 -> 868, the power counter 846 / 852 = 6 per fuel). So the game's text "up to 100 units of fuel per turn" is **not what the slider
-enforces**; what does limit it (stock, labor, a different cap) is not yet known. The model in `reimpl/production.c` still has the 100 cap and
-should be treated as unconfirmed on that point. Dragging the slider knob did not move it (the grab point was probably the left arrow);
-clicking a point on the track jumps straight there. Not yet tried: running out of Fuel at the next turn start with a standing order.
+* **No cap at 100 fuel.** The order's amount is counted in *power* units (6 per fuel) and its maximum is the amount already set plus the Fuel in stock x 6
+  (`TPowerPlantOrder_vf12`); `SetAmount` only checks 0 <= new <= maximum. With 150 Fuel the slider reached 150 fuel = **900 power** (stock 0, labor 16 -> 916). The help
+  text's "up to 100 units of fuel per turn" is not enforced anywhere in the code. (My earlier 141 / 142 were only where a click landed on the slider track.)
+* **Clicking the slider track jumps to that point proportionally; the right arrow adds one fuel (6 power).** Dragging the knob did not move it.
+* **Running out of Fuel**: the standing order (900) survives. At the next turn start with 0 Fuel the plant gave 0 power (labor back to 16); after giving the city 30 Fuel the turn
+  start gave **180 power** (30 fuel, all burned) with the 900 still remembered: the order is re-applied up to what is available (`TPowerPlantOrder_vf14`: if the maximum is below the
+  remembered amount it sets the maximum, then tries the remembered amount, which is refused).
+* Fixture `oil_plant_built` (turn 4, Power Plant built, Refinery capacity 4) is the starting point for these tests.

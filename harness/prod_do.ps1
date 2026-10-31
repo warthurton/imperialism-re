@@ -11,6 +11,7 @@
 #   mark / txt     remember the end of the game's text log / print the text drawn since the last mark (read, not seen)
 #   dlg            print the open dialog (position, size, kind)         dwait [gone]   wait for a dialog to appear (or vanish)
 #   dplus [N]      slider arrow right N times (production dialogs)       dminus [N]     slider arrow left
+#   dat NAME       click the named control (knob, end, plus, minus, close, expand ...)
 #   dend / dstart  drag the slider knob to its far end / back to the start
 #   dexpand        the expand-capacity button of a production dialog
 #   dclose         X button of a production dialog                       dok / dcancel  OK / Cancel of a construction dialog
@@ -45,6 +46,7 @@ foreach ($raw in $Steps.Split(';')) {
     'dplus' { 1..$(if ($t.Count -gt 1) { [int]$t[1] } else { 1 }) | ForEach-Object { Dialog-Click 'plus' } }
     'dminus' { 1..$(if ($t.Count -gt 1) { [int]$t[1] } else { 1 }) | ForEach-Object { Dialog-Click 'minus' } }
     'dexpand' { Dialog-Click 'expand' }
+    'dat'    { Dialog-Click $t[1] }                      # click any named control of the open dialog (see $script:DLG in fast.ps1), e.g. dat end
     'dend'   { Dialog-Drag 'knob' 'end' }
     'dstart' { Dialog-Drag 'end' 'knob' }
     'dclose' { Dialog-Click 'close'; Wait-Dialog $false | Out-Null }
