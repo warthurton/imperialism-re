@@ -4485,7 +4485,16 @@
 "0045e0b0": "TScreenBuilder_TechHistory",
 "004601b0": "TScreenBuilder_BoardOfTrade",
 "0046fd10": "TScreenBuilder_LedgerTransport",
-"004749a0": "TScreenBuilder_004749a0"
+"004749a0": "TScreenBuilder_004749a0",
+"005af330": "TTechMgr_ScheduleReleases",
+"005af980": "TTechMgr_ReleaseDueTechs",
+"005afb10": "TTechMgr_GrantTech",
+"005afba0": "TTechMgr_SetKnown",
+"005afd00": "TTechMgr_ApplyToPower",
+"005b0340": "TTechMgr_UnlockRegiment",
+"005b0500": "TTechMgr_UnlockShip",
+"00581260": "TGame_GetLocalPower",
+"0057d8b0": "TGame_GetTurn"
 },
 "vtables": {
 "00645fc8": "CDib_vtable",
