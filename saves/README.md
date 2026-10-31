@@ -14,6 +14,8 @@ Game Controls (top-bar icon) -> Load Game -> slot 0.
 | `oil_t0.imp` ("T0 oil age ready") | Spring 1815, turn 0, local power index 2, $50,000, **Oil Drilling known for the local power** (the record the capital screen checks), Oil 20 and Fuel 20 in stock, nothing built; the Refinery and Power Plant sites are live |
 | `oil_refinery4.imp` ("T3 refinery cap 4") | Same world, turn 3: Refinery built and expanded to capacity 4 (Lumber and Steel 16), Fuel 20, Power Plant not built |
 
+| `oil_plant_built.imp` ("T4 plant built refinery 4") | Same world, turn 4: Power Plant built and Refinery capacity 4, cash $44,400; set Fuel with `poke_stock.py` to test the plant |
+
 Add new fixtures here with a one-line description (what turn, what orders, what stock) so tests can name them.
 
 ## Naming saves

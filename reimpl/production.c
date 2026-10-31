@@ -143,9 +143,10 @@ void order_reset_amount(Order *o)
 
 /* ---- Power Plant (TPowerPlantOrder, city+0x1b4): turns Fuel into labor ---- [confirmed in play, docs/production_playtest.md]
  * One unit of fuel gives 6 units of power (TPowerPlantOrder_vf16 @ 004b7c90: power = amount * 6); power is added straight to the
- * available labor (labor obj +0x1c) and is not a commodity. The plant takes at most 100 fuel a turn (game text, not tested).
+ * available labor (labor obj +0x1c) and is not a commodity. The order's amount is in POWER units; its maximum is the current amount plus the Fuel in
+ * stock x 6 (TPowerPlantOrder_vf12 @ 004b7b00). The help text's "up to 100 units of fuel per turn" is NOT enforced: with 150 Fuel the slider took all 150 (900 power).
  * Like every other order it is charged the moment the slider moves and is re-applied every turn from the remembered amount. */
-enum { PLANT_FUEL_CAP = 100, POWER_PER_FUEL = 6, PLANT_COST = 5000, REFINERY_CAPACITY = 2, REFINERY_EXPANSION = 2 };
+enum { POWER_PER_FUEL = 6, PLANT_COST = 5000, REFINERY_CAPACITY = 2, REFINERY_EXPANSION = 2 };
 typedef struct PowerPlant {
     short built;                /* 0 until the turn after construction                        */
     short fuel;                 /* fuel burned this turn (the slider)                         */
@@ -157,7 +158,7 @@ int power_set_fuel(PowerPlant *pp, int fuel)
 {
     City *c = pp->city;
     int delta = fuel - pp->fuel;
-    if (!pp->built || fuel < 0 || fuel > PLANT_FUEL_CAP) return 0;
+    if (!pp->built || fuel < 0) return 0;
     if (delta > c->stock[FUEL]) return 0;                       /* not enough fuel in stock: refused */
     c->stock[FUEL] -= delta;                                    /* seen: Fuel 20 -> 19 */
     c->labor += delta * POWER_PER_FUEL;                         /* seen: labor 16 -> 22 */
@@ -248,7 +249,6 @@ void city_begin_turn(City *c, Order *orders, int n_orders, PowerPlant *pp)
         int want = pp->remembered;                              /* if fuel runs short the remembered figure is kept */
         pp->fuel = 0;
         if (want > c->stock[FUEL]) want = c->stock[FUEL];
-        if (want > PLANT_FUEL_CAP) want = PLANT_FUEL_CAP;
         { short keep = pp->remembered; power_set_fuel(pp, want); pp->remembered = keep; }
     }
 }
@@ -348,7 +348,7 @@ int main(void)
         /* Power Plant: 1 fuel -> 6 power, charged at once. */
         d.labor = 16; d.stock[FUEL] = 20;
         CHECK(power_set_fuel(&pp, 1) && d.stock[FUEL] == 19 && d.labor == 22);
-        CHECK(!power_set_fuel(&pp, 101));                       /* over the 100 fuel cap */
+        CHECK(!power_set_fuel(&pp, 400));                       /* more than the Fuel in stock is refused */
 
         /* Next turn start with no input: the Refinery delivers its 2 Fuel, orders are re-charged, labor refilled to 16 then +6. */
         d.labor_total = 16;
@@ -371,6 +371,20 @@ int main(void)
             CHECK(build_power_plant(&e, &q) && e.cash == 45000);
             CHECK(cancel_power_plant(&e) && e.cash == 50000 && !e.plant_pending);
         }
+    }
+
+    /* Power Plant limits, seen in play (fixture oil_plant_built, 150 Fuel): no cap at 100, and a standing order survives running out of Fuel. */
+    {
+        City d; PowerPlant pp;
+        memset(&d, 0, sizeof d); memset(&pp, 0, sizeof pp);
+        pp.city = &d; pp.built = 1; d.labor = d.labor_total = 16; d.stock[FUEL] = 150;
+        CHECK(power_set_fuel(&pp, 150) && d.stock[FUEL] == 0 && d.labor == 16 + 900);   /* all 150 Fuel = 900 power (seen), not 100 */
+        CHECK(!power_set_fuel(&pp, 151));                                              /* but never more than the stock */
+        city_begin_turn(&d, NULL, 0, &pp);                      /* the next turn starts with 0 Fuel: no power, labor back to 16 (seen) */
+        CHECK(pp.fuel == 0 && d.labor == 16 && pp.remembered == 150);
+        d.stock[FUEL] = 30;
+        city_begin_turn(&d, NULL, 0, &pp);                      /* 30 Fuel: all burned, 180 power (seen); the 150 order is still remembered */
+        CHECK(pp.fuel == 30 && d.stock[FUEL] == 0 && d.labor == 16 + 180 && pp.remembered == 150);
     }
 
     puts(fails ? "production model: FAILURES" : "production model: all checks pass");

@@ -22,9 +22,7 @@ Last updated: 2026-10-31 (diplomacy overtures decoded).
 
 ## Open questions
 
-- **Power Plant limit**: the slider took 141 and 142 fuel from a stock of 150, so the game text's "100 fuel per turn" is not what it enforces; the real
-  limit is unknown. What happens at the next turn start when a standing order outruns the Fuel stock is untried. `reimpl/production.c` still carries
-  the 100 cap (unconfirmed).
+- (Resolved) Power Plant: no 100-fuel cap, standing order survives running out of Fuel (`docs/production_playtest.md`).
 - **Dialog identity**: a dialog's size gives its kind (production 276x149, construction 320x320) but not which building it belongs to.
 - **Technology Investment screen** (the microscope button, where techs are bought): not looked at; the hot key 5 shows only the history.
 - **Briefings through the registry** survive a loaded save but not a new game; the Library and Load screens have no found way out except choosing.
@@ -36,7 +34,7 @@ Last updated: 2026-10-31 (diplomacy overtures decoded).
 1. **Diplomacy, finish** (`docs/diplomacy.md`, `reimpl/diplomacy.c`, tools `readdiplo.py`, `readpending.py`, `readnations.py`): decoded and seen in play: the four matrices
    (relation, status, turn, presence), all overture ids and costs (War 0x131, Consulate 0x133, Embassy 0x134, Alliance 0x12e, Pact 0x12f, Peace 0x130), placement and End Turn
    execution, Pact/Peace effects. Still open: **the war ripple code** (-50 / -40 / -9, seen once), the Empire overture, Alliance on the Great Power side, aid in play.
-2. Power Plant limit and the out-of-fuel turn (fixture `oil_refinery4`, `poke_stock.py Fuel=...`).
+2. (done) Power Plant limit and the out-of-fuel turn.
 3. The next least-verified systems: training (University, Trade School), transport, trade settlement (`TTradeMgr_*` read in the code, never checked in play).
 4. Keep playing normally now and then with crash dumps armed (`dumps/`) to confirm the music fix.
 
