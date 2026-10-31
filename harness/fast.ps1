@@ -42,7 +42,7 @@ function Snap([string]$name) { [GW]::Shot((Mirror), "$PSScriptRoot\shots\$name.p
 $script:MIR_S = 1.993; $script:MIR_X0 = 10.4; $script:MIR_Y0 = 34.5
 
 function Get-Dialog {
-  # -> $null, or @{ X; Y; W; H; Kind } in game pixels. Kind: 'construct' (320x320) or 'production' (276x149) or 'other'.
+  # -> $null, or @{ X; Y; W; H; Kind } in game pixels. Kind: 'construct' (320x320), 'production' (276x149), 'unit' (University etc., 376x439) or 'other'.
   $pid_ = (Get-Process Imperialism -ErrorAction SilentlyContinue | Select-Object -First 1).Id
   if (-not $pid_) { return $null }
   $frame = [GW]::Windows([uint32]$pid_) | Where-Object { $_[1] -like 'Afx:*' -and $_[3] -eq 'vis' } | Select-Object -First 1
@@ -54,7 +54,7 @@ function Get-Dialog {
     if ($o.Class -eq 'AmbitGameWindow') { $game = $o } elseif ($o.Class -eq 'AmbitMcWindow' -and $o.Vis) { $dlg = $o }
   }
   if (-not $game -or -not $dlg) { return $null }
-  $kind = if ($dlg.W -eq 320 -and $dlg.H -eq 320) { 'construct' } elseif ($dlg.W -eq 276 -and $dlg.H -eq 149) { 'production' } else { 'other' }
+  $kind = if ($dlg.W -eq 320 -and $dlg.H -eq 320) { 'construct' } elseif ($dlg.W -eq 276 -and $dlg.H -eq 149) { 'production' } elseif ($dlg.W -eq 376 -and $dlg.H -eq 439) { 'unit' } else { 'other' }
   @{ X = $dlg.L - $game.L; Y = $dlg.T - $game.T; W = $dlg.W; H = $dlg.H; Kind = $kind }
 }
 
@@ -68,6 +68,8 @@ function Wait-Dialog([bool]$Present = $true, [double]$Max = 3) {
 $script:DLG = @{
   production = @{ close = @(262, 12); plus = @(241, 123); minus = @(77, 122); expand = @(229, 47); knob = @(76, 123); end = @(236, 123) }
   construct  = @{ ok = @(273, 301); cancel = @(39, 301) }
+  # unit centres (University; the Armory and Shipyard are expected to match): picture N = select, add N / sub N = its arrows, 2x2 grid (column 1 = rows 1-3, column 2 = row 1)
+  unit       = @{ close = @(361, 12); pic1 = @(248, 111); add1 = @(268, 151); sub1 = @(228, 151); pic2 = @(327, 111); add2 = @(347, 151); sub2 = @(307, 151); pic3 = @(248, 193); add3 = @(268, 235); sub3 = @(228, 235); pic4 = @(248, 278); add4 = @(268, 318); sub4 = @(228, 318) }
 }
 function Dialog-Click([string]$Control) {
   $d = Get-Dialog; if (-not $d) { throw "no dialog open for '$Control'" }

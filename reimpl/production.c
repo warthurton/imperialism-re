@@ -34,6 +34,8 @@ typedef struct City {
     int   cash;                 /* the owner's money                      owner+0x10  [confirmed in play] */
     short refinery_pending;     /* a Refinery has been paid for and appears at the next turn start   [confirmed in play] */
     short plant_pending;        /* same for the Power Plant                                          [confirmed in play] */
+    short workers[3];           /* untrained, trained, expert workers  [confirmed in play: left bar of the Industry screen] */
+    short units_pending[4];     /* civilians paid for, reported at the next turn start (Miner, Prospector, Farmer, Engineer)  [confirmed in play] */
     short refinery_expand_pending; /* an expansion (+2 capacity) has been paid for; completes at the next turn start  [confirmed in play] */
 } City;
 
@@ -275,6 +277,29 @@ static void make_recipes(City *c, Order out[9])
 }
 
 /* ---- self-test: the rules above, exercised end to end ---- */
+/* ---- University (civilians) and Trade School (training); seen in play, docs/production_playtest.md ----
+ * Every civilian costs 1 expert worker + 2 Paper + cash, charged the moment the arrow is clicked; the expert's 4 labor go with him
+ * (labor 16 -> 12 for one Miner). They are reported ("New units are reporting for duty") at the next turn start and are not re-ordered.
+ * A shortage of any of the three refuses the click and charges nothing. [confirmed in play] */
+enum Civilian { MINER, PROSPECTOR, FARMER, ENGINEER };
+static const int CIVILIAN_CASH[4] = { 1500, 500, 1000, 2000 };
+#define EXPERT_LABOR 4
+int order_civilian(City *c, int kind)
+{
+    if (c->workers[2] < 1 || c->stock[PAPER] < 2 || c->cash < CIVILIAN_CASH[kind]) return 0;
+    c->workers[2]--; c->stock[PAPER] -= 2; c->cash -= CIVILIAN_CASH[kind]; c->labor -= EXPERT_LABOR; c->labor_total -= EXPERT_LABOR;
+    c->units_pending[kind]++;
+    return 1;
+}
+/* Trade School: untrained -> trained costs 1 labor, 1 Paper, $100; trained -> expert 2 labor, 2 Paper, $1,000.  [confirmed in play] */
+int train_worker(City *c, int to_expert)
+{
+    int grade = to_expert ? 1 : 0, n = to_expert ? 2 : 1, cash = to_expert ? 1000 : 100;
+    if (c->workers[grade] < 1 || c->labor < n || c->stock[PAPER] < n || c->cash < cash) return 0;
+    c->workers[grade]--; c->workers[grade + 1]++; c->labor -= n; c->stock[PAPER] -= n; c->cash -= cash;
+    return 1;
+}
+
 static int fails;
 #define CHECK(c) do { if (!(c)) { printf("FAIL line %d: %s\n", __LINE__, #c); fails++; } } while (0)
 
@@ -385,6 +410,19 @@ int main(void)
         d.stock[FUEL] = 30;
         city_begin_turn(&d, NULL, 0, &pp);                      /* 30 Fuel: all burned, 180 power (seen); the 150 order is still remembered */
         CHECK(pp.fuel == 30 && d.stock[FUEL] == 0 && d.labor == 16 + 180 && pp.remembered == 150);
+    }
+
+    /* University and Trade School, seen in play (fixture oil_plant_built: 2 experts, 20 Paper, $44,400, labor 16). */
+    {
+        City u; memset(&u, 0, sizeof u);
+        u.workers[2] = 2; u.stock[PAPER] = 20; u.cash = 44400; u.labor = u.labor_total = 16;
+        CHECK(order_civilian(&u, MINER) && u.stock[PAPER] == 18 && u.cash == 42900 && u.workers[2] == 1 && u.labor == 12);
+        CHECK(order_civilian(&u, PROSPECTOR) && u.stock[PAPER] == 16 && u.cash == 42400 && u.workers[2] == 0 && u.labor == 8);
+        CHECK(!order_civilian(&u, ENGINEER) && u.stock[PAPER] == 16 && u.cash == 42400);      /* no expert left: refused, nothing charged */
+        CHECK(u.units_pending[MINER] == 1 && u.units_pending[PROSPECTOR] == 1);
+        u.workers[0] = 2; u.workers[1] = 3; u.labor = 16; u.stock[PAPER] = 20; u.cash = 50000;
+        CHECK(train_worker(&u, 0) && u.stock[PAPER] == 19 && u.cash == 49900 && u.labor == 15 && u.workers[1] == 4);
+        CHECK(train_worker(&u, 1) && u.stock[PAPER] == 17 && u.cash == 48900 && u.labor == 13 && u.workers[2] == 1);
     }
 
     puts(fails ? "production model: FAILURES" : "production model: all checks pass");

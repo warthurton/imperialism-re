@@ -47,3 +47,4 @@ imperialism_decomp_extra2.c
 exported_all.txt
 new_entries.txt
 analyze3.log
+results/*.bin
