@@ -52,4 +52,6 @@ Seen in the real game (fixture `oil_plant_built`, text log and memory), 2026-10-
   the **Clipper** (Hull 25, Cargo 4, no weapons, cost 2 Fabric + 6 Lumber, "more likely than other ships to run a blockade or escape hostile fleets").
 * Not tested: the other techs' effects, what the AI powers do (the per-power record is set for each power; `FUN_005af980` also charges and sets a timer for powers that have not got a known tech, which I did not trace), the
   1-turn purchase delay for other techs (here the "Purchasing" state lasted one End Turn), insufficient cash.
+* Named in `names/names.tsv`: `TTechMgr_ScheduleReleases` (0x5af330), `TTechMgr_ReleaseDueTechs` (0x5af980), `TTechMgr_SetKnown` (0x5afba0), `TTechMgr_GrantTech` (0x5afb10, likely), `TTechMgr_ApplyToPower` (0x5afd00),
+  `TTechMgr_UnlockRegiment` (0x5b0340, likely), `TTechMgr_UnlockShip` (0x5b0500, likely), `TGame_GetTurn` (0x57d8b0), `TGame_GetLocalPower` (0x581260).
 * Memory: `tools/readtech.py` finds `TTechMgr` by vtable 0x66ad28 (the old default 0x66ac98 matched nothing and was fixed).

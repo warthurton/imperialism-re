@@ -55,3 +55,4 @@ late	if \(\(param_2 & 1\) != 0\) \{\s*FUN_00606faf\(param_1\);	dtor_wrappers
 laddr	004b0970-004b09ff	framework
 laddr	005420a0-005421ff	nations_sim
 laddr	005498d0-00549fff	nations_sim
+laddr	005c3670-005c36ff	military_ai
