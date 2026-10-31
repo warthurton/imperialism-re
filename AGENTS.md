@@ -24,11 +24,15 @@ local. Saved games in `saves/` are fine (written by the game from a random world
   `reimpl/production.c` (build and run it; it must keep passing), and the confidence column in `docs/recipes.md`.
 
 ## Gotchas
-- Write Python/PowerShell scripts with the Write tool, not inline heredocs (backslashes get mangled: `\a` becomes BEL, `\b`
-  backspace, `\n` a real newline). If a one-liner is unavoidable use `chr(92)`, `chr(13)`, `chr(10)`.
-- Line endings: `.gitattributes` and `.editorconfig` make everything LF except Windows-centric files (`.ps1`, `.bat`, `.cmd`, `.def`, `.ini`, `.ini.example`, ...), which are CRLF in the working tree; the repository stores LF for all of them, and the rules override `core.autocrlf`. Python patch scripts that edit a text file should read bytes/`newline=''`, normalise `
-` to `
-`, edit, and write back the original style. Check with `git ls-files --eol` (every row should read `i/lf` and `w/lf`, or `w/crlf` for the Windows-centric ones); `git diff --stat` must not show whole-file noise.
+- **Quoting rule (agents keep breaking this): no text goes through the shell.** Never put multi-line text, a script, a commit message or a PR body inside a Bash/PowerShell command
+  (heredocs, `python -c`, `python - <<EOF`, `echo "..."`, long `-m "..."`). Quotes, backslashes, `$`, backticks and apostrophes break them (`\a` becomes BEL, `\n` a real newline, an
+  apostrophe ends the string, the whole command fails to parse and nothing runs). Instead: (1) change a file's text with the **Edit** tool (exact old string -> new string) or **Write** a whole new file;
+  (2) for anything scripted, **Write** a `.py`/`.sh` file (in the scratchpad if it is throwaway) and run it with a short command like `python path/to/script.py`; (3) commit with
+  `git commit -F <message file>` (Write the message first, trailers included) and ship with `sh tools/ship.sh "one-line title" <body file>`; (4) the shell only gets short single-line commands
+  with simple arguments (paths, flags). If a `python` one-liner is truly unavoidable keep it free of quotes and backslashes, or use `chr(92)`, `chr(13)`, `chr(10)`.
+- Line endings: `.gitattributes` and `.editorconfig` make everything LF except Windows-centric files (`.ps1`, `.bat`, `.cmd`, `.def`, `.ini`, `.ini.example`, ...), which are CRLF in the working tree;
+  the repository stores LF for all of them, and the rules override `core.autocrlf`. The Edit tool keeps a file's existing line endings. Check with `git ls-files --eol` (every row should read `i/lf`,
+  and `w/lf` or `w/crlf` for the Windows-centric ones); `git diff --stat` must not show whole-file noise.
 - `python -I` ignores the script dir; scripts insert their own sys.path. Regexes over function bodies can backtrack
   catastrophically: prefer line-by-line checks.
 - `Remove-Item` on `C:\GOG ...` is blocked: build to a new filename and Move-Item.
