@@ -1,10 +1,10 @@
-"""Read-only: find the TTechMgr object (vtable 0x66ac98, 0x63c bytes) in the running Imperialism.exe's heap and print its
+"""Read-only: find the TTechMgr object (vtable 0x66ad28, 0x63c bytes) in the running Imperialism.exe's heap and print its
 known-tech byte array (+0x180, 29 entries) and the other per-tech arrays. No writes. Usage: python -I readtech.py [label]
 Saves the raw object to results/tech_<label>.bin"""
 import ctypes, ctypes.wintypes as wt, os, struct, subprocess, sys
 
 RE = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + '/'
-VT = int(sys.argv[2], 16) if len(sys.argv) > 2 else 0x66ac98
+VT = int(sys.argv[2], 16) if len(sys.argv) > 2 else 0x66ad28
 label = sys.argv[1] if len(sys.argv) > 1 else 'now'
 pid = int(subprocess.check_output(['powershell', '-NoProfile', '-Command', '(Get-Process Imperialism).Id']).split()[0])
 k32 = ctypes.WinDLL('kernel32', use_last_error=True)
