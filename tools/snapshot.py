@@ -14,6 +14,7 @@ ORDER_SIZES = {
     0x64f848: 80, 0x64f738: 76, 0x64f798: 76, 0x64f8a0: 92,
     0x64f678: 84, 0x64f6d8: 84, 0x64f8f8: 84,
 }
+TASK_SIZES = {0x66a9a8: 20, 0x66a9f8: 24}
 
 
 class ProcessMemory:
@@ -107,6 +108,45 @@ def capture(read):
                     raise ValueError('unknown order vtable 0x%x at city %d slot %d' % (vtable, index, slot))
                 order_raw = block('city.%d.order.%d' % (index, slot), order, ORDER_SIZES[vtable])
                 field('city.%d.order.%d.amount' % (index, slot), order_raw, 4, 'h')
+        # The city save/load methods traverse both auxiliary containers (0x4b30a0/0x4b35d0).
+        task_list = pointer(city + 0x270)
+        if task_list:
+            header = block('city.%d.tasks' % index, task_list, 32)
+            if struct.unpack_from('<I', header)[0] != 0x66aa48:
+                raise ValueError('unknown city task list vtable')
+            # 0x5aebb5 passes this+4 to the embedded CObList constructor.
+            head, tail, count = struct.unpack_from('<IIi', header, 8)
+            if not 0 <= count <= 100000:
+                raise ValueError('invalid city task count')
+            fields['city.%d.task_count' % index] = count
+            node, previous, visited = head, 0, set()
+            for slot in range(count):
+                if not node or node in visited:
+                    raise ValueError('invalid city task chain')
+                visited.add(node)
+                node_raw = block('city.%d.task_node.%d' % (index, slot), node, 12)
+                following, prior, task = struct.unpack('<III', node_raw)
+                if prior != previous:
+                    raise ValueError('invalid city task back link')
+                vtable = pointer(task)
+                if vtable not in TASK_SIZES:
+                    raise ValueError('unknown city task vtable 0x%x' % vtable)
+                block('city.%d.task.%d' % (index, slot), task, TASK_SIZES[vtable])
+                previous, node = node, following
+            if node or previous != tail:
+                raise ValueError('city task count/tail mismatch')
+        records = pointer(city + 0x274)
+        if records:
+            header = block('city.%d.auxiliary_records' % index, records, 24)
+            count, capacity = struct.unpack_from('<ii', header, 8)
+            record_size = struct.unpack_from('<h', header, 0x14)[0]
+            if not 0 <= count <= capacity <= 100000 or record_size != 4:
+                raise ValueError('invalid city auxiliary record bounds')
+            fields['city.%d.auxiliary_record_count' % index] = count
+            if count:
+                entries = block('city.%d.auxiliary_pointers' % index, pointer(records + 4), count * 4)
+                for slot, (address,) in enumerate(struct.iter_unpack('<I', entries)):
+                    block('city.%d.auxiliary_record.%d' % (index, slot), address, 4)
     diplomacy = block('diplomacy', pointer(0x6a43d0), 6364)
     for name, offset in [('relation', 0x79c), ('status', 0xbbe),
                          ('turn', 0xfe0), ('presence', 0x1402)]:
@@ -157,7 +197,8 @@ def capture(read):
                 'Live reads are not atomic; capture only while the game is idle.',
                 'Partial state: game, nations including known AI tails, cities/orders/population/pools, '
                 'diplomacy, technology, trade/deals, map manager/tiles/provinces and RNG. '
-                'Military objects, province pointer targets, city auxiliary objects and other managers '
+                'City task chains and auxiliary records are captured. Military objects, '
+                'province/nation pointer targets and other managers '
                 'are not captured.']}
 
 

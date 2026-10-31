@@ -1,7 +1,7 @@
 # Status: where the project stands
 
 Update this file at every ship (and before ending a session). It is the first thing to read after `AGENTS.md`.
-Last updated: 2026-10-31 (snapshot capture/diff and live validation harness; game stopped after each test).
+Last updated: 2026-10-31 (field miner, city auxiliary snapshot coverage; game stopped after each test).
 
 ## Done and verified (in the running game unless noted)
 
@@ -9,7 +9,12 @@ Last updated: 2026-10-31 (snapshot capture/diff and live validation harness; gam
   read-only capture of game/nations/cities/orders/population, diplomacy, technology, trade/deals,
   map tiles/provinces and both RNG states. Semantic and raw-byte comparison. The single-session
   `harness/prod_snapshot.ps1` checks idle identity, one completed turn, and byte agreement with
-  the existing city/tech/diplomacy readers before and after. Eight offline tests pass.
+  the existing city/tech/diplomacy readers before and after. Ten offline snapshot tests pass.
+- **Field miner, heuristic** (`tools/field_miner.py`, `docs/field_miner.md`): 8,779 functions
+  analyzed, 8,702 candidate rows; unresolved scaling, nested pointer targets and dynamic indices
+  stay separate. Counts and declaration-bound checks guide review, not automatic struct creation.
+  Eleven miner tests pass. City task/auxiliary containers added to snapshots after code/disassembly
+  review; live empty-container validation passed (nonempty traversal is synthetic-tested only).
 - **Display shim** (`shim/`): windowed scaling, maximize, fullscreen with integer scale, mouse mapping, and an opt-in **text log** (installed build: `shim/build20.dll`;
   the previous one is `original/msvfw32_before_textlog.dll`). The game's music-loss crash is intermittent and **not proven fixed** (`winmm/` rebuilt from ogg-winmm).
 - **Decompile**: 10.9k functions named; `src/` groups (git-ignored) from `tools/split_source.py`, none left unsorted (the `late`/`laddr` rows are filing guesses,
@@ -66,11 +71,17 @@ avoided the earlier missing-process failure; its exact cause remains unproven. E
 across 188 blocks. Final run with both RNG states (`snapshot_live3`) also passed all eight:
 491 -> 489 blocks, 3,933 fields, 282 changed fields across 173 blocks. Idle bytes identical,
 game turn 5 -> 6, local cash $44,400 -> $44,250; game stopped and settings restored.
-Eight offline tests pass (`python -I tools/test_snapshot.py`). No functions lifted this session.
-Next: field miner and remaining military/nation/province/city pointer targets, more fixtures,
-and replay checks. M0 is not complete. Raw snapshots remain local and ignored.
+Field-miner continuation: heuristic index implemented (`docs/field_miner.md`), including
+pointer scaling, cast order, nested targets, dynamic indices, read/write counts and bounds.
+It exposed city +0x270/+0x274 containers. The task-list embedded header needed a +4 adjustment,
+confirmed in machine code after the first live read rejected it. Corrected `snapshot_fields2`
+passed all eight checks: 505 -> 507 blocks, 3,947 decoded fields, 269 changes across 173 blocks;
+idle bytes identical. The containers were empty: populated traversal remains live-unverified.
+Eleven miner tests and ten snapshot tests pass. No functions lifted this session.
+Next: populated city-task fixtures, remaining military/nation/province pointer targets,
+more fixture pairs and replay checks. M0 is not complete. Raw snapshots remain local and ignored.
 
-1. **Expand snapshot coverage** (`tools/snapshot.py` + diff, partial capture validated): remaining pointer targets and managers, then pairs for more fixtures. The field miner (`tools/field_miner.py`, not written) should derive the missing layouts from the decompile. See `docs/snapshots.md` for proven bounds and current limits.
+1. **Expand snapshot coverage** (`tools/snapshot.py` + diff, partial capture validated): remaining pointer targets and managers, then pairs for more fixtures. Use `tools/field_miner.py` to find candidate layouts and check them against constructors/save methods/disassembly. See `docs/snapshots.md` and `docs/field_miner.md` for bounds, evidence and current limits.
 2. **Decode the 219 unnamed simulation functions** the trace hit: `python -I tools/tracer/analyze_trace.py results/trace4 --unnamed nations_sim` (and `military_ai`, `map_sim`, `production`, `trade`); `--phase N` lists a phase in call order with callers. Name them in `names/names.tsv` with evidence.
 3. **More trace scenarios**: a war, a tech release (`tools/poke_techturn.py`), accepted offers (`prod_endturn.ps1 -Accept`), an Empire/colony turn, an AI-heavy later turn. Save fixtures with `harness/prod_save.ps1`.
 4. Narrow the 2,631 open source-file functions using trace evidence (functions that run together in one phase), then start `core/` M1 (load a save into typed structs, write it back byte-identical).
