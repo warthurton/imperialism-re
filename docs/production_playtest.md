@@ -128,3 +128,17 @@ Observations:
 
 So the Fish-or-Meat input is one unit of either, taken from whichever is available. The power plant remains untested: it needs the
 oil-drilling technology (not available at the start of a game; the game text says it also enables Refinery and Power Plant).
+
+## Power plant: first attempt (2026-10-30, not finished)
+
+* The game keeps technology in a single `TTechMgr` (vtable 0x66ad28, 0x63c bytes, pointer in global 0x6a43d8). Byte `+0x180+N` is
+  "tech N known" (N = string id - 17161: 1 High Pressure Steam Engine ... 19 Oil Drilling); a new game starts with 0, 1, 2 set. The game
+  itself tests `+0x193` before showing Oil (warehouse ledger, prospector, trade), and its grant routine `FUN_005afba0` only sets
+  side flags for a few other techs (4, 9, 0xb, 0xf, 0x15, 0x16, 0x18, 0x1b), none for Oil.
+* `tools/readtech.py` (read-only) finds the object; `tools/poke_tech.py 19` (fixture) marks Oil Drilling known.
+* Result: with the flag set, and again one turn later, the capital screen (all buildings, Capitol dialog) still shows **no
+  Refinery or Power Plant**. So `+0x193` alone does not make those buildings available. The help text says Oil Drilling "permits
+  constructing" them, and the help blocks 8097-8099 / 8597-8599 end in "Cancel construction.", so they are probably *built*
+  through the `TBuildingConstructionView` (not yet located in the UI), after which the order slot becomes usable.
+* Harness: `prod_vol.ps1 -Mode test` now also sets minister warnings and briefings Off through the registry before launch (a new game
+  still resets briefings to On, a loaded save keeps them); `harness/shot.ps1 <name>` takes a focused screenshot.
