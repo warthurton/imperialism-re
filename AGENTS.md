@@ -80,6 +80,7 @@ local. Saved games in `saves/` are fine (written by the game from a random world
 ## Where things are
 Read first: this file, then **`docs/STATUS.md`** (state, open questions, next steps, how to resume). Keep both current (see Workflow).
 - `README.md`: layout and rebuild.
+- `docs/original_code_style.md`: evidence-backed assessment of the original C++/MFC/Ambit architecture, tables, switches and decompiler limits.
 - `docs/snapshots.md`: partial read-only state capture, semantic/raw diff, coverage limits and validation.
 - `docs/field_miner.md`: conservative field-access index, unresolved arithmetic, allocation checks and layout evidence.
 - `docs/screens.md`: manual-based screen names, ids, main menu, hot keys, reading on-screen text. `docs/turn_phases.md`, `docs/how_a_turn_works.md`: the turn.

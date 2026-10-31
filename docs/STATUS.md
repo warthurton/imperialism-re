@@ -1,10 +1,15 @@
 # Status: where the project stands
 
 Update this file at every ship (and before ending a session). It is the first thing to read after `AGENTS.md`.
-Last updated: 2026-10-31 (military snapshot graph, planning probe and later-turn fixture; game stopped after each test).
+Last updated: 2026-10-31 (original code-style assessment added; military snapshot continuation remains next).
 
 ## Done and verified (in the running game unless noted)
 
+- **Original architecture assessment** (`docs/original_code_style.md`, code/metadata inspection):
+  substantial C++ inheritance/virtual dispatch through Ambit and MFC, combined with imperative
+  methods, fixed tables, global managers and localized large dispatch/layout routines.
+  Distinguishes runtime class names from our method labels and confirmed layouts from
+  source-style inferences. Documentation only; no game behavior changed or new live test run.
 - **Snapshot oracle, partial** (`docs/snapshots.md`, `tools/snapshot.py`, `tools/diff_snapshot.py`):
   read-only capture of game/nations/cities/orders/population, diplomacy, technology, trade/deals,
   map tiles/provinces, minister lists, military rosters/units/stacks, ships and both RNG states. Semantic and raw-byte comparison. The single-session
