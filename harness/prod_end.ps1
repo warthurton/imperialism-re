@@ -1,5 +1,5 @@
 # End of testing: stop the game and put the user's settings back: effects 100%, music 75%, briefings and warnings On.
-Get-Process Imperialism -ErrorAction SilentlyContinue | Stop-Process -Force
+Get-Process Imperialism -ErrorAction SilentlyContinue | Where-Object { -not $_.HasExited } | Stop-Process -Force
 Start-Sleep -Seconds 2
 $k = 'HKCU:\Software\SSI\Imperialism\Settings'
 Set-ItemProperty -Path $k -Name Pref2 -Value 100 -Type DWord      # effects 100%

@@ -7,7 +7,7 @@ import ctypes, ctypes.wintypes as wt, struct, subprocess, sys
 
 VT = 0x66ad28
 BASE = 0x180
-pid = int(subprocess.check_output(['powershell', '-NoProfile', '-Command', '(Get-Process Imperialism).Id']).split()[0])
+pid = int(subprocess.check_output(['powershell', '-NoProfile', '-Command', '(Get-Process Imperialism | Where-Object { -not $_.HasExited } | Select-Object -First 1).Id']).split()[0])
 k32 = ctypes.WinDLL('kernel32', use_last_error=True)
 k32.OpenProcess.restype = wt.HANDLE
 k32.VirtualQueryEx.argtypes = [wt.HANDLE, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_size_t]

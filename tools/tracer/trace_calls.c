@@ -202,9 +202,39 @@ int main(int argc, char **argv)
         ContinueDebugEvent(ev.dwProcessId, ev.dwThreadId, cont);
         if (GetTickCount() - start > (DWORD)seconds * 1000u) running = 0;
     }
-    /* detach: put every original byte back first */
+    /* Detach safely. A thread can be executing one of our INT3 bytes at any moment; if its exception is still queued when we detach, the unhandled
+     * breakpoint kills the game (seen: 0x80000003 right after a trace). So: put every original byte back, mark everything disabled, then keep answering
+     * debug events until the game has been quiet for a while (a breakpoint exception on an address of ours is resumed at the original instruction),
+     * and only then detach. */
     if (patched) {
-        for (int i = 0; i < nfn; i++) if (fns[i].armed) put_byte(fns[i].addr, fns[i].orig);
+        for (int i = 0; i < nfn; i++) { if (fns[i].armed) put_byte(fns[i].addr, fns[i].orig); fns[i].armed = 0; fns[i].disabled = 1; }
+        int quiet = 0;
+        DWORD drain_start = GetTickCount();
+        while (quiet < 5 && GetTickCount() - drain_start < 5000) {
+            DEBUG_EVENT ev;
+            if (!WaitForDebugEvent(&ev, 100)) { quiet++; continue; }
+            quiet = 0;
+            DWORD cont = DBG_CONTINUE;
+            if (ev.dwDebugEventCode == EXIT_PROCESS_DEBUG_EVENT) { ContinueDebugEvent(ev.dwProcessId, ev.dwThreadId, DBG_CONTINUE); patched = 0; break; }
+            if (ev.dwDebugEventCode == EXCEPTION_DEBUG_EVENT) {
+                DWORD code = ev.u.Exception.ExceptionRecord.ExceptionCode;
+                DWORD addr = (DWORD)(ULONG_PTR)ev.u.Exception.ExceptionRecord.ExceptionAddress;
+                if (code == EXCEPTION_BREAKPOINT && find_fn(addr) >= 0) {
+                    HANDLE th = OpenThread(THREAD_ALL_ACCESS, FALSE, ev.dwThreadId);
+                    CONTEXT ctx;
+                    ctx.ContextFlags = CONTEXT_CONTROL;
+                    if (th && GetThreadContext(th, &ctx)) { ctx.Eip = addr; SetThreadContext(th, &ctx); }
+                    if (th) CloseHandle(th);
+                } else if (code == EXCEPTION_SINGLE_STEP) {
+                    HANDLE th = OpenThread(THREAD_ALL_ACCESS, FALSE, ev.dwThreadId);
+                    CONTEXT ctx;
+                    ctx.ContextFlags = CONTEXT_CONTROL;
+                    if (th && GetThreadContext(th, &ctx)) { ctx.EFlags &= ~0x100u; SetThreadContext(th, &ctx); }
+                    if (th) CloseHandle(th);
+                } else if (code != EXCEPTION_BREAKPOINT) cont = DBG_EXCEPTION_NOT_HANDLED;
+            }
+            ContinueDebugEvent(ev.dwProcessId, ev.dwThreadId, cont);
+        }
     }
     DebugActiveProcessStop(pid);
 

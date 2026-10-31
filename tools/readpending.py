@@ -6,7 +6,7 @@ import ctypes, ctypes.wintypes as wt, struct, subprocess, sys
 G_NATIONS = 0x6a4310
 G_GAME = 0x6a20f8
 base = int(sys.argv[1], 16) if len(sys.argv) > 1 else 0xb2
-pid = int(subprocess.check_output(['powershell', '-NoProfile', '-Command', '(Get-Process Imperialism).Id']).split()[0])
+pid = int(subprocess.check_output(['powershell', '-NoProfile', '-Command', '(Get-Process Imperialism | Where-Object { -not $_.HasExited } | Select-Object -First 1).Id']).split()[0])
 k32 = ctypes.WinDLL('kernel32', use_last_error=True)
 k32.OpenProcess.restype = wt.HANDLE
 h = k32.OpenProcess(0x0010 | 0x0400, False, pid)

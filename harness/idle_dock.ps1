@@ -9,7 +9,7 @@ $mutex = New-Object Threading.Mutex($false, 'Global\ImperialismIdleDock'); if (-
 $wake = New-Object Threading.EventWaitHandle($false, [Threading.EventResetMode]::AutoReset, 'Global\ImperialismWake')   # Wake-Game signals this
 $wasFg = Test-GameForeground
 $lastStamp = if (Test-Path $stamp) { (Get-Item $stamp).LastWriteTime } else { [datetime]::MinValue }
-while (Get-Process Imperialism -ErrorAction SilentlyContinue) {
+while (Get-Process Imperialism -ErrorAction SilentlyContinue | Where-Object { -not $_.HasExited }) {
   $woken = $wake.WaitOne(400)
   if ((Mirror) -eq [IntPtr]::Zero) { continue }
   $fg = Test-GameForeground

@@ -1,6 +1,6 @@
 """Read-only: print the game's 14 preference shorts (g_Game+0x48+2N) and the turn counter from the running Imperialism.exe."""
 import ctypes, ctypes.wintypes as wt, struct, subprocess
-pid = int(subprocess.check_output(['powershell', '-NoProfile', '-Command', '(Get-Process Imperialism).Id']).split()[0])
+pid = int(subprocess.check_output(['powershell', '-NoProfile', '-Command', '(Get-Process Imperialism | Where-Object { -not $_.HasExited } | Select-Object -First 1).Id']).split()[0])
 k32 = ctypes.WinDLL('kernel32', use_last_error=True); k32.OpenProcess.restype = wt.HANDLE
 h = k32.OpenProcess(0x0010 | 0x0400, False, pid)
 def rd(a, n):

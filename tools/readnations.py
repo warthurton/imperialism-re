@@ -32,7 +32,7 @@ if sys.argv[1] == 'diff':
             print('nation %2d (%s): %d cells  %s' % (n, 'G' if n < 7 else 'M', len(cells), '  '.join(cells[:12]) + (' ...' if len(cells) > 12 else '')))
     sys.exit()
 
-pid = int(subprocess.check_output(['powershell', '-NoProfile', '-Command', '(Get-Process Imperialism).Id']).split()[0])
+pid = int(subprocess.check_output(['powershell', '-NoProfile', '-Command', '(Get-Process Imperialism | Where-Object { -not $_.HasExited } | Select-Object -First 1).Id']).split()[0])
 k32 = ctypes.WinDLL('kernel32', use_last_error=True)
 k32.OpenProcess.restype = wt.HANDLE
 h = k32.OpenProcess(0x0010 | 0x0400, False, pid)

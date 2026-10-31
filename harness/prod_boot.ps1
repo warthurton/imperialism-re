@@ -7,8 +7,8 @@ param([string]$Fixture = 'oil_t0', [ValidateSet('test','sound','normal')][string
 $root = $PSScriptRoot
 $src = Join-Path (Split-Path $root) "saves\$Fixture.imp"
 if (-not (Test-Path $src)) { throw "no such fixture: $src" }
-if ($Restart) { Get-Process Imperialism -ErrorAction SilentlyContinue | Stop-Process -Force; Start-Sleep -Seconds 2 }
-if (Get-Process Imperialism -ErrorAction SilentlyContinue) { throw 'the game is already running: use -Restart (loading from the title screen needs a fresh launch)' }
+if ($Restart) { Get-Process Imperialism -ErrorAction SilentlyContinue | Where-Object { -not $_.HasExited } | Stop-Process -Force; Start-Sleep -Seconds 2 }
+if (Get-Process Imperialism -ErrorAction SilentlyContinue | Where-Object { -not $_.HasExited }) { throw 'the game is already running: use -Restart (loading from the title screen needs a fresh launch)' }
 & "$root\prod_vol.ps1" -Mode $Volumes
 # Windows' compatibility assistant adds 'IgnoreFreeLibrary' to the exe after a crash, which makes it load the SYSTEM winmm (no music).
 $layerKey = 'HKCU:\Software\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\Layers'; $exePath = 'C:\GOG Games\Imperialism\Imperialism.exe'
