@@ -93,3 +93,5 @@ TDiplomacyMgr_vf31	TDiplomacyMgr_MakePeace	func	guess	SetStatus(a,b,4) then post
 TDiplomacyMgr_vf33	TDiplomacyMgr_IsGreatPower	func	confirmed	index < 7 (the seven Great Powers are nations 0-6, the sixteen Minor Nations 7-22). The old note calling this IsHuman was wrong
 TDiplomacyMgr_vf35	TDiplomacyMgr_CountAllies	func	likely	number of the seven Great Powers whose status with nation n is 2 (alliance)
 TDiplomacyMgr_vf36	TDiplomacyMgr_NthAlly	func	likely	index of the n-th Great Power allied (status 2) with nation m
+TDiplomacyMgr_vf26	TDiplomacyMgr_RelationshipLevel	func	confirmed	maps the 0-255 relationship score to the 8-level colour code the diplomacy screen shows: <21 -> 0, <50 -> 1, <80 -> 2, <101 -> 3, <136 -> 4, <171 -> 5, <206 -> 6, <=240 -> 7, above -> 8 (read in the code)
+TDiplomacyMgr_vf27	TDiplomacyMgr_PostStatusText	func	likely	for treaty status 2, 3, 4 or 6 asks g_Game (slot 33) for string group 0x2714 and the status; the status names are the game strings 17361 + code: 0 Member of our Empire, 1 Ruler of our Empire, 2 Alliance, 3 Non-Aggression Pact, 4 Peace, 5 Member, 6 War

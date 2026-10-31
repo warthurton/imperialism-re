@@ -35,8 +35,8 @@ Last updated: 2026-10-31 (diplomacy decoded in part).
 
 1. **Diplomacy, continued** (`docs/diplomacy.md`, model `reimpl/diplomacy.c`, tool `tools/readdiplo.py`): the manager's data and its setters are decoded
    and seen in play (status 4 = peace, 6 = war; scores; war fallout -50/-40/-9). Still open: where overtures are queued and applied at End Turn, where consulates
-   and embassies live, the war ripple, Pact/Empire/Peace acceptance. Next try: follow `TForeignMinister*` and the Great Power's virtual slots around 0x2a8 and
-   0x290, and watch memory around the Minor Nation objects while ordering a consulate.
+   and embassies live, the war ripple, Pact/Empire/Peace acceptance. Found since: status names (game strings 17361+code), the colour-code function, and the Great Power's
+   pending-overture table (+0xb2, one short per target; 0x131 War, 0x133 Consulate). Next: find who reads that table at End Turn, and order the other overtures to learn their ids.
 2. Power Plant limit and the out-of-fuel turn (fixture `oil_refinery4`, `poke_stock.py Fuel=...`).
 3. The next least-verified systems: training (University, Trade School), transport, trade settlement (`TTradeMgr_*` read in the code, never checked in play).
 4. Keep playing normally now and then with crash dumps armed (`dumps/`) to confirm the music fix.
