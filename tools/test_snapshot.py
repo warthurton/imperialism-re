@@ -138,6 +138,110 @@ class SnapshotTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'auxiliary record bounds'):
             capture(self.read)
 
+    def test_minister_standard_and_embedded_lists(self):
+        minister = self.allocate(452, self.nations[0] + 0x98)
+        self.write(minister, struct.pack('<I', 0x6508a8))
+        for offset, embedded in ((0x2c, 0), (0x18c, 4)):
+            header = self.allocate(28 + embedded, minister + offset)
+            node = self.allocate(12)
+            self.write(header + embedded + 4, struct.pack('<IIi', node, node, 1))
+            self.write(node, struct.pack('<III', 0, 0, 7))
+        state = capture(self.read)['result']
+        self.assertEqual(state['fields']['nation.0.interior.list_02c.count'], 1)
+        self.assertEqual(state['fields']['nation.0.interior.list_18c.count'], 1)
+
+    def test_province_army_unit_chain(self):
+        manager = struct.unpack('<I', self.read(0x6a43d4, 4))[0]
+        provinces = struct.unpack('<I', self.read(manager + 0x10, 4))[0]
+        unit = self.allocate(68, provinces + 0x98)
+        self.write(unit, struct.pack('<I', 0x66eea8))
+        state = capture(self.read)['result']
+        self.assertEqual(state['fields']['army.unit_count'], 1)
+        self.assertEqual(state['blocks']['province.0.unit.0']['size'], 68)
+        self.write(unit + 0x14, struct.pack('<I', unit))
+        with self.assertRaisesRegex(ValueError, 'province military chain'):
+            capture(self.read)
+
+    def test_army_record_bounds(self):
+        army = self.allocate(936, 0x6a3338)
+        self.write(army, struct.pack('<I', 0x64c928))
+        records = self.allocate(24, army + 4)
+        self.write(records + 8, struct.pack('<ii', 1, 1))
+        self.write(records + 0x14, struct.pack('<h', 0x268))
+        entries = self.allocate(4, records + 4)
+        self.allocate(0x268, entries)
+        self.assertEqual(capture(self.read)['result']['fields']['army.record_count'], 1)
+        self.write(records + 0x14, struct.pack('<h', 4))
+        with self.assertRaisesRegex(ValueError, 'army record bounds'):
+            capture(self.read)
+
+    def test_stack_nodes_and_nation_roster_share_unit(self):
+        army = self.allocate(936, 0x6a3338)
+        self.write(army, struct.pack('<I', 0x64c928))
+        header = self.allocate(32, army + 0xc)
+        stack_node = self.allocate(12)
+        stack = self.allocate(28)
+        self.write(header + 8, struct.pack('<IIi', stack_node, stack_node, 1))
+        self.write(stack_node, struct.pack('<III', 0, 0, stack))
+        self.write(stack, struct.pack('<I', 0x64ca38))
+        self.write(stack + 10, struct.pack('<h', 1))
+        node = self.allocate(8, stack + 0x14)
+        unit = self.allocate(68)
+        self.write(unit, struct.pack('<I', 0x66eea8))
+        self.write(node, struct.pack('<II', unit, 0))
+        roster = self.allocate(32, self.nations[0] + 0x44)
+        roster_node = self.allocate(12)
+        self.write(roster + 8, struct.pack('<IIi', roster_node, roster_node, 1))
+        self.write(roster_node, struct.pack('<III', 0, 0, unit))
+        state = capture(self.read)['result']
+        self.assertEqual(state['fields']['army.unit_count'], 1)
+        self.assertEqual(state['fields']['army.stack_count'], 1)
+        self.assertEqual(state['fields']['army.unlisted_unit_count'], 0)
+        self.assertEqual(state['fields']['army.unplaced_unit_count'], 0)
+        self.assertEqual(state['blocks']['army.stack.0.unit.0']['address'], unit)
+        self.write(node + 4, struct.pack('<I', node))
+        with self.assertRaisesRegex(ValueError, 'army stack count mismatch'):
+            capture(self.read)
+
+    def test_roster_only_and_province_only_units_are_reported(self):
+        manager = struct.unpack('<I', self.read(0x6a43d4, 4))[0]
+        provinces = struct.unpack('<I', self.read(manager + 0x10, 4))[0]
+        placed = self.allocate(68, provinces + 0x98)
+        self.write(placed, struct.pack('<I', 0x66eea8))
+        roster = self.allocate(32, self.nations[0] + 0x44)
+        node = self.allocate(12)
+        unplaced = self.allocate(68)
+        self.write(unplaced, struct.pack('<I', 0x66eea8))
+        self.write(roster + 8, struct.pack('<IIi', node, node, 1))
+        self.write(node, struct.pack('<III', 0, 0, unplaced))
+        state = capture(self.read)['result']
+        self.assertEqual(state['fields']['army.unit_count'], 2)
+        self.assertEqual(state['fields']['army.unlisted_unit_count'], 1)
+        self.assertEqual(state['fields']['army.unplaced_unit_count'], 1)
+        self.assertEqual(state['blocks']['nation.0.military.unit.0']['address'], unplaced)
+
+    def test_unknown_graph_types_rejected_before_full_read(self):
+        for root, message in ((0x6a3338, 'army manager'), (0x6a43e4, 'navy manager'),
+                              (0x6a3edc, 'ship vtable')):
+            with self.subTest(root=root):
+                self.allocate(4, root)
+                with self.assertRaisesRegex(ValueError, message):
+                    capture(self.read)
+                self.write(root, bytes(4))
+
+    def test_intrusive_ship_chain_and_cycle(self):
+        navy = self.allocate(16, 0x6a43e4)
+        self.write(navy, struct.pack('<I', 0x65c4c8))
+        ships = [self.allocate(56, 0x6a3edc), self.allocate(56)]
+        for index, ship in enumerate(ships):
+            self.write(ship, struct.pack('<I', 0x65c438))
+            self.write(ship + 0x24, struct.pack('<II', ships[1] if index == 0 else 0,
+                                              ships[0] if index == 1 else 0))
+        self.assertEqual(capture(self.read)['result']['fields']['navy.ship_count'], 2)
+        self.write(ships[1] + 0x24, struct.pack('<I', ships[0]))
+        with self.assertRaisesRegex(ValueError, 'global ship chain'):
+            capture(self.read)
+
     def test_turn_change_fails(self):
         def advancing_read(address, size):
             if address == self.game + 0x2c:

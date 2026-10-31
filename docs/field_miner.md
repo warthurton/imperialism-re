@@ -75,5 +75,14 @@ Live run `snapshot_fields2` passed all eight existing checks: 505 -> 507 blocks,
 fields, 269 field changes across 173 blocks, game turn 5 -> 6 and local cash $44,400 -> $44,250.
 Idle captures were byte-identical. All task/auxiliary record counts were zero in this fixture,
 so nonempty traversal remains verified only by synthetic tests and code/disassembly review.
-Ten snapshot tests pass; populated live fixtures remain a next step. Game stopped and user
+That revision passed ten snapshot tests; populated live fixtures remained a next step. Game stopped and user
 settings restored after both the rejected run and the successful run.
+
+The subsequent military expansion (`docs/snapshots.md`) distinguishes the Interior Minister
+at nation +0x98 from Foreign at +0x94. Its +0x28/+0x2c/+0x190 lists are populated in the live
+game, but their node payloads are kept raw: they have not been established as city tasks.
+The minister +0x18c facade and city task/auxiliary containers were still empty after eight
+warmup turns. A targeted one-turn trace hit minister BeginTurn and vf33, but none of the
+selected city-task producers/consumer (`docs/tracer.md`). This is scenario coverage evidence,
+not proof that the task code is dead. A different scenario or a capture during actual task
+generation is still needed to verify populated city task traversal live.

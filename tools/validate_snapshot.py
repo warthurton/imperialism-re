@@ -27,6 +27,10 @@ def validate(prefix):
             if bytes.fromhex(state['blocks'][block]['hex']) != reader_raw:
                 raise ValueError(label + ': ' + block + ' differs from independent reader')
         checks.extend([label + '.city', label + '.technology', label + '.diplomacy'])
+        if 'army.unlisted_unit_count' in state['fields']:
+            if state['fields']['army.unlisted_unit_count'] != 0:
+                raise ValueError(label + ': province/stack military units missing from nation rosters')
+            checks.append(label + '.military_rosters')
     idle = compare(snapshots['before'], snapshots['idle'])['result']
     if not idle['equal']:
         raise ValueError('idle state changed: ' + json.dumps(idle))
@@ -40,6 +44,8 @@ def validate(prefix):
             'block_changes': len(changes['blocks']),
             'blocks_before': len(before['blocks']), 'blocks_after': len(after['blocks']),
             'decoded_fields': len(before['fields']),
+            'graph_counts_before': {name: value for name, value in before['fields'].items()
+                                    if name.startswith(('army.', 'navy.'))},
             'turn_before': before['fields']['game.turn'], 'turn_after': after['fields']['game.turn'],
             'economic_changes': [change for change in changes['fields']
                                  if '.stock.' in change['field'] or change['field'].endswith('.cash')]}

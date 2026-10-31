@@ -56,3 +56,24 @@ dialog that appears. Also: an interrupted End Turn can leave the game on a trade
 * A thread that runs through a function in the instant its first byte is restored for the single step is missed (rare; the game has few threads).
 * One scenario covers one set of branches. Combat, colonies, a Great Power's collapse and the AI's war decisions need their own fixtures.
 * The decompile's function list comes from Ghidra; if it merged or split a function, the entry is still the real address.
+
+## City planning probe
+
+`tools/tracer/city_planning.txt` is a fixed 15-entry probe of the Interior Minister turn entry,
+its vf33 helper, city-task generation/processing and the phase driver. Run it inside the
+snapshot harness with `-TracePlanning`; it attaches only for the measured End Turn and waits
+for safe detach before the after-snapshot. `harness/trace_city_planning.ps1` can also run against
+an existing game; that caller must finish with `prod_end.ps1`. Logs remain under ignored
+`results/trace_*`. The existing tracer writes hit entries only, with no TSV header.
+
+A later-turn probe (`oil_plant_built` after eight warmup turns, game turn 13 -> 14) hit
+0x4bf770 (minister BeginTurn) six times, 0x4bf8a0 (vf33) six times and the phase driver
+0x57da70 seventeen times. None of the other twelve selected entries fired, including
+0x4bfa50 (vf34), its task generators, 0x4c2a30 (vf52), 0x5aeca0 (task-list add), or
+0x5aecc0 (task-list process). This explains why extending this scenario has not validated
+nonempty city task queues; it does not prove that those paths are unused in other scenarios.
+
+The trace harness retains the process handle immediately after `Start-Process`, before the
+tracer exits. Without this, Windows PowerShell 5.1 returned a null `ExitCode` even after
+successful tracing/detachment, causing an erroneous failure. The parent snapshot harness
+still restored settings and stopped the game on that rejected run.
