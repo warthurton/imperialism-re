@@ -6,12 +6,14 @@ tools/ocr.local.json (git-ignored). Output goes to docs/manual/ (git-ignored: th
 
   python tools/ocr_pdf.py models                                  list the server's models that can read images
   python tools/ocr_pdf.py images "<pdf>" --out docs/manual/images extract embedded pictures (screens, art) and write a page index
+  python tools/ocr_pdf.py text   "<pdf>" --out docs/manual/text      rebuild pages from the PDF's own text layer (fixes bogus spaces), list pages that need OCR
+  python tools/ocr_pdf.py chapters docs/manual/text --out docs/manual/chapters   join pages into one file per chapter
   python tools/ocr_pdf.py pages  "<pdf>" --out docs/manual/qrc --model qwen3-vl:4b [--pages 1-6] [--hint-text]
   python tools/ocr_pdf.py bench  "<pdf>" --models a,b,c --pages 5,40,70 --out docs/manual/bench
 
 `pages` writes pNNN.md per page (resumable: existing files are kept unless --force) and all.md. --hint-text gives the model the PDF's own
 text layer as a hint (pages that have one): it then fixes structure (headings, lists, tables) instead of guessing letters.
-`bench` times each model on the same pages (warm-up call not counted) and, for pages that have a text layer, scores the OCR against it
+`bench` times each model on the same pages (load, unload, load again first: the first load after a while is slow because of the server's model cache, none of it counted) and, for pages that have a text layer, scores the OCR against it
 (word-level similarity), so speed is compared only between models that are accurate enough. Nothing here prints the host address."""
 import argparse, base64, difflib, json, os, re, sys, time, urllib.request, urllib.error
 
@@ -52,6 +54,23 @@ def vision_models():
     return out
 
 
+def load(model):
+    api('/api/chat', {'model': model, 'stream': False, 'think': False, 'keep_alive': '30m', 'options': {'num_predict': 1},
+                      'messages': [{'role': 'user', 'content': 'hi'}]})
+
+
+def unload(model):
+    api('/api/generate', {'model': model, 'keep_alive': 0, 'stream': False}, 120)
+
+
+def warm(model):
+    """Load, unload, load again: the first load after a while is slow because of the server's model cache, the second is representative."""
+    load(model)
+    unload(model)
+    time.sleep(2)
+    load(model)
+
+
 def pdf_pages(path):
     try:
         import pymupdf as fitz
@@ -84,7 +103,8 @@ def ocr_page(model, png, text_hint=None, num_predict=4096):
     r = api('/api/chat', {'model': model, 'stream': False, 'think': False, 'keep_alive': '30m',
                           'options': {'temperature': 0, 'num_predict': num_predict},
                           'messages': [{'role': 'user', 'content': prompt, 'images': [base64.b64encode(open(png, 'rb').read()).decode()]}]})
-    return r['message']['content'].strip(), time.time() - t, r.get('eval_count', 0)
+    work = (r.get('total_duration', 0) - r.get('load_duration', 0)) / 1e9 or time.time() - t     # model load time (server memory swaps) is not counted
+    return r['message']['content'].strip(), work, r.get('eval_count', 0), len(r['message'].get('thinking') or '')
 
 
 def clean(md):
@@ -92,13 +112,108 @@ def clean(md):
     return md
 
 
-def words(s):
-    return re.findall(r'[a-z0-9]+', s.lower())
+def squash(s):
+    return re.sub(r'[^a-z0-9]', '', s.lower())      # the PDF's text layer has stray spaces inside words ("dange rous"), so compare letters only
 
 
 def similarity(a, b):
-    wa, wb = words(a), words(b)
-    return difflib.SequenceMatcher(None, wa, wb, autojunk=False).ratio() if wa and wb else 0.0
+    sa, sb = squash(a), squash(b)
+    return difflib.SequenceMatcher(None, sa, sb, autojunk=False).ratio() if sa and sb else 0.0
+
+
+def page_markdown(page):
+    """Rebuild one page from the PDF's own text layer. The layer's letters are right but it is full of bogus spaces inside words ("dange rous"):
+    a bogus space is one whose next character starts well before the space ends (negative gap, about -2 pt), so those are dropped. Bold lines that
+    are short become headings, a block becomes a paragraph, hyphenated line ends are joined, bullet lines stay bullets."""
+    out = []
+    for b in page.get_text('rawdict')['blocks']:
+        lines = []
+        for l in b.get('lines', []):
+            text, bold, size, space = '', True, 0.0, None
+            for s in l['spans']:
+                bold = bold and ('Bold' in s['font'] or 'Medi' in s['font'])
+                size = max(size, s['size'])
+                for c in s['chars']:
+                    if c['c'] == ' ':
+                        space = c
+                        text += ' '
+                        continue
+                    if space is not None and text.endswith(' ') and c['bbox'][0] - space['bbox'][2] < -1.0:
+                        text = text[:-1]                       # bogus space: the next letter overlaps it
+                    space = None
+                    text += c['c']
+            if text.strip():
+                lines.append((text.strip(), bold, size))
+        if not lines:
+            continue
+        if all(bl for _, bl, _ in lines) and sum(len(x) for x, _, _ in lines) < 90:
+            out.append(('##' if max(s for _, _, s in lines) >= 10 else '###') + ' ' + ' '.join(x for x, _, _ in lines))
+            continue
+        para = ''
+        for x, _, _ in lines:
+            if re.match(r'^[•·*-]\s', x):
+                if para:
+                    out.append(para)
+                    para = ''
+                out.append('- ' + x[2:].strip())
+                continue
+            para = para[:-1] + x if para.endswith('-') and x[:1].islower() else (para + ' ' + x if para else x)
+        if para:
+            out.append(para)
+    return '\n\n'.join(out)
+
+
+def fragment_ratio(s):
+    toks = re.findall(r"[A-Za-z']+", s)
+    return sum(1 for w in toks if len(w) == 1 and w not in 'aAI') / len(toks) if toks else 1.0
+
+
+def cmd_text(a):
+    doc = pdf_pages(a.pdf)
+    os.makedirs(a.out, exist_ok=True)
+    need, rows = [], []
+    for i in parse_pages(a.pages, len(doc)):
+        page = doc[i]
+        md = page_markdown(page)
+        ratio = fragment_ratio(md)
+        why = ''
+        if len(squash(md)) < 40:
+            why = 'no text layer'
+        elif ratio > a.max_fragments:
+            why = 'still broken (%.1f%% stray letters)' % (100 * ratio)
+        elif len(squash(md)) < a.min_chars and page.get_images():
+            why = 'mostly a picture'
+        open(os.path.join(a.out, 'p%03d.md' % (i + 1)), 'w', encoding='utf-8').write(md + '\n')
+        rows.append((i + 1, ratio, len(md)))
+        if why:
+            need.append('%d  %s' % (i + 1, why))
+    open(os.path.join(a.out, 'needs_ocr.txt'), 'w').write('\n'.join(need) + '\n')
+    print('%d pages written to %s; %d need OCR (listed in needs_ocr.txt); median stray-letter ratio %.1f%%' % (
+        len(rows), a.out, len(need), 100 * sorted(r for _, r, _ in rows)[len(rows) // 2]))
+
+
+def cmd_chapters(a):
+    """Join the pNNN.md pages in a folder into one Markdown file per chapter (a chapter starts on a page whose first line is an ALL-CAPS ## heading),
+    plus all.md. Pages are marked with <!-- page N --> comments (PDF page numbers, not the printed ones)."""
+    files = sorted(f for f in os.listdir(a.src) if re.match(r'p\d{3}\.md$', f))
+    chapters, cur = [], None
+    for f in files:
+        n = int(f[1:4])
+        body = open(os.path.join(a.src, f), encoding='utf-8').read().strip()
+        m = re.match(r'## ([A-Z][A-Z0-9 ,&\'-]+)\s*$', body.split('\n')[0]) if body else None
+        if m or cur is None:
+            cur = [m.group(1).title() if m else 'Front matter', []]
+            chapters.append(cur)
+        cur[1].append('<!-- page %d -->\n\n%s' % (n, body))
+    os.makedirs(a.out, exist_ok=True)
+    allmd = []
+    for k, (title, parts) in enumerate(chapters):
+        name = '%02d_%s.md' % (k, re.sub(r'[^a-z0-9]+', '_', title.lower()).strip('_'))
+        text = '\n\n'.join(parts) + '\n'
+        open(os.path.join(a.out, name), 'w', encoding='utf-8').write(text)
+        allmd.append(text)
+        print('%-40s %3d pages  %6d chars' % (name, len(parts), len(text)))
+    open(os.path.join(a.out, 'all.md'), 'w', encoding='utf-8').write('\n'.join(allmd))
 
 
 def cmd_models(a):
@@ -134,7 +249,7 @@ def cmd_pages(a):
             continue
         png = render(doc, i, a.dpi, os.path.join(a.out, 'png'))
         hint = doc[i].get_text().strip() if a.hint_text else None
-        text, secs, toks = ocr_page(a.model, png, hint or None)
+        text, secs, toks, _ = ocr_page(a.model, png, hint or None)
         open(md, 'w', encoding='utf-8').write(clean(text) + '\n')
         print('page %d: %.1f s, %d tokens' % (i + 1, secs, toks), flush=True)
     parts = []
@@ -153,13 +268,16 @@ def cmd_bench(a):
     truth = {i: doc[i].get_text().strip() for i in pages}
     rows = []
     for model in a.models.split(','):
-        api('/api/chat', {'model': model, 'stream': False, 'think': False, 'keep_alive': '30m', 'options': {'num_predict': 1},
-                          'messages': [{'role': 'user', 'content': 'hi'}]})            # load the model: not timed
+        warm(model)                                                                    # load, unload, load again: none of this is timed
         for i in pages:
             try:
-                text, secs, toks = ocr_page(model, pngs[i], truth[i] if a.hint_text else None, a.num_predict)
+                text, secs, toks, think = ocr_page(model, pngs[i], truth[i] if a.hint_text else None, a.num_predict)
             except SystemExit as e:
                 rows.append((model, i + 1, None, None, None, str(e))); continue
+            if not text and think:        # a model that reasons and never answers inside the budget: not usable, do not burn the other pages
+                rows.append((model, i + 1, None, None, None, 'empty answer: all %d tokens went to hidden reasoning' % toks))
+                print('%-24s p%-3d EMPTY (hidden reasoning, %d tok); skipping the model' % (model, i + 1, toks), flush=True)
+                break
             open(os.path.join(a.out, '%s_p%03d.md' % (re.sub(r'[^A-Za-z0-9.]+', '_', model), i + 1)), 'w', encoding='utf-8').write(clean(text) + '\n')
             sim = similarity(text, truth[i]) if truth[i] else None
             rows.append((model, i + 1, secs, toks, sim, ''))
@@ -184,10 +302,13 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__.split('\n')[0])
     sub = ap.add_subparsers(dest='cmd', required=True)
     sub.add_parser('models').set_defaults(f=cmd_models)
-    for name, f in (('images', cmd_images), ('pages', cmd_pages), ('bench', cmd_bench)):
+    c = sub.add_parser('chapters'); c.set_defaults(f=cmd_chapters); c.add_argument('src'); c.add_argument('--out', required=True)
+    for name, f in (('images', cmd_images), ('text', cmd_text), ('pages', cmd_pages), ('bench', cmd_bench)):
         p = sub.add_parser(name); p.set_defaults(f=f)
         p.add_argument('pdf'); p.add_argument('--out', required=True)
-        if name != 'images':
+        if name == 'text':
+            p.add_argument('--pages'); p.add_argument('--max-fragments', type=float, default=0.05); p.add_argument('--min-chars', type=int, default=400)
+        if name not in ('images', 'text'):
             p.add_argument('--pages'); p.add_argument('--dpi', type=int, default=150); p.add_argument('--hint-text', action='store_true')
         if name == 'pages':
             p.add_argument('--model', required=True); p.add_argument('--force', action='store_true')
