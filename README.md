@@ -26,6 +26,7 @@ or third-party binaries (see `.gitignore`); everything excluded can be regenerat
 | `lib_matches.tsv`, `lib_names.json` | MFC 4.21 and C-runtime functions found in the exe by matching the original static libs (`tools/match_lib.py` + `apply_lib_names.py`): 1,183 named. Needs the VC++ 5.0 disc (see below). |
 | `classes.tsv`, `renames.json` | The game's ~400 `T*` classes (size, base, factory) and the 3,167 virtual methods named from them. |
 | `docs/` | Findings: `how_a_turn_works.md` (start here), `turn_phases.md`, `recipes.md`, `trade_rows.txt`. |
+| `docs/original_code_style.md` | How the original code appears to have been written: C++ classes, Ambit/MFC, tables, switches and evidence limits. |
 | `harness/` | Windows PowerShell 5.1 test harness that drives the real game (clicks, keys, screenshots, per-process audio meter, crash counting). `test18.ps1` = stress run, `test21.ps1` = music at each stage, `test22.ps1` = fullscreen look. |
 | `results/` | Raw outputs of past test batches. |
 
