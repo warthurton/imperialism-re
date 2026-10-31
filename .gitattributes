@@ -1,2 +1,37 @@
-*.sh text eol=lf
-*.py text eol=lf
+# Line endings: LF everywhere, CRLF only for files that are Windows-centric (the project is meant to move to a Unix-style build/edit setup).
+# The repository itself always stores LF; "eol" decides what a checkout writes. These rules override a contributor's core.autocrlf.
+* text=auto eol=lf
+
+# Windows-centric: PowerShell, batch, registry, Windows linker/resource inputs and the game's own ini files (checked out as CRLF)
+*.ps1   text eol=crlf
+*.psm1  text eol=crlf
+*.psd1  text eol=crlf
+*.bat   text eol=crlf
+*.cmd   text eol=crlf
+*.reg   text eol=crlf
+*.def   text eol=crlf
+*.rc    text eol=crlf
+*.sln   text eol=crlf
+*.vcxproj text eol=crlf
+*.ini   text eol=crlf
+*.ini.example text eol=crlf
+
+# Everything that must stay LF whatever the platform (shell scripts are run by sh)
+*.sh    text eol=lf
+*.py    text eol=lf
+
+# Binary: never touched
+*.imp   binary
+*.dll   binary
+*.exe   binary
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.ico   binary
+*.pdf   binary
+*.bin   binary
+*.pkl   binary
+*.ogg   binary
+*.wav   binary
+*.zip   binary
