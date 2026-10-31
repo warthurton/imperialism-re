@@ -1,7 +1,7 @@
 # Status: where the project stands
 
 Update this file at every ship (and before ending a session). It is the first thing to read after `AGENTS.md`.
-Last updated: 2026-10-31 (University, Transport, Trade, Shipyard added after the production/diplomacy work; game stopped, tree clean).
+Last updated: 2026-10-31 (Armory and Indiaman verified, 0x4357b0 named, a group placement fixed; game stopped).
 
 ## Done and verified (in the running game unless noted)
 
@@ -26,6 +26,7 @@ Last updated: 2026-10-31 (University, Transport, Trade, Shipyard added after the
 - **University, Transport, Trade** (`docs/production_playtest.md` end, `docs/transport.md`, `docs/trade.md`; models `reimpl/production.c`, `transport.c`, `trade.c`, self-tested): civilians cost
   1 expert + 2 Paper + cash ($500 Prospector ... $2,000 Engineer), charged at once, reported next turn; the Transport sliders and capacity bar; the Board of Trade (4 bids max, settlement in
   board order, **merchant marine 16 units limits sales plus purchases**, bottom line = cash change).
+- **Armory and Indiaman** (`docs/production_playtest.md`, `reimpl/production.c`): eight regiments with costs read from the dialog; Cuirassier + Sapper ordered for real and charged as modelled; Indiaman 3 Fabric + 7 Lumber, merchant capacity +4.
 - **Fixtures** (`saves/README.md`): `oil_t0`, `oil_refinery4`, `oil_plant_built` (turn 4, plant built, Refinery 4) and the earlier production ones.
 
 ## Open questions
@@ -35,13 +36,13 @@ Last updated: 2026-10-31 (University, Transport, Trade, Shipyard added after the
 - **Dialog identity**: a dialog's size gives its kind (production 276x149, construction 320x320) but not which building it belongs to (the text log can now tell: read the dialog's strings).
 - **Technology Investment screen** (microscope button, where techs are bought): not looked at; hot key 5 shows only the history.
 - Briefings through the registry survive a loaded save but not a new game; the Library and Load screens have no found way out except choosing.
-- `names/names.tsv`: 0x4357b0 is another screen builder with no identifying strings yet. `map_sim`, `display` and a few `nations_sim` placements near 0x5149d0 are guesses.
+- `names/names.tsv`: 0x4357b0 is now `TScreenBuilder_HelpAndSmallWindows` (likely: a switch on window id building the Help topics/tips window and other small windows; read from code, not seen in play). The 8 unnamed map-reading functions at 0x557e10-0x55a160 and 0x563990 moved from `ui_screens` to `military_ai` (they read `g_MapMgr` and sit among TPortZone/TOcean code; `names/groups.tsv`). `map_sim`, `display` and a few `nations_sim` placements near 0x5149d0 are still guesses.
 - Slider quirk: clicking the slider track jumps proportionally and the right arrow adds one step; dragging the knob did not move it.
 
 ## Next steps (suggested order)
 
-1. Done this round: University/Trade School, Transport, trade settlement (see above). Shipyard done too (Trader 2 Fabric + 4 Lumber, merchant capacity 16 -> 20; `production_playtest.md`). Left: the transport bar when full and the
-   demand lines, the exact first-in-line rule and price formula (code notes in `docs/trade.md`), Armory re-check, Indiaman order.
+1. Done: University/Trade School, Transport, trade settlement, Shipyard, Armory, Indiaman. Left: the first-in-line rule and price formula (code notes in `docs/trade.md`; needs a Board of Trade
+   with rival bids, so a fixture with more goods), and the full transport bar (unreachable with only food on the network: sliders stop at 'available', 10 of 15). Hussars $100 vs Skirmishers $200 not re-ordered.
 2. Diplomacy leftovers above (order Empire where it is offered, ally with a Great Power, make a grant) if wanted.
 3. Keep playing normally now and then with crash dumps armed (`dumps/`) to confirm the music fix.
 

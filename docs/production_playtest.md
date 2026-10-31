@@ -251,7 +251,29 @@ Dialog text is READ from the log: the cost block ("Cost:" workers, Paper, cash) 
 * The four pictures are a 2x2 grid: Miner and Prospector on the top row, Farmer, Engineer below; their set grows with technology (Rancher after Feed Grasses, Forester after
   Iron Railroad Bridges, Driller after Oil Drilling), so address them by position (`pic1..4`, `add1..4`, `sub1..4` in `fast.ps1`'s `unit` dialog kind).
 * Trade School training (costs in the fourth run above) is modelled in `reimpl/production.c` next to the civilians (`train_worker`, `order_civilian`), self-tested.
-* Not tested: the Armory and Shipyard dialogs (the manual says they work "exactly like the University"; the `unit` controls are expected to match).
+* The Armory is covered in its own section below; the Shipyard section follows it.
+
+## Armory (fixture `oil_plant_built`)
+
+The Armory is the red-brick-roofed building at the left (about (200,610) mirror units; the hover text says "Armory"). Its dialog is also 376x439: eight regiments in a 2-column, 4-row grid
+(`a1..a8` row by row, `aa1..as8` = add/subtract arrows in `fast.ps1`'s `unit` kind). Selecting a picture shows its stats, cost and the stock available; all read from the text log.
+
+| Regiment (grid) | Firepower / Move / Range / Entrench | Cost: worker, Arms, Horses, cash |
+|---|---|---|
+| Skirmishers (a1) | 5 / 6 / 5 / Yes | untrained, 1, -, $200 |
+| Hussars (a2) | 7 / 11 / 3 / No | untrained, 1, 1, $100 |
+| Regulars (a3) | 10 / 4 / 5 / Yes | untrained, 1, -, $500 |
+| Cuirassiers (a4) | 15 / 9 / 3 / No | trained, 1, 1, $500 |
+| Grenadiers (a5) | 12 / 4 / 5 / Yes | trained, 1, -, $1,000 |
+| Light Artillery (a6) | 10 / 5 / 9 / No | trained, 2, 1, $1,000 |
+| Sappers (a7) | 0 / 4 / 5 / Yes | expert, 2, -, $5,000 |
+| Artillery (a8) | 16 / 3 / 11 / No | trained, 2, -, $1,000 |
+
+The worker grade is inferred from the dialog's "Available" line, whose first number is the pool the unit draws on (2 for the untrained ones, 3 for the trained ones, 2 for the Sappers, matching the left bar 2 / 3 / 2).
+Hussars at $100 against Skirmishers at $200 is as read; I have not ordered those two to double-check.
+
+Ordered for real: one Cuirassier and one Sapper. Cash 44,400 -> 38,900 (= 500 + 5,000), Arms 10 -> 7 (1 + 2), Horses 10 -> 9, labor 16 -> 10 (trained 2 + expert 4), workers 2/3/2 -> 2/2/1. End Turn: the
+Interior Minister reports "New units are reporting for duty: 1 regiment of Sappers, 1 regiment of Cuirassiers"; Arms and Horses stay down, and the order is not repeated. Modelled in `reimpl/production.c` (`order_regiment`, self-tested).
 
 ## Shipyard (fixture `oil_plant_built`)
 
@@ -267,4 +289,5 @@ The Shipyard is the ship-building yard at the top-right of the Industry screen (
 
 * Seen: two Traders took Fabric 20 -> 16 and Lumber 16 -> 8 at the click; at the next turn start the Interior Minister reported "New units are reporting for duty: 2 Traders. Our merchant
   capacity has increased to 20." and the ship icon on the Board of Trade went 16 -> 20 (+2 per Trader). That capacity is the per-turn limit on units sold plus bought (`docs/trade.md`).
-* Costs of the other three ships were read from the dialog's text, not ordered. Model: `order_ship` / `complete_ships` in `reimpl/production.c`.
+* One Indiaman (ordered in a later run of the same fixture): Fabric 20 -> 17, Lumber 16 -> 9 at the click; next turn "1 Indiaman. Our merchant capacity has increased to 20" (16 -> 20, +4, as modelled). `fast.ps1` controls `y1..y4` / `ya1..` / `ys1..` address the Shipyard's 2x2 ship grid.
+* Costs of the Frigate and Ship-of-the-Line were read from the dialog's text, not ordered. Model: `order_ship` / `complete_ships` in `reimpl/production.c`.
