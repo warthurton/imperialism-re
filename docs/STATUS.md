@@ -1,7 +1,7 @@
 # Status: where the project stands
 
 Update this file at every ship (and before ending a session). It is the first thing to read after `AGENTS.md`.
-Last updated: 2026-10-31 (end of the production, diplomacy and harness work; PR #48 merged, game stopped, tree clean).
+Last updated: 2026-10-31 (University, Transport, Trade, Shipyard added after the production/diplomacy work; game stopped, tree clean).
 
 ## Done and verified (in the running game unless noted)
 
@@ -40,8 +40,8 @@ Last updated: 2026-10-31 (end of the production, diplomacy and harness work; PR 
 
 ## Next steps (suggested order)
 
-1. Done this round: University/Trade School, Transport, trade settlement (see above). Left in those areas: Armory/Shipyard dialogs (expected to match the University's), the transport capacity bar when full and the
-   demand lines, first-in-line rule for offers and the price update, buying ships.
+1. Done this round: University/Trade School, Transport, trade settlement (see above). Shipyard done too (Trader 2 Fabric + 4 Lumber, merchant capacity 16 -> 20; `production_playtest.md`). Left: the transport bar when full and the
+   demand lines, the exact first-in-line rule and price formula (code notes in `docs/trade.md`), Armory re-check, Indiaman order.
 2. Diplomacy leftovers above (order Empire where it is offered, ally with a Great Power, make a grant) if wanted.
 3. Keep playing normally now and then with crash dumps armed (`dumps/`) to confirm the music fix.
 
