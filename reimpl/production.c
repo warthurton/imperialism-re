@@ -34,6 +34,7 @@ typedef struct City {
     int   cash;                 /* the owner's money                      owner+0x10  [confirmed in play] */
     short refinery_pending;     /* a Refinery has been paid for and appears at the next turn start   [confirmed in play] */
     short plant_pending;        /* same for the Power Plant                                          [confirmed in play] */
+    short refinery_expand_pending; /* an expansion (+2 capacity) has been paid for; completes at the next turn start  [confirmed in play] */
 } City;
 
 /* ---- an order that turns inputs into one output good ---- */
@@ -144,7 +145,7 @@ void order_reset_amount(Order *o)
  * One unit of fuel gives 6 units of power (TPowerPlantOrder_vf16 @ 004b7c90: power = amount * 6); power is added straight to the
  * available labor (labor obj +0x1c) and is not a commodity. The plant takes at most 100 fuel a turn (game text, not tested).
  * Like every other order it is charged the moment the slider moves and is re-applied every turn from the remembered amount. */
-enum { PLANT_FUEL_CAP = 100, POWER_PER_FUEL = 6, PLANT_COST = 5000, REFINERY_CAPACITY = 2 };
+enum { PLANT_FUEL_CAP = 100, POWER_PER_FUEL = 6, PLANT_COST = 5000, REFINERY_CAPACITY = 2, REFINERY_EXPANSION = 2 };
 typedef struct PowerPlant {
     short built;                /* 0 until the turn after construction                        */
     short fuel;                 /* fuel burned this turn (the slider)                         */
@@ -184,6 +185,31 @@ int cancel_refinery(City *c)
     c->refinery_pending = 0;
     return 1;
 }
+/* Expanding the Refinery (the factory-arrow button in its production dialog -> "Expand Factory", capacity 2 -> 4): same price as
+ * building, 1 Lumber + 1 Steel per point, so 2 + 2 for the +2 seen; taken at once, capacity arrives at the next turn start.
+ * Pressing Cancel in the re-offered dialog while it is pending cancels the expansion and refunds it. [confirmed in play] */
+int expand_refinery(City *c)
+{
+    if (!c->cap_max[REFINERY] || c->refinery_expand_pending) return 0;
+    if (c->stock[LUMBER] < REFINERY_EXPANSION || c->stock[STEEL] < REFINERY_EXPANSION) return 0;
+    c->stock[LUMBER] -= REFINERY_EXPANSION; c->stock[STEEL] -= REFINERY_EXPANSION;   /* seen: 18/18 -> 16/16 */
+    c->refinery_expand_pending = 1;
+    return 1;
+}
+int cancel_refinery_expansion(City *c)
+{
+    if (!c->refinery_expand_pending) return 0;
+    c->stock[LUMBER] += REFINERY_EXPANSION; c->stock[STEEL] += REFINERY_EXPANSION;   /* seen: back to 18/18 */
+    c->refinery_expand_pending = 0;
+    return 1;
+}
+/* Cancelling a Power Plant that is still under construction refunds the $5,000 (seen: $45,000 -> $50,000). [confirmed in play] */
+int cancel_power_plant(City *c)
+{
+    if (!c->plant_pending) return 0;
+    c->cash += PLANT_COST; c->plant_pending = 0;
+    return 1;
+}
 int build_power_plant(City *c, PowerPlant *pp)
 {
     if (pp->built || c->plant_pending || c->cash < PLANT_COST) return 0;
@@ -213,6 +239,9 @@ void city_begin_turn(City *c, Order *orders, int n_orders, PowerPlant *pp)
         c->cap_max[REFINERY] = c->cap_left[REFINERY] = REFINERY_CAPACITY; c->refinery_pending = 0;
     }
     if (c->plant_pending && pp) { pp->built = 1; c->plant_pending = 0; }
+    if (c->refinery_expand_pending) {                           /* seen: capacity 2 -> 4 at the turn start after paying */
+        c->cap_max[REFINERY] += REFINERY_EXPANSION; c->cap_left[REFINERY] += REFINERY_EXPANSION; c->refinery_expand_pending = 0;
+    }
     c->labor = c->labor_total;
     for (i = 0; i < n_orders; i++) order_reset_amount(&orders[i]);
     if (pp && pp->built) {                                      /* seen: Fuel 19 -> 18 and labor 16 + 6 again with no input */
@@ -328,6 +357,20 @@ int main(void)
         CHECK(d.stock[OIL] == 12 && d.cap_left[REFINERY] == 0); /* 16 - 4 re-charged */
         CHECK(d.labor == 16 - 4 + 6);                           /* refill, refinery order 2 units x 2 labor, plant +6 */
         CHECK(d.score == 2 * 10);                               /* score 20 seen in play */
+
+        /* Expanding the Refinery and cancelling things (all seen in play). */
+        d.stock[LUMBER] = 18; d.stock[STEEL] = 18; d.cash = 50000;
+        CHECK(expand_refinery(&d) && d.stock[LUMBER] == 16 && d.stock[STEEL] == 16 && d.cap_max[REFINERY] == 2);
+        CHECK(!expand_refinery(&d));                            /* already pending */
+        CHECK(cancel_refinery_expansion(&d) && d.stock[LUMBER] == 18 && d.stock[STEEL] == 18);
+        CHECK(expand_refinery(&d));
+        city_begin_turn(&d, r, 9, &pp);
+        CHECK(d.cap_max[REFINERY] == 4);                        /* seen: 2 -> 4 after the turn */
+        {
+            City e; PowerPlant q; memset(&e, 0, sizeof e); memset(&q, 0, sizeof q); q.city = &e; e.cash = 50000;
+            CHECK(build_power_plant(&e, &q) && e.cash == 45000);
+            CHECK(cancel_power_plant(&e) && e.cash == 50000 && !e.plant_pending);
+        }
     }
 
     puts(fails ? "production model: FAILURES" : "production model: all checks pass");

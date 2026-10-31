@@ -200,3 +200,24 @@ coordinates for sliders only ever worked for one site. The dialog's rect fixes t
 mirror shows the 640x480 game area at 1.993x starting at (10.4, 34.5) in mirror units. `prod_do.ps1` now has `dlg`, `dwait`, `dplus N`,
 `dminus N`, `dclose`, `dok`, `dcancel`; site clicks wait for their dialog, and `back` closes any open dialog first. Checked on the Steel
 Mill: `dplus 2; dminus 1` left the order at 1 (capacity left 2 -> 1, labor 16 -> 14) and `dminus 1` returned it to 0.
+
+## Refinery expansion and the two cancel paths (2026-10-30), run from a saved game
+
+These ran from the fixture `saves/oil_t0.imp` (below), not a fresh game plus pokes.
+
+| Step (real UI) | Seen | Notes |
+|---|---|---|
+| Refinery dialog, factory-arrow button (top right) | overlay "Expand Factory": "Oil Refinery, Capacity: 4", cost 2 Steel + 2 Lumber, Cancel / OK | the overlay is not a separate `AmbitMcWindow` |
+| OK | Lumber 18 -> 16, Steel 18 -> 16, cash unchanged, capacity still 2; a hammer icon appears in the production dialog, hot text "Expansion in Progress" | the hammer is only a marker, clicking it does nothing |
+| Press the expand button again | the same "Capacity: 4" dialog is offered again | |
+| Cancel in that dialog | **expansion cancelled and refunded**: Lumber 18, Steel 18; capacity stays 2 after the turn | so Cancel here means "cancel the pending expansion" |
+| Expand again, OK, end turn | at the next turn start `cap_max` = `cap_left` = **4** | cost is 1 Lumber + 1 Steel per point, same as building |
+| Power Plant under construction: click the site, Cancel | cash $45,000 -> $50,000 (**$5,000 refunded**); header says "Power Plant Under Construction" while pending | matches the Refinery's cancel |
+
+`reimpl/production.c` gained `expand_refinery`, `cancel_refinery_expansion` and `cancel_power_plant`, with checks for all of the above.
+
+**Saved games as fixtures.** A save keeps the tech records and the stock: after loading `oil_t0` the local power's tech-19 record
+still read 2 and Oil/Fuel were 20/20, so no poking is needed. Loading also fixes the world and the local power index (2 in these
+saves), which a fresh game randomises. The title screen has no load option (its book opens the scenario and tutorial list), so a fixture
+still needs a launch and a new game first (`prod_nav.ps1`, about 35 s) and then `prod_load.ps1 <name>` (about 20 s); the saving is in
+skipping setup, not in the launch. Use a fixture whenever a test needs the oil-age state or a mid-game situation.

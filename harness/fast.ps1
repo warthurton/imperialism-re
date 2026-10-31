@@ -66,7 +66,7 @@ function Wait-Dialog([bool]$Present = $true, [double]$Max = 3) {
 
 # control positions inside a dialog, in game pixels from the dialog's top-left (measured on the Steel Mill, Refinery and Power Plant dialogs)
 $script:DLG = @{
-  production = @{ close = @(262, 12); plus = @(241, 123); minus = @(77, 122) }
+  production = @{ close = @(262, 12); plus = @(241, 123); minus = @(77, 122); expand = @(229, 47) }
   construct  = @{ ok = @(273, 301); cancel = @(39, 301) }
 }
 function Dialog-Click([string]$Control) {
