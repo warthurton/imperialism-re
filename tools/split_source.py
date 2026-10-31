@@ -7,11 +7,16 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from sdk_annotate import annotate_dp
 rules = []
 addr_rules = []
+late_addr = []                             # "laddr" rows: address ranges tried only on still-unsorted functions
 late_rules = []                            # "late" rows: body regex tried only on functions every other pass left unsorted
 for ln in open(RE + 'names/groups.tsv', encoding='utf-8'):
     if ln.startswith('#') or not ln.strip():
         continue
     on, rx, grp = ln.rstrip('\r\n').split('\t')
+    if on == 'laddr':
+        lo, hi = (int(x, 16) for x in rx.split('-'))
+        late_addr.append((lo, hi, grp))
+        continue
     if on == 'addr':                       # explicit address range "start-end" (hex), e.g. SDK wrapper code
         lo, hi = (int(x, 16) for x in rx.split('-'))
         addr_rules.append((lo, hi, grp))
@@ -155,10 +160,34 @@ while changed:
 
 for i in order:
     if grp[i] == 'unsorted':
-        for _, rx, g in late_rules:
+        for lo, hi, g in late_addr:
+            if lo <= addr[i] <= hi:
+                grp[i] = g
+        for _, rx, g in (late_rules if grp[i] == 'unsorted' else ()):
             if rx.search(texts[i]):
                 grp[i] = g
                 break
+
+# Weakest evidence, tried last and repeated until stable: a plurality (>= half) of the classified callers, or, for a function
+# nobody classified calls, the single group its callees live in (a leaf helper of that group's code).
+LIB = ('unsorted', 'link_stubs', 'mfc', 'crt', 'static_init')
+changed = True
+while changed:
+    changed = False
+    for i in order:
+        if grp[i] != 'unsorted':
+            continue
+        votes = collections.Counter(grp[c] for c in callers[i] if grp[c] not in LIB)
+        if votes:
+            g, n = votes.most_common(1)[0]
+            if n * 2 >= sum(votes.values()):
+                grp[i] = g
+                changed = True
+            continue
+        votes = collections.Counter(grp[j] for j in callees[i] if grp[j] not in LIB)
+        if len(votes) == 1:
+            grp[i] = next(iter(votes))
+            changed = True
 
 # Applied last so these tiny functions still act as neighbours for the passes above, then split out of whatever group absorbed them.
 for i in range(len(blocks)):
