@@ -38,6 +38,17 @@ plus 97 functions seen before the first phase tag (the End Turn button handler a
 * **A coverage number for the plan**: functions hit / functions in scope, per fixture and per scenario (a turn with a war, a tech release, a colony will hit more).
 * **Evidence for the source-file boundaries**: functions that call each other in one phase and sit in an open zone can now be compared (not yet used).
 
+## Detaching safely (a bug found and fixed on 2026-10-31)
+
+The first version restored the breakpoints and detached while the game was running. A thread that executed a still-planted INT3 in that instant raised a breakpoint exception that nobody answered, and the game died
+(Windows event `0x80000003` at `0x5b66b0`; the user saw "Imperialism is not responding"). The tracer now removes every breakpoint, marks all functions disabled, and keeps answering debug events (a breakpoint on one of its
+addresses is resumed at the original instruction) until the game has been quiet for half a second, and only then detaches. `harness/trace_endturn.ps1 -Name x -StopAfterSeconds N` detaches N seconds into an End Turn as a stress test:
+it survived stops at 1, 2, 5 and 8 seconds, and a normal turn afterwards.
+
+Side effects to know about: a crashed game can leave a dead process that Windows keeps listed (`Get-Process` shows it with `HasExited = True`) while the desktop compositor holds a "(Not Responding)" ghost window for it.
+The harness and the Python readers now ignore exited processes (`Where-Object { -not $_.HasExited }`), so they pick the live game. To clear a ghost: send it `WM_SYSCOMMAND` / `SC_CLOSE`, then press **End Process** in the
+dialog that appears. Also: an interrupted End Turn can leave the game on a trade offer sheet (screen id 8500); the Escape key may not reach it, but clicking the red REJECT seal does.
+
 ## Limits
 
 * Only function **entries** are traced, not returns or data; a function called through a table whose first byte is not an instruction start of the traced list is missed.

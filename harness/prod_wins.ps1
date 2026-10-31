@@ -3,7 +3,7 @@
 param([switch]$Visible)
 $root = $PSScriptRoot
 . "$root\gw.ps1"
-$pid_ = (Get-Process Imperialism).Id
+$pid_ = (Get-Process Imperialism | Where-Object { -not $_.HasExited } | Select-Object -First 1).Id
 foreach ($w in [GW]::Windows([uint32]$pid_)) {
   if ($Visible -and $w[3] -ne 'vis') { continue }
   "TOP $($w[0]) $($w[1]) '$($w[2])' $($w[3]) $($w[6])"

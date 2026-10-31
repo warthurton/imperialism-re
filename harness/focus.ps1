@@ -9,7 +9,7 @@ Add-Type -Namespace FG -Name Api -MemberDefinition @'
 [DllImport("user32.dll")] public static extern void keybd_event(byte vk, byte scan, uint flags, UIntPtr extra);
 '@
 function Test-GameForeground {
-  $pid_ = (Get-Process Imperialism -ErrorAction SilentlyContinue | Select-Object -First 1).Id
+  $pid_ = (Get-Process Imperialism -ErrorAction SilentlyContinue | Where-Object { -not $_.HasExited } | Select-Object -First 1).Id
   $p = 0; [FG.Api]::GetWindowThreadProcessId([FG.Api]::GetForegroundWindow(), [ref]$p) | Out-Null
   return ($pid_ -and $p -eq $pid_)
 }

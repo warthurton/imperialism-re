@@ -43,7 +43,7 @@ $script:MIR_S = 1.993; $script:MIR_X0 = 10.4; $script:MIR_Y0 = 34.5
 
 function Get-Dialog {
   # -> $null, or @{ X; Y; W; H; Kind } in game pixels. Kind: 'construct' (320x320), 'production' (276x149), 'unit' (University etc., 376x439) or 'other'.
-  $pid_ = (Get-Process Imperialism -ErrorAction SilentlyContinue | Select-Object -First 1).Id
+  $pid_ = (Get-Process Imperialism -ErrorAction SilentlyContinue | Where-Object { -not $_.HasExited } | Select-Object -First 1).Id
   if (-not $pid_) { return $null }
   $frame = [GW]::Windows([uint32]$pid_) | Where-Object { $_[1] -like 'Afx:*' -and $_[3] -eq 'vis' } | Select-Object -First 1
   if (-not $frame) { return $null }
@@ -80,7 +80,7 @@ function Dialog-Click([string]$Control) {
 
 # ---- keys, sent as window messages (no dependence on which window has focus; a global keybd_event press stopped reaching the game) ----
 function Post-Key([int]$Vk) {
-  $pid_ = (Get-Process Imperialism -ErrorAction SilentlyContinue | Select-Object -First 1).Id
+  $pid_ = (Get-Process Imperialism -ErrorAction SilentlyContinue | Where-Object { -not $_.HasExited } | Select-Object -First 1).Id
   $f = [GW]::Windows([uint32]$pid_) | Where-Object { $_[1] -like 'Afx:*' } | Select-Object -First 1
   if (-not $f) { throw 'game frame window not found' }
   $g = [GW]::Children([IntPtr][int64]$f[0]) | Where-Object { $_ -match 'AmbitGameWindow' } | Select-Object -First 1
@@ -106,7 +106,7 @@ public static class GMem {
 }
 '@ -ErrorAction SilentlyContinue
 function Get-ScreenId {
-  $pid_ = (Get-Process Imperialism -ErrorAction SilentlyContinue | Select-Object -First 1).Id
+  $pid_ = (Get-Process Imperialism -ErrorAction SilentlyContinue | Where-Object { -not $_.HasExited } | Select-Object -First 1).Id
   if (-not $pid_) { return -1 }
   $mgr = [GMem]::Read($pid_, 0x6a21bc, 4); if ($mgr -le 0) { return -1 }
   return [GMem]::Read($pid_, [uint32]($mgr + 4), 2)

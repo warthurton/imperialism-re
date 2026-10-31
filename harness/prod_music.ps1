@@ -2,7 +2,7 @@
 # (-1 = no audio session at all, 0 = silent session.) Quiet test volumes give small peaks; anything above 0.0003 counts.
 $root = $PSScriptRoot
 . "$root\gw.ps1"; . "$root\audio.ps1"
-$g = Get-Process Imperialism -ErrorAction Stop
+$g = Get-Process Imperialism -ErrorAction Stop | Where-Object { -not $_.HasExited }
 $max = -1; 1..8 | ForEach-Object { Start-Sleep -Milliseconds 500; $p = [AudioPeek]::Peak($g.Id); if ($p -gt $max) { $max = $p } }
 $k = 'HKCU:\Software\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\Layers'
 $layer = (Get-ItemProperty $k -ErrorAction SilentlyContinue).'C:\GOG Games\Imperialism\Imperialism.exe'

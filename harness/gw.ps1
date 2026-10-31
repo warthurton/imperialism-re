@@ -129,7 +129,7 @@ public static class GW {
 }
 '@
 
-function Get-Game { Get-Process Imperialism -ErrorAction SilentlyContinue }
+function Get-Game { Get-Process Imperialism -ErrorAction SilentlyContinue | Where-Object { -not $_.HasExited } }
 function Show-GameWindows {
   $g = Get-Game; if (-not $g) { 'game not running'; return }
   foreach ($p in $g) { [GW]::Windows([uint32]$p.Id) | ForEach-Object { $_ -join ' | ' } }
