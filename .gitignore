@@ -48,6 +48,8 @@ exported_all.txt
 new_entries.txt
 analyze3.log
 results/*.bin
+# strings dumped from the game exe (local only; regenerate with tools/exe_strings.py)
+results/exe_strings*.tsv
 
 # generated from the copyrighted manual/guides, and the local Ollama host
 docs/manual/

@@ -2,6 +2,8 @@
 # NOTE: rows of kind late/laddr are last-resort heuristics (tried only on functions no other pass could place); treat the group as a filing guess, not proof.
 # Columns (tab separated): on | regex | group     on = name (function name) or body (function text)
 addr	0047f870-004833b0	directplay
+# UMapper.cpp (assert strings, tools/source_files.py) is the map generator (TMapMaker): game logic, filed by an older rule under framework
+addr	00529960-0052e350	map_sim
 name	^TScreenBuilder_	ui_layouts
 name	^(crt_|_?_?(mem|str|f|s|v)[a-z]+$)	crt
 name	^(~?C[A-Z][A-Za-z]*|DDX|AFX|FID)_	mfc
@@ -36,7 +38,7 @@ laddr	00483db0-00485cff	ui_screens
 laddr	00490a00-00490aff	mfc
 laddr	00493250-00493260	framework
 laddr	00493fe0-00494400	display
-laddr	004a1130-004a8fff	military_ai
+laddr	004a1100-004a8fff	military_ai
 laddr	004b95c0-004b9fff	ui_layouts
 laddr	004d6570-004d7fff	military_ai
 laddr	00509e10-0050e7ff	ui_screens
