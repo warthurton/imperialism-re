@@ -48,3 +48,7 @@ exported_all.txt
 new_entries.txt
 analyze3.log
 results/*.bin
+
+# generated from the copyrighted manual/guides, and the local Ollama host
+docs/manual/
+tools/ocr.local.json
