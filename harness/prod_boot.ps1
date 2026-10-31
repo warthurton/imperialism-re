@@ -15,6 +15,9 @@ $layerKey = 'HKCU:\Software\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\L
 if (((Get-ItemProperty $layerKey -ErrorAction SilentlyContinue).$exePath) -match 'IgnoreFreeLibrary') { Set-ItemProperty -Path $layerKey -Name $exePath -Value 'HIGHDPIAWARE'; Write-Host 'removed IgnoreFreeLibrary compat layer' }
 . "$root\gw.ps1"; . "$root\focus.ps1"; . "$root\fast.ps1"
 Copy-Item $src 'C:\GOG Games\Imperialism\Save\slot0.imp' -Force
+# The shim can log every string the game draws (imperialism_text.log); switch that on so tests can READ screens (tools/readtext.py, prod_do "mark" / "txt").
+$ini = 'C:\GOG Games\Imperialism\imperialism_shim.ini'
+if (-not (Test-Path $ini) -or -not (Select-String -Path $ini -Pattern '^\[text_log\]' -Quiet)) { Add-Content -Path $ini -Value "`r`n[text_log]`r`nenabled=1" }
 $sw = [Diagnostics.Stopwatch]::StartNew()
 $game = Start-Process $exePath -WorkingDirectory 'C:\GOG Games\Imperialism' -PassThru
 $t = 0; while ((Mirror) -eq [IntPtr]::Zero -and $t -lt 60) { Start-Sleep -Milliseconds 500; $t++ }

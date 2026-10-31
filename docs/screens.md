@@ -48,3 +48,12 @@ The manual's hot keys (1-5 for screens, F1 help, Escape/Return for offers, `w` o
 a global key press (`keybd_event`) stopped reaching the game partway through a session, while `PostMessage` of WM_KEYDOWN to the
 game frame and the `AmbitGameWindow` worked every time. `prod_do.ps1 "go industry|transport|trade|diplomacy|tech|map"` uses that and
 `readview.py id` to confirm: transport 2014, industry 2011, trade 2009, diplomacy 2008, tech 2300, map 2013.
+
+## Reading what is on screen
+
+Screenshots are the slow way. The display shim can log every string the game draws (it hooks `TextOutA`, `ExtTextOutA`, `TabbedTextOutA`, `DrawTextA`)
+to `imperialism_text.log` in the game folder when `imperialism_shim.ini` has `[text_log]` / `enabled=1` (`prod_boot.ps1` writes that). Each line is
+`<tick> <T|X|B|D> <x>,<y> <text>`; the game draws every string twice (a shadow one pixel up-left), and the reader collapses those. `prod_do.ps1 "mark; go trade; txt"`
+prints what a screen drew: the Board of Trade's prices and quantities, the diplomacy "Information:" panel (Provinces / Military / Industry), hot text, the load
+screen's slot names. Positions are in the game's own 640x480 coordinates (or the off-screen bitmap's). Installed build: `shim/build20.dll` (build 17 plus the
+text log; the previous shim is saved as `original/msvfw32_before_textlog.dll`, and the log does nothing unless the ini switches it on).

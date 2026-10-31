@@ -49,6 +49,10 @@ local. Saved games in `saves/` are fine (written by the game from a random world
   are test fixtures only: orders must still be placed through the real UI so the game's own code runs, and the docs must say
   what was poked. `poke_tech.py L:19` targets the local power: its index (g_Game+0x2e) changes between new games, never hardcode it.
   Dialogs are `AmbitMcWindow` children of the game frame (`prod_wins.ps1`, `Get-Dialog`), not game objects.
+- **Read the screen's text, do not look at it.** The shim logs every string the game draws (`TextOutA`, `ExtTextOutA`, `TabbedTextOutA`, `DrawTextA`) to
+  `imperialism_text.log` when `[text_log] enabled=1` is in the game's `imperialism_shim.ini` (`prod_boot.ps1` sets it; needs the shim build with the text log,
+  `shim/build.sh`). `prod_do.ps1 "mark; <action>; txt"` prints the text drawn in response (hot text, offer sheets, prices); `tools/readtext.py tail|since`. Strings come
+  twice (shadow); the reader collapses them. Use this before a screenshot.
 - **Keys go as window messages** (`Post-Key` in `fast.ps1`); a global `keybd_event` press stopped reaching the game. Escape rejects
   a trade offer, Return accepts or moves past results and the newspaper. Waits poll the screen id or the screen itself
   (`Wait-Stable`), not fixed sleeps.
