@@ -1,10 +1,15 @@
 # Status: where the project stands
 
 Update this file at every ship (and before ending a session). It is the first thing to read after `AGENTS.md`.
-Last updated: 2026-10-31 (Armory and Indiaman verified, 0x4357b0 named, a group placement fixed; game stopped).
+Last updated: 2026-10-31 (snapshot capture/diff and live validation harness; game stopped after each test).
 
 ## Done and verified (in the running game unless noted)
 
+- **Snapshot oracle, partial** (`docs/snapshots.md`, `tools/snapshot.py`, `tools/diff_snapshot.py`):
+  read-only capture of game/nations/cities/orders/population, diplomacy, technology, trade/deals,
+  map tiles/provinces and both RNG states. Semantic and raw-byte comparison. The single-session
+  `harness/prod_snapshot.ps1` checks idle identity, one completed turn, and byte agreement with
+  the existing city/tech/diplomacy readers before and after. Eight offline tests pass.
 - **Display shim** (`shim/`): windowed scaling, maximize, fullscreen with integer scale, mouse mapping, and an opt-in **text log** (installed build: `shim/build20.dll`;
   the previous one is `original/msvfw32_before_textlog.dll`). The game's music-loss crash is intermittent and **not proven fixed** (`winmm/` rebuilt from ogg-winmm).
 - **Decompile**: 10.9k functions named; `src/` groups (git-ignored) from `tools/split_source.py`, none left unsorted (the `late`/`laddr` rows are filing guesses,
@@ -54,7 +59,18 @@ Last updated: 2026-10-31 (Armory and Indiaman verified, 0x4357b0 named, a group 
 * OCR tool for the manual/card (`docs/manual_ocr.md`, git-ignored output in `docs/manual/`), Mac/iPad notes (`docs/mac_ipad.md`, untested), LF/CRLF rules, the quoting rule in `AGENTS.md`.
 
 **Next, in order**
-1. **Snapshot tool** (`tools/snapshot.py` + diff): dump the whole game state (TGame, nations, Great Powers, cities, the map manager's 6,480 tiles x 0x24 bytes, TDiplomacyMgr, TTechMgr, trade tables, RNG seed) before and after an End Turn. Layouts exist for several (see `tools/read*.py`); the field miner (`tools/field_miner.py`, not written) should derive the rest from the decompile.
+Snapshot continuation (2026-10-31): the partial schema-1 oracle now has successful live
+before/idle/after captures from `oil_plant_built`. Keeping the whole test in one harness lifetime
+avoided the earlier missing-process failure; its exact cause remains unproven. Expanded run
+`snapshot_live2` passed eight checks: 490 -> 498 blocks, 3,932 decoded fields, 266 field changes
+across 188 blocks. Final run with both RNG states (`snapshot_live3`) also passed all eight:
+491 -> 489 blocks, 3,933 fields, 282 changed fields across 173 blocks. Idle bytes identical,
+game turn 5 -> 6, local cash $44,400 -> $44,250; game stopped and settings restored.
+Eight offline tests pass (`python -I tools/test_snapshot.py`). No functions lifted this session.
+Next: field miner and remaining military/nation/province/city pointer targets, more fixtures,
+and replay checks. M0 is not complete. Raw snapshots remain local and ignored.
+
+1. **Expand snapshot coverage** (`tools/snapshot.py` + diff, partial capture validated): remaining pointer targets and managers, then pairs for more fixtures. The field miner (`tools/field_miner.py`, not written) should derive the missing layouts from the decompile. See `docs/snapshots.md` for proven bounds and current limits.
 2. **Decode the 219 unnamed simulation functions** the trace hit: `python -I tools/tracer/analyze_trace.py results/trace4 --unnamed nations_sim` (and `military_ai`, `map_sim`, `production`, `trade`); `--phase N` lists a phase in call order with callers. Name them in `names/names.tsv` with evidence.
 3. **More trace scenarios**: a war, a tech release (`tools/poke_techturn.py`), accepted offers (`prod_endturn.ps1 -Accept`), an Empire/colony turn, an AI-heavy later turn. Save fixtures with `harness/prod_save.ps1`.
 4. Narrow the 2,631 open source-file functions using trace evidence (functions that run together in one phase), then start `core/` M1 (load a save into typed structs, write it back byte-identical).
