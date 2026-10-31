@@ -16,3 +16,20 @@ The game folder has two PDFs: `Imperialism - manual.pdf` (120 pages, **has a tex
   `--hint-text` hands the model the PDF's own text layer so it only fixes structure (headings, lists, tables); use it for the manual, not for the card (no layer).
 * `python tools/ocr_pdf.py bench "<pdf>" --models a,b,c --pages 12,40,73 --out docs/manual/bench`: time per page for each model (load, unload, load again first; not counted) and, where the page has a
   text layer, a word-level similarity against it, written to `bench.md`.
+
+## Model benchmark (2026-10-31, an Ollama server on the local network; load, unload, load again before timing; seconds exclude model load)
+
+Pages: manual 12 (screenshot page), 40 (text), 73 (mixed) with the repaired text layer as ground truth (letters-only similarity); quick reference card pages 1 (terrain table) and 4 (flow chart), no ground truth.
+
+| Model | s/page, manual | similarity | s/page, card | Card result |
+|---|---|---|---|---|
+| gemma4:e2b | 5.3 | 0.90 | 3.1 | fast, but dropped the Mountain row's coal/iron/gold/gems split |
+| **gemma4:e4b** (default) | 7.0 | 0.91 | 5.5 | kept those rows; table cells approximate |
+| qwen3.5:4b | 18.2 | 0.91 | 13 | similar to e4b, slower |
+| gemma4:12b | 20.1 | 0.88 | 12-27 | best table (all levels and units), still no flow-chart arrows |
+| gemma4:27b, 31b | 44 | 0.83-0.86 | not run | errored on 2 of 3 manual pages; not worth the time |
+| qwen3-vl 4b, 8b | n/a | n/a | n/a | always reason (`think:false` ignored); empty answers inside 2500 tokens |
+
+Decision: the manual is rebuilt from its text layer (no model); e4b for other text-heavy pages; **no model reads diagram arrows correctly** (page 4 got invented edges from the small models and labels only from 12b), so
+diagrams and dense tables on the card are transcribed by looking at the image.
+

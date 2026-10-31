@@ -18,6 +18,7 @@ text layer as a hint (pages that have one): it then fixes structure (headings, l
 import argparse, base64, difflib, json, os, re, sys, time, urllib.request, urllib.error
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+DEFAULT_MODEL = 'gemma4:e4b-mlx'      # fastest model that was accurate enough on text pages and kept table rows (see docs/manual_ocr.md); 'gemma4:12b-mlx' for dense tables
 PROMPT = ("Transcribe this page of a printed game manual into clean Markdown. Keep the reading order. Use # / ## / ### for headings, "
           "- for bullet lists, 1. for numbered lists, Markdown tables for tables, **bold** and *italic* where the print has them. "
           "Join lines of one paragraph. Do not summarize, translate, correct or add anything. For a picture, screenshot or diagram "
@@ -311,7 +312,7 @@ def main():
         if name not in ('images', 'text'):
             p.add_argument('--pages'); p.add_argument('--dpi', type=int, default=150); p.add_argument('--hint-text', action='store_true')
         if name == 'pages':
-            p.add_argument('--model', required=True); p.add_argument('--force', action='store_true')
+            p.add_argument('--model', default=DEFAULT_MODEL); p.add_argument('--force', action='store_true')
         if name == 'bench':
             p.add_argument('--models', required=True); p.add_argument('--num-predict', type=int, default=3000)
     a = ap.parse_args()
