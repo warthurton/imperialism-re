@@ -37,6 +37,7 @@ typedef struct City {
     short workers[3];           /* untrained, trained, expert workers  [confirmed in play: left bar of the Industry screen] */
     short units_pending[4];     /* civilians paid for, reported at the next turn start (Miner, Prospector, Farmer, Engineer)  [confirmed in play] */
     short ships_pending[4];     /* ships paid for (Trader, Indiaman, Frigate, Ship-of-the-Line); appear next turn  [confirmed in play] */
+    short army_pending[8];      /* regiments paid for at the Armory, reported next turn  [confirmed in play: Skirmishers, Cuirassiers, Sappers] */
     short merchant;             /* merchant marine capacity (units that can be sold or bought per turn)  [confirmed in play: 16 -> 20 for 2 Traders] */
     short refinery_expand_pending; /* an expansion (+2 capacity) has been paid for; completes at the next turn start  [confirmed in play] */
 } City;
@@ -302,6 +303,23 @@ int train_worker(City *c, int to_expert)
     return 1;
 }
 
+/* ---- Armory: a regiment costs 1 worker (grade by unit), Arms, sometimes Horses, and cash, all charged when the arrow is clicked; the regiment
+ * is reported "reporting for duty" at the next turn start; the worker's labor is lost (untrained 1, trained 2, expert 4).  Table read from the
+ * dialog's text (Available line shows which worker pool the unit draws on: 2 untrained, 3 trained, 2 expert in the test); the orders of Skirmishers,
+ * Cuirassiers and Sappers were then placed and charged exactly as modelled.  [Skirmishers, Cuirassiers, Sappers confirmed in play; rest read] */
+enum Regiment { SKIRMISHERS, HUSSARS, REGULARS, CUIRASSIERS, GRENADIERS, LIGHT_ARTILLERY, SAPPERS, ARTILLERY };
+static const struct { short grade, arms, horses, cash; } REGIMENT[8] = {
+    { 0, 1, 0, 200 }, { 0, 1, 1, 100 }, { 0, 1, 0, 500 }, { 1, 1, 1, 500 },
+    { 1, 1, 0, 1000 }, { 1, 2, 1, 1000 }, { 2, 2, 0, 5000 }, { 1, 2, 0, 1000 } };
+static const short GRADE_LABOR[3] = { 1, 2, 4 };
+int order_regiment(City *c, int kind)
+{
+    if (c->workers[REGIMENT[kind].grade] < 1 || c->stock[ARMS] < REGIMENT[kind].arms || c->stock[HORSES] < REGIMENT[kind].horses || c->cash < REGIMENT[kind].cash) return 0;
+    c->workers[REGIMENT[kind].grade]--; c->stock[ARMS] -= REGIMENT[kind].arms; c->stock[HORSES] -= REGIMENT[kind].horses; c->cash -= REGIMENT[kind].cash;
+    c->labor -= GRADE_LABOR[REGIMENT[kind].grade]; c->labor_total -= GRADE_LABOR[REGIMENT[kind].grade];
+    c->army_pending[kind]++; return 1;
+}
+
 /* ---- Shipyard: each ship costs goods only (no labor, no cash, no worker), charged when the arrow is clicked (read from the dialog, then 2 Traders
  * seen: Fabric 20 -> 16, Lumber 16 -> 8). Traders and Indiamen are merchant ships: "Our merchant capacity has increased to 20" at the next turn start,
  * +2 per Trader (Cargo 2), +4 per Indiaman (Cargo 4, read); warships carry no cargo.  [confirmed in play for the Trader; costs of the others read] */
@@ -452,6 +470,16 @@ int main(void)
         complete_ships(&y); CHECK(y.merchant == 20);              /* seen: "merchant capacity has increased to 20" */
         CHECK(order_ship(&y, SHIP_OF_THE_LINE) && y.stock[ARMS] == 5 && y.stock[LUMBER] == 0);
         CHECK(!order_ship(&y, SHIP_OF_THE_LINE));                 /* no Lumber left: refused */
+    }
+
+    /* Armory, seen in play (fixture oil_plant_built: 2 untrained, 3 trained, 2 expert, labor 16, Arms 10, Horses 10, $44,400): a Cuirassier and a Sapper. */
+    {
+        City a; memset(&a, 0, sizeof a);
+        a.workers[0] = 2; a.workers[1] = 3; a.workers[2] = 2; a.labor = a.labor_total = 16; a.stock[ARMS] = 10; a.stock[HORSES] = 10; a.cash = 44400;
+        CHECK(order_regiment(&a, CUIRASSIERS) && order_regiment(&a, SAPPERS));
+        CHECK(a.cash == 38900 && a.stock[ARMS] == 7 && a.stock[HORSES] == 9 && a.labor == 10 && a.workers[1] == 2 && a.workers[2] == 1);  /* seen exactly */
+        CHECK(a.army_pending[CUIRASSIERS] == 1 && a.army_pending[SAPPERS] == 1);                 /* seen: "1 regiment of Sappers, 1 regiment of Cuirassiers" */
+        a.workers[2] = 0; CHECK(!order_regiment(&a, SAPPERS));                                  /* no expert left */
     }
 
     puts(fails ? "production model: FAILURES" : "production model: all checks pass");

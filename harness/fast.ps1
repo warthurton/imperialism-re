@@ -69,7 +69,7 @@ $script:DLG = @{
   production = @{ close = @(262, 12); plus = @(241, 123); minus = @(77, 122); expand = @(229, 47); knob = @(76, 123); end = @(236, 123) }
   construct  = @{ ok = @(273, 301); cancel = @(39, 301) }
   # unit centres (University; the Armory and Shipyard are expected to match): picture N = select, add N / sub N = its arrows, 2x2 grid (column 1 = rows 1-3, column 2 = row 1)
-  unit       = @{ close = @(361, 12); pic1 = @(248, 111); add1 = @(268, 151); sub1 = @(228, 151); pic2 = @(327, 111); add2 = @(347, 151); sub2 = @(307, 151); pic3 = @(248, 193); add3 = @(268, 235); sub3 = @(228, 235); pic4 = @(248, 278); add4 = @(268, 318); sub4 = @(228, 318) }
+  unit       = @{ close = @(361, 12); pic1 = @(248, 111); add1 = @(268, 151); sub1 = @(228, 151); pic2 = @(327, 111); add2 = @(347, 151); sub2 = @(307, 151); pic3 = @(248, 193); add3 = @(268, 235); sub3 = @(228, 235); pic4 = @(248, 278); add4 = @(268, 318); sub4 = @(228, 318); a1 = @(248, 111); aa1 = @(268, 151); as1 = @(228, 151); a2 = @(327, 111); aa2 = @(347, 151); as2 = @(307, 151); a3 = @(248, 195); aa3 = @(268, 235); as3 = @(228, 235); a4 = @(327, 195); aa4 = @(347, 235); as4 = @(307, 235); a5 = @(248, 278); aa5 = @(268, 318); as5 = @(228, 318); a6 = @(327, 278); aa6 = @(347, 318); as6 = @(307, 318); a7 = @(248, 362); aa7 = @(268, 402); as7 = @(228, 402); a8 = @(327, 362); aa8 = @(347, 402); as8 = @(307, 402) }
 }
 function Dialog-Click([string]$Control) {
   $d = Get-Dialog; if (-not $d) { throw "no dialog open for '$Control'" }
