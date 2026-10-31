@@ -2,6 +2,8 @@
 
 Agent instructions (single source for Claude Code, GitHub Copilot and other coding agents).
 
+**Start of every session: read this file, then `docs/STATUS.md`** (what is done, what is open, what to do next, how to resume). Follow its links to the other docs (see "Where things are" at the end).
+
 Public fan project (MIT): reverse engineering and display modernization for Imperialism (1997, GOG). Learning
 exercise. NEVER commit game files, decompiler output, discs or third-party binaries (see .gitignore; vendor_untrusted/
 is proprietary and local only). Check `git ls-files` for binaries before shipping. Raw memory dumps (`results/*.bin`) stay
@@ -71,6 +73,12 @@ local. Saved games in `saves/` are fine (written by the game from a random world
   guess). Run `tools/audit_groups.py` after changing them.
 
 ## Where things are
-README.md (layout, rebuild), docs/STATUS.md (read first), docs/ (screens.md, production_playtest.md, recipes.md, turn_phases.md, how_a_turn_works.md,
-trade_rows.txt), reimpl/production.c (tested model), saves/ (fixtures), harness/, tools/, classes.tsv, ghidra/,
-shim/ (display), winmm/ (music DLL rebuild).
+Read first: this file, then **`docs/STATUS.md`** (state, open questions, next steps, how to resume). Keep both current (see Workflow).
+- `README.md`: layout and rebuild.
+- `docs/screens.md`: manual-based screen names, ids, main menu, hot keys, reading on-screen text. `docs/turn_phases.md`, `docs/how_a_turn_works.md`: the turn.
+- Verified game rules, each with a tested model in `reimpl/`:
+  `docs/production_playtest.md` + `docs/recipes.md` (production, Power Plant, Refinery, University, Shipyard; `reimpl/production.c`),
+  `docs/diplomacy.md` (`reimpl/diplomacy.c`), `docs/transport.md` (`reimpl/transport.c`), `docs/trade.md` + `docs/trade_rows.txt` (`reimpl/trade.c`).
+- `saves/` (fixtures, `saves/README.md`), `harness/` (game driving), `tools/` (readers, pokes, decompile tooling), `names/`, `classes.tsv`, `ghidra/`,
+  `shim/` (display and text log), `winmm/` (music DLL rebuild).
+- A new doc or model goes in this list in the same PR.
