@@ -133,11 +133,11 @@ oil-drilling technology (not available at the start of a game; the game text say
 
 **What gates it.** The capital screen (`TCityProductionView`, vf53 hot text and vf71 click handler) treats building types 6 (Oil
 Refinery) and 0xb (Power Plant) specially: the site is only live when `TTechMgr` per-power record `+0x268 + power*29 + 19` equals
-**2** ("owned"), where `power` is `g_Game+0x2e` (the local human; **0** in this game, not 1). The global known-tech byte `+0x193`
+**2** ("owned"), where `power` is `g_Game+0x2e` (the local human). **That index changes between new games** (0 in one, 6 in the next), so a poke aimed at a fixed power silently misses; `poke_tech.py L:19` looks it up. The global known-tech byte `+0x193`
 is a different thing (it only unhides Oil in the warehouse, prospector and trade screens). A new game starts with techs 0-2 at 2 in
 every power's record. The sites are invisible hotspots: `harness/prod_hover.ps1` (hover grid, records the hot text) showed 14
 building names before and 16 after, the new ones being "Site for Factory: Oil Refinery" (930,420) and "...: Power Plant" (1080,470).
-`tools/poke_tech.py 0:19` sets the record (fixture; the real route is buying Oil Drilling at the University/Trade School).
+`tools/poke_tech.py L:19` sets the record (fixture; the real route is buying Oil Drilling at the University/Trade School).
 
 | Step (real UI) | Seen | Notes |
 |---|---|---|
@@ -152,3 +152,8 @@ Not tested: the 100-fuel cap, shortage (Fuel 0), and the Refinery (not needed he
 **Harness.** `prod_vol.ps1 -Mode test` now means effects 10% and music about 5% and also sets minister warnings and briefings Off in the
 registry before launch (a new game still resets briefings to On; a loaded save keeps them). `prod_nav.ps1` no longer starts the
 idle-dock watcher (it shrank the window after 10 s and broke hover scans). `shot.ps1` takes a focused screenshot.
+
+**Faster harness.** `harness/prod_do.ps1 "city; m 1000 400; w 0.3; plant; s shot1"` runs a chain of clicks in one process. `fast.ps1`
+replaces the fixed sleep after each click with "wait for the screen to start changing, then to settle" (a plain settle check
+returned before slow screen transitions had begun, so it first waits for a change). Map to construction dialog went from about 15 s
+of separate scripts to about 7 s. After entering a screen, move the mouse once before clicking a hotspot.
