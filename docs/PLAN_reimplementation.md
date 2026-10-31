@@ -94,7 +94,8 @@ Every function gets a file attribution from `names/source_attribution.tsv`, so w
 ## First actions (in order)
 
 1. `tools/callgraph_stats.py` (done): the baseline numbers above.
-2. Write the breakpoint tracer (`tools/trace_calls.py`, Win32 debug API through ctypes; the game is 32-bit, the tool must run with a 32-bit-capable approach or use a small C helper built with the existing llvm-mingw i686 toolchain).
+2. The breakpoint tracer (**done**, `tools/tracer/`, a small C program built with the i686 toolchain; `docs/tracer.md`).
 3. Write the snapshot dump (`tools/snapshot.py`) for the objects we already have layouts for, and the diff tool. Verify on the economic fields we know.
-4. Run the tracer over one End Turn on `oil_plant_built` and publish the real call tree and coverage.
+4. First trace (**done**: one End Turn on `oil_plant_built`, `docs/trace_end_turn.tsv`): 1,132 of 4,868 functions run (199 were reachable statically); 589 are simulation code, about 220 of them still unnamed: the decode queue.
+   Next: more scenarios (a war, a tech release, a colony, an AI turn with offers accepted) to widen coverage.
 5. Start `core/` with M1.
