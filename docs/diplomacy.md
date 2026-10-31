@@ -1,85 +1,83 @@
 # Diplomacy and offers (what is decoded, what is not)
 
-Sources: the game manual ("Diplomacy" and "Receiving Trade Offers"), the decompile (`TDiplomacyMgr`, vtable 0x654d90), and numbers read out of the
-running game with `tools/readdiplo.py` while making overtures through the real UI. A tested model of the decoded part is `reimpl/diplomacy.c`.
-Confidence: **seen** (in play), **code** (read in the decompile only), **guess**.
+Sources: the game manual ("Diplomacy" and "Receiving Trade Offers"), the decompile (`TDiplomacyMgr`, vtable 0x654d90), the game's own strings, and numbers read
+out of the running game (`tools/readdiplo.py`, `readnations.py`, `readpending.py`) while ordering every overture through the real UI. A tested model of the decoded
+part is `reimpl/diplomacy.c`. Confidence: **seen** (in play), **code** (read in the decompile only), **guess**.
 
 ## The two kinds of offer
 
-1. **Trade offers** (the "Offer Sheet", screen id 8500). After all Great Powers end their turn the world market opens and each country selling
-   a commodity you bid on makes you an offer: "Hurshen offers 2 units of Food @ $87/unit", a Purchase box, a "No more offers of Food"
-   checkbox, a red REJECT seal and a blue ACCEPT seal; the book on the right gives advice ("Purchase Not Recommended: we have no consulate with
-   Hurshen, thus trade serves no diplomatic purpose"). **Escape rejects, Return accepts** (manual hot keys, seen to work with `Post-Key`). Offers
-   you decline pass to other bidders. Accepted trades improve relations (manual; seen: AI trades moved scores 90 -> 91).
-2. **Diplomatic overtures** (screen id 2008, the right-hand scroll tab "Offer Treaties"): you order them, they are carried out at End Turn.
-   Seven scrolls, mirror coordinates: Peace (270,810), Trade Consulate (655,810), Embassy (900,810), War (270,915), Pact (555,915),
-   Alliance (770,915), Empire (990,915). Click a scroll, then a country on the map; a marker stays on the country and clicking it again rescinds
-   the overture (manual: money is returned). Information tabs on the left: the blue "i" (basic information), treaties (scroll), relationships (document),
-   trade policies (ship), Council report. The tab on the far right is Grants (foreign aid); the ship tab is Trade Policies (subsidies, boycotts).
+1. **Trade offers** (the "Offer Sheet", screen id 8500). After all Great Powers end their turn the world market opens and each country selling a commodity you bid on
+   makes you an offer: "Hurshen offers 2 units of Food @ $87/unit", a Purchase box, a "No more offers of Food" checkbox, a red REJECT and a blue ACCEPT seal; the book
+   on the right gives advice. **Escape rejects, Return accepts** (seen with `Post-Key`). Declined offers pass to other bidders. Accepted trades improve relations (manual;
+   seen: AI trades moved scores 90 -> 91). End Turn then shows the trade results book (id 8800) and the Imperial Times (id 8451).
+2. **Diplomatic overtures** (screen id 2008, the right-hand scroll tab "Offer Treaties"): ordered during the turn, carried out at End Turn. Seven scrolls, mirror coordinates:
+   Peace (270,810), Trade Consulate (655,810), Embassy (900,810), War (270,915), Pact (555,915), Alliance (770,915), Empire (990,915). Click a scroll, then a country; a
+   marker stays and clicking it again rescinds the order (money returned). Left tabs: the blue "i" (information), treaties (scroll), relationships (document), trade
+   policies (ship), Council report. Far right: Grants (foreign aid) and Trade Policies (subsidies, boycotts).
 
-Manual rules (not all checked): Minor Nations always accept Trade Consulate ($500, opens next turn), Embassy ($5,000, needs a consulate), Pact (free,
-needs an embassy) and Peace, and never refuse War being declared on them; Empire (colony) is refused unless relations are friendly enough; Great Powers
-accept Peace only when it suits them, offer and accept Alliance when disadvantaged; a Great Power joins your Empire only when its position is hopeless.
+Manual rules (not all checked): Minor Nations always accept Trade Consulate, Embassy (needs a consulate), Pact (needs an embassy) and Peace, and cannot refuse War;
+Empire (colony) is refused unless relations are friendly enough; Great Powers accept Peace only when it suits them, offer and accept Alliance when disadvantaged.
 
-## The manager's data (`TDiplomacyMgr`, global 0x6a43d0, 6,364 bytes) [seen]
+## `TDiplomacyMgr` (global 0x6a43d0, 6,364 bytes) [seen]
 
-Nations are numbered 0-6 for the Great Powers and 7-22 for the sixteen Minor Nations (`TDiplomacyMgr_IsGreatPower`: index < 7).
+Nations are numbered 0-6 (Great Powers) and 7-22 (Minor Nations). Four symmetric 23x23 short matrices:
 
-| Offset | Type | Meaning |
-|---|---|---|
-| +0x79c | 23x23 short, symmetric | **relationship score** 0-255 |
-| +0xbbe | 23x23 short, symmetric | **treaty status code**; the names are the game's strings 17361 + code: 0 Member of our Empire, 1 Ruler of our Empire, 2 Alliance, 3 Non-Aggression Pact, **4 Peace** (every pair at the start), 5 Member, **6 War** (4 and 6 seen in the matrix in play) |
-| +0xfe0 | 23x23 short, symmetric | game turn the status last changed, -1 = never |
-| +4 (384 shorts), +0x304 (384 bytes) | | empty at the start (0 and 255); a history of some kind, unknown |
-| +0x1886, +0x18a6 | 16 shorts each | filled in during play (values like 3, 4, 96, 100); unknown |
-| +0x1402 | 23x23 short | derived flags written by `SetStatus` (2 for allied Great Powers, 0 at war); unknown |
+| Offset | Meaning |
+|---|---|
+| +0x79c | **relationship score** 0-255 |
+| +0xbbe | **treaty status**, named by the game's strings 17361 + code: 0 Member of our Empire, 1 Ruler of our Empire, 2 Alliance, 3 Non-Aggression Pact, **4 Peace** (every pair at the start), 5 Member, **6 War** |
+| +0xfe0 | game turn the status last changed (-1 = never) |
+| +0x1402 | **diplomatic presence**: 0 none, **1 Trade Consulate, 2 Embassy**. At the start: 2 between the Great Powers, 1 for the human power in four Minor Nations (the AI powers also hold consulates) |
 
-Start of a game (Introductory, 1815, turn 0): every pair has status 4; scores are 90 between a Great Power and anything, 110 between two Minor Nations,
-150 between *neighbouring* Minor Nations (the manual: "Minor Nations like their neighbours"), 110 between the human power and its four starting
-consulate nations, and 255 / 256 with oneself. `readdiplo.py --full` prints the whole matrices.
+Also: 16-entry short tables at +0x1886 (the Great Power with the **best relationship** with each Minor Nation) and +0x18a6 (its **favourite trading partner**), both indexed by
+nation number (entries 0-6 unused), filled by `UpdateMinorFavourites` after trade; 384-entry tables at +4 and +0x304 (empty at the start, unknown); the war list object at +0x18d4.
+Per Great Power object (`g_Nations[g]`): a **pending-overture table at +0xb2** (one short per target, 0xFFFF = none), a second table at +0xe0 (aid amounts and notices), an
+attitude table at +0x14 (100 normal, **300 = war**).
 
-## What `SetRelationship` and `SetStatus` do [code, numbers seen]
+Start of a game (Introductory, 1815): scores 90 between a Great Power and anyone, 110 between two Minor Nations, 150 between *neighbouring* Minor Nations, 110 between the
+human power and its four consulate nations, 255 / 256 with oneself. `readdiplo.py --full` prints the matrices.
 
-* `SetRelationship(a,b,v)` (vf10): symmetric write; negative becomes 0; above 255 becomes 255 (except a == b); **below 50 is allowed only while at war**,
-  otherwise it is raised to 50. Human Great Powers are told about the change.
-* `SetStatusEx(a,b,code,flag)` (vf29) / `SetStatus` (vf30): writes both halves of the status matrix, stamps the turn into both halves of +0xfe0, tells each
-  side if it is a Great Power, then acts on the code: 2 raises the score by 10 (event 0x1a), 3 raises it by 10, 4 lifts it to at least 50, 5 sets it to 255,
-  6 starts a war (event 0x19; each nation's slot-18 handler gets 300). The decompiled switch is scrambled by register reuse, so the exact fall-through is a guess.
-* `RelationshipLevel(a,b)` (vf26): the score as the 8-level colour code on the diplomacy screen: below 21 -> 0, 50 -> 1, 80 -> 2, 101 -> 3, 136 -> 4, 171 -> 5, 206 -> 6, up to 240 -> 7, above -> 8.
-  So the start scores 90 / 110 / 150 / 255 are levels 3 / 4 / 5 / 8, and war's 40 and 50 are levels 1 and 2 (the manual: "dark green means they might join your Empire").
-* `IsAtWar` is `status == 6`; `CountAllies(n)` counts the Great Powers whose status with n is 2.
-* A Minor Nation answers a Great Power's overtures in `TMinor_HandleOffer` by message id: 0x12d (aid or bribe), 0x12f (status 3), 0x130 (status 4),
-  each charging an amount.
+## Overture order ids and costs [seen]
 
-## Pending overtures live in the Great Power's own object [seen]
+The id written into the pending table when you click a country (read with `tools/readpending.py`):
 
-Snapshots of all 23 nation objects (`tools/readnations.py`) before and after ordering showed that the only nation that changed was the local Great Power:
-cash at +0x10 (50,000 -> 49,500 for the consulate) and a **table of pending overtures at about +0xb2, one short per target nation** (entry for nation n at
-+0xb2 + 2n, -1 = none). Ordering War on Pram (nation 11) wrote 305 (0x131) at +0xc8; ordering a Trade Consulate in Manx (nation 13) wrote 307 (0x133) at +0xcc;
-both were back to 0xFFFF after End Turn. So the overture order ids are 0x131 = War and 0x133 = Trade Consulate; `TMinor_HandleOffer` receives 0x12f and 0x130, which fits Pact
-(status 3) and Peace (status 4) in a sequence 0x12d Empire?, 0x12f Pact, 0x130 Peace, 0x131 War (the others not yet seen). Every nation also changes +0x8c / +0x8e each
-tick (a clock): ignore it when diffing.
-
-## Experiment: overtures from the real UI (fixture `oil_t0`, local power index 2)
-
-| Overture (ordered turn 1-2) | Money | Matrices before End Turn | After End Turn |
+| Overture | Id | Cost | Effect at End Turn (`TDiplomacyMgr_ExecuteOvertures`, seen unless noted) |
 |---|---|---|---|
-| Trade Consulate in Manx | $500 taken **at once** (50,000 -> 49,500) | nothing changed | consulate shown on the map next turn; **no cell of the three matrices changed** |
-| Embassy in Manx | $5,000 at once (49,350 -> 44,350) | nothing changed | marker shown; no matrix change |
-| War on Pram (nation 11) | free | nothing changed | status G2-M11 **4 -> 6**, turn stamp -1 -> 2; scores: **Pram 90 -> 40**, three of its neighbours **90 -> 50**, every other Minor Nation **-9** (90 -> 81, 110 -> 101); Great Powers' scores to the human unchanged |
-| (no overture) | | | AI Great Powers' trades raised their scores with minors by 1-2 per turn |
+| Empire | 0x12d (guess; not offered at the relationship tried) | | delivered to the target (`TMinor_HandleOffer`) |
+| Alliance | 0x12e = 302 | free | delivered to the target; a Great Power may refuse (Kem did: no status change) |
+| Pact | 0x12f = 303 | free | delivered to a Minor Nation, which accepts: **status 4 -> 3, score +10** |
+| Peace | 0x130 = 304 | free | delivered: **status 6 -> 4, score raised to 50** |
+| War | 0x131 = 305 | free | not at war yet -> `DeclareWar` (status 6, turn stamp; scores fall: see below) |
+| Trade Consulate | 0x133 = 307 | **$500 at once** | presence 1 |
+| Embassy | 0x134 = 308 | **$5,000 at once** | presence 2 |
 
-So overtures are **queued as orders** until End Turn (pending ones are not in the manager), consulates and embassies are **not stored in these matrices**,
-and the war declaration's score ripple (-50 target, -40 neighbours, -9 others) is real but its code has **not been found**: it is not in `SetStatus`,
-`TMinor_HandleOffer` or `TClientGreatPower_vf20` (which turned out to be the "Great Power conquered" handler). `TRemoteMinor_vf50` is the "foreign units must
-leave" step of a war. The relationship numbers 81 / 50 / 40 were seen once and only for a war on a Minor Nation.
+`TClientGreatPower_PlaceOverture` (vf116) commits an order: writes the id at +0xb2 + 2*target, charges the cost; id -1 cancels and refunds. The table is cleared at End Turn.
+
+## The rules in the code
+
+* `SetRelationship(a,b,v)`: symmetric; negative -> 0; above 255 -> 255 (except a == b); **below 50 only while at war**, otherwise raised to 50.
+* `SetStatus(a,b,code)`: writes both halves of the status matrix, stamps the turn, tells each Great Power side, then by code: 2 and 3 add 10 to the score, 4 lifts it to at least 50,
+  5 sets 255, 6 clears the presence entry and starts the war. (The decompiled switch is scrambled; the pact and peace effects were seen, the rest is code.)
+* `RelationshipLevel(a,b)`: the colour code, 8 levels: below 21 -> 0, 50 -> 1, 80 -> 2, 101 -> 3, 136 -> 4, 171 -> 5, 206 -> 6, up to 240 -> 7, above -> 8.
+* `ExecuteAid` (code, not seen): with an embassy, a grant of $1,000 adds 2 to the score, $3,000 adds 4, $5,000 adds 6, $10,000 adds 10.
+* `UpdateMinorFavourites` (after trade): for each Minor Nation, among Great Powers with presence > 0, the best relationship and the favourite trading partner
+  (max of (200 - the power's attitude entry) x score), ties broken by the game's LCG; a power that loses a position gets message 0x13a / 0x13b.
+* `IsAtWar` is `status == 6`; `CountAllies(n)` counts Great Powers with status 2.
+
+## Experiments (fixture `oil_t0`, local power 2)
+
+| Order | Seen |
+|---|---|
+| Consulate Manx, Embassy Dedge, War Pram, Alliance Kem (turn 1) | cash -$500 and -$5,000 at once; ids 0x133, 0x134, 0x131, 0x12e in the table; at End Turn presence Manx 1, Dedge 2; war status G2-M11 4 -> 6, turn 1; Kem did not ally |
+| War on Pram, scores | Pram 90 -> **40**, three of its neighbours 90 -> 50, every other Minor Nation **-9** (90 -> 81, 110 -> 101); Great Powers' scores unchanged |
+| Pact Dedge, Peace Pram (turn 2) | ids 0x12f, 0x130; status G2-M19 4 -> 3 (score 101 -> 111), G2-M11 6 -> 4 (score 40 -> 50); no cash change |
+| no overture | AI trades raised their scores with minors by 1-2 per turn |
 
 ## Open
 
-* How End Turn turns a pending order (0x131 War, 0x133 Consulate, ...) into the change: the table is at +0xb2 of the Great Power; find who reads it (search for `+ 0xb2` /
-  `+ 0xc8` accesses on the nation, and the Great Power's virtual slots around 0x2a8-0x2b0).
-* The order ids of Embassy, Pact, Peace, Alliance and Empire (order each once and read the table).
-* Where consulates and embassies are stored (candidates: the Minor Nation object's per-nation table at +0x14, or the Great Power object).
-* The war ripple, the acceptance rules for Pact, Empire and Peace, and what Alliance does on the Great Power side.
-* Status codes 0, 1, 3 and 5 as the game uses them (only 4 and 6 were seen).
+* **The war ripple** (-50 target, -40 its neighbours, -9 other minors): not in `SetStatus`, `DeclareWar`, `ExecuteOvertures`, `TClientGreatPower_vf161/vf164`, `TRemoteMinor_vf18/vf50`
+  or the news poster `FUN_0055c9f0`. Seen once, for a war on a Minor Nation. Next: the nation-side handlers (`+0x2a8`, `+0x214`, `+0x1d4`) and the events 0x19 / 0x1a consumers.
+* The Empire overture's id (0x12d is a guess) and the conditions under which it is offered; what accepting an Alliance does on the Great Power side.
+* Aid: the Grants tab, the second table at +0xe0, and the effect seen in play.
+* Status codes 0, 1 and 5 as the game uses them (Empire); the war list at +0x18d4.
 * The trade Offer Sheet's logic (`TTradeMgr_SettleTrades` pairs each offer with every allowed buyer after diplomacy checks) is read but not tested in play.
