@@ -117,6 +117,7 @@ int main(int argc, char **argv)
     DWORD seq = 0, cur_phase = 31, start = GetTickCount();
     char stopname[600];
     snprintf(stopname, sizeof stopname, "%s.stop", prefix);
+    DeleteFileA(stopname);                 /* a stop file left by an earlier run with the same name must not end this one at once */
     int patched = 0, running = 1;
     DWORD total_hits = 0, skipped = 0;
     while (running) {

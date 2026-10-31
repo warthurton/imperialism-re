@@ -20,13 +20,14 @@ breakpoint stays removed, so hot functions do not slow the game down. On the way
 
 | | |
 |---|---|
-| Functions hit | **1,132** of 4,868 traced (static reachability from the turn driver had found 199) |
-| Breakpoint hits / distinct call edges | 25,874 / 1,831 |
+| Functions hit | **1,138** of 4,868 traced (static reachability from the turn driver had found 199) |
+| Breakpoint hits / distinct call edges | 24,381 / 1,887 |
+| Reproducible | a second, independent trace of another turn (turn 4 to 5, 1,132 functions) shares 1,113 functions (98.3%) with it |
 | An idle game (mouse moves, nothing else) | 0 functions hit: everything above belongs to the turn and its screens |
-| Simulation groups hit | `nations_sim` 216, `military_ai` 202, `production` 94, `map_sim` 37, `trade` 30, `name_gen` 10 (589 functions) |
-| Interface groups hit | `display` 363, `ui_screens` 145, `ui_layouts` 32 |
-| Still only an auto name among the simulation functions hit | about 220 (`nations_sim` 85, `military_ai` 79, `map_sim` 37, `production` 13, `trade` 5): the decode queue |
-| End Turn under the tracer | 15 s instead of 7 s |
+| Simulation groups hit | `nations_sim` 212, `military_ai` 201, `production` 97, `map_sim` 41, `trade` 30, `name_gen` 10 (591 functions) |
+| Interface groups hit | `display` 365, `ui_screens` 147, `ui_layouts` 32 |
+| Still only an auto name among the simulation functions hit | 219 (`nations_sim` 81, `military_ai` 81, `map_sim` 41, `production` 11, `trade` 5): the decode queue |
+| End Turn under the tracer | 15-24 s instead of 7 s (`prod_endturn.ps1` now waits for the turn to leave the map before judging it finished) |
 
 The per-function table is `docs/trace_end_turn.tsv` (address, name, group, source file, hits, first-seen order, phase mask, first caller). Phase numbers seen: 5 to 25 (the driver has more phases than the 0x00-0x12 listed in `docs/turn_phases.md`),
 plus 97 functions seen before the first phase tag (the End Turn button handler and screen switches).
