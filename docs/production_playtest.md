@@ -187,3 +187,16 @@ pointer at +0xf0 is set only on the map. `readview.py id` prints just that numbe
 windows and do not change this object, so a dialog still has to be told from a screenshot or found in another object (open question).
 It already paid for itself: a `back` click that a dialog swallowed was caught because the id stayed 2011, which a screenshot-settle
 check would have missed. `readcity.py` (stock, capacity, labor, cash) remains the way to read the economy.
+
+## Telling which dialog is open (answer to the open question above)
+
+Not from the game's own objects (I did not find one that tracks dialogs), but from Windows: every dialog is an `AmbitMcWindow` child of
+the game frame, so `harness/prod_wins.ps1 -Visible` (or `Get-Dialog` in `fast.ps1`) lists it with its rectangle, no screenshot needed.
+On the map there is none; in the capital with a dialog open there is exactly one. Sizes seen (game pixels): **320x320 = construction
+dialog**, **276x149 = production dialog** (Steel Mill, Capitol and Refinery all the same, so the size gives the kind, not the building).
+The position changes with the site it opens from (Capitol at (60,210), Steel Mill at (203,72), constructors at (147,64)), so fixed click
+coordinates for sliders only ever worked for one site. The dialog's rect fixes that: controls sit at a constant offset inside it
+(production: X at (262,12), slider right arrow (241,123), left arrow (77,122); construction: OK (273,301), Cancel (39,301)), and the
+mirror shows the 640x480 game area at 1.993x starting at (10.4, 34.5) in mirror units. `prod_do.ps1` now has `dlg`, `dwait`, `dplus N`,
+`dminus N`, `dclose`, `dok`, `dcancel`; site clicks wait for their dialog, and `back` closes any open dialog first. Checked on the Steel
+Mill: `dplus 2; dminus 1` left the order at 1 (capacity left 2 -> 1, labor 16 -> 14) and `dminus 1` returned it to 0.
