@@ -120,3 +120,12 @@ function Dialog-Drag([string]$From, [string]$To) {   # drag between two named co
   $p1 = Mirror-Px ($script:MIR_X0 + ($d.X + $b[0]) * $script:MIR_S) ($script:MIR_Y0 + ($d.Y + $b[1]) * $script:MIR_S)
   [GW]::Drag($p0[0], $p0[1], $p1[0], $p1[1]); Wait-Stable -Max 3
 }
+
+# ---- text the game draws, read from the shim's text log (see tools/readtext.py) ----
+$script:TEXTLOG = 'C:\GOG Games\Imperialism\imperialism_text.log'
+function Text-Mark { if (Test-Path $script:TEXTLOG) { (Get-Item $script:TEXTLOG).Length } else { 0 } }
+function Text-Since([long]$Mark) {
+  # strings drawn since $Mark, one "x,y text" per line (shadow copies and repeats collapsed)
+  $py = Join-Path (Split-Path $PSScriptRoot) 'tools\readtext.py'
+  & python -I $py since $Mark
+}

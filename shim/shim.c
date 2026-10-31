@@ -740,6 +740,71 @@ static DWORD WINAPI w_GetMessagePos(void)
     return GetMessagePos();
 }
 
+/* ---- text log: the strings the game draws, with positions (off unless [text_log] enabled=1 in imperialism_shim.ini) ----
+ * Lets a test harness READ what is on screen (offer sheets, hot text, dialogs) instead of looking at pixels. One line per string:
+ * "<tick> <T|X|B|D> <x>,<y> <text>" in imperialism_text.log; the same string at the same place is not repeated within 1.5 s. */
+static BOOL g_textLog;
+static FILE *g_text;
+static struct { unsigned h; DWORD t; } g_recent[128];
+static unsigned g_recentN;
+
+static void text_out(const char *kind, int x, int y, const char *s, int n)
+{
+    char buf[420];
+    int i, k = 0;
+    unsigned h = 2166136261u;
+    DWORD now;
+    if (!g_textLog || !g_text || !s) return;
+    if (n < 0) n = (int)strlen(s);
+    if (n > 400) n = 400;
+    for (i = 0; i < n; i++) {
+        unsigned char c = (unsigned char)s[i];
+        buf[k++] = (c < 32) ? ' ' : (char)c;
+        h = (h ^ c) * 16777619u;
+    }
+    while (k && buf[k - 1] == ' ') k--;
+    buf[k] = 0;
+    if (!k) return;
+    h = (h ^ (unsigned)x) * 16777619u;
+    h = (h ^ (unsigned)y) * 16777619u;
+    now = GetTickCount();
+    EnterCriticalSection(&g_cs);
+    for (i = 0; i < 128; i++)
+        if (g_recent[i].h == h && now - g_recent[i].t < 1500) { LeaveCriticalSection(&g_cs); return; }
+    g_recent[g_recentN & 127].h = h;
+    g_recent[g_recentN & 127].t = now;
+    g_recentN++;
+    fprintf(g_text, "%lu %s %d,%d %s\n", now, kind, x, y, buf);
+    fflush(g_text);
+    LeaveCriticalSection(&g_cs);
+}
+
+DECL("GDI32.dll", TextOutA);
+DECL("GDI32.dll", ExtTextOutA);
+DECL("USER32.dll", TabbedTextOutA);
+DECL("USER32.dll", DrawTextA);
+
+static BOOL WINAPI w_TextOutA(HDC dc, int x, int y, LPCSTR s, int n)
+{
+    text_out("T", x, y, s, n);
+    return ORIG(TextOutA, BOOL (WINAPI *)(HDC,int,int,LPCSTR,int))(dc, x, y, s, n);
+}
+static BOOL WINAPI w_ExtTextOutA(HDC dc, int x, int y, UINT opts, const RECT *r, LPCSTR s, UINT n, const INT *dx)
+{
+    if (!(opts & ETO_GLYPH_INDEX)) text_out("X", x, y, s, (int)n);
+    return ORIG(ExtTextOutA, BOOL (WINAPI *)(HDC,int,int,UINT,const RECT*,LPCSTR,UINT,const INT*))(dc, x, y, opts, r, s, n, dx);
+}
+static LONG WINAPI w_TabbedTextOutA(HDC dc, int x, int y, LPCSTR s, int n, int nt, const INT *tabs, int origin)
+{
+    text_out("B", x, y, s, n);
+    return ORIG(TabbedTextOutA, LONG (WINAPI *)(HDC,int,int,LPCSTR,int,int,const INT*,int))(dc, x, y, s, n, nt, tabs, origin);
+}
+static int WINAPI w_DrawTextA(HDC dc, LPCSTR s, int n, LPRECT r, UINT fmt)
+{
+    if (!(fmt & DT_CALCRECT) && r) text_out("D", r->left, r->top, s, n);
+    return ORIG(DrawTextA, int (WINAPI *)(HDC,LPCSTR,int,LPRECT,UINT))(dc, s, n, r, fmt);
+}
+
 static Hook *g_hooks[] = {
     &H(BitBlt), &H(PatBlt), &H(StretchDIBits), &H(CreateDIBSection), &H(CreateDIBitmap),
     &H(CreateCompatibleDC), &H(CreateCompatibleBitmap), &H(CreatePalette), &H(SelectPalette),
@@ -747,6 +812,7 @@ static Hook *g_hooks[] = {
     &H(ChangeDisplaySettingsA), &H(CreateWindowExA), &H(GetDC), &H(ReleaseDC), &H(BeginPaint),
     &H(EndPaint), &H(SetWindowPos), &H(ShowWindow), &H(SetCapture), &H(ReleaseCapture),
     &H(GetCapture), &H(GetCursorPos), &H(GetMessagePos), &H(SetWindowPlacement), &H(MoveWindow), &H(SetCursor),
+    &H(TextOutA), &H(ExtTextOutA), &H(TabbedTextOutA), &H(DrawTextA),
 };
 #define NHOOKS (sizeof g_hooks / sizeof g_hooks[0])
 
@@ -769,6 +835,8 @@ static void init_hook_table(void)
     H(GetMessagePos).hook = w_GetMessagePos;           H(SetWindowPlacement).hook = w_SetWindowPlacement;
     H(MoveWindow).hook = w_MoveWindow;
     H(SetCursor).hook = w_SetCursor;
+    H(TextOutA).hook = w_TextOutA;                     H(ExtTextOutA).hook = w_ExtTextOutA;
+    H(TabbedTextOutA).hook = w_TabbedTextOutA;         H(DrawTextA).hook = w_DrawTextA;
 }
 
 /* Patch the main executable's IAT entries for every Hook in the table. */
@@ -863,6 +931,14 @@ BOOL WINAPI DllMain(HINSTANCE inst, DWORD reason, LPVOID reserved)
             g_intScale = GetPrivateProfileIntA("display", "fullscreen_integer_scale", 1, ini) != 0;
             g_blockModeChange = GetPrivateProfileIntA("display", "block_mode_change", 1, ini) != 0;
             g_brownTitle = GetPrivateProfileIntA("display", "brown_titlebar", 1, ini) != 0;
+            g_textLog = GetPrivateProfileIntA("text_log", "enabled", 0, ini) != 0;
+            if (g_textLog) {
+                char tp[MAX_PATH], *ts;
+                strcpy(tp, path);
+                ts = strrchr(tp, '\\');
+                if (ts) strcpy(ts + 1, "imperialism_text.log");
+                g_text = fopen(tp, "w");
+            }
         }
         CreateThread(NULL, 0, summary_thread, NULL, 0, NULL);
     } else if (reason == DLL_PROCESS_DETACH && g_log) {

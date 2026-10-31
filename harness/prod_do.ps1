@@ -8,6 +8,7 @@
 #   plant = Power Plant site (1080,470)   refinery = Refinery site (930,420)   endturn = run prod_endturn.ps1
 #   (a site click waits until its dialog is on screen)
 # Dialog steps use the dialog's real position, read from its window (fast.ps1 Get-Dialog), so they work wherever it opened:
+#   mark / txt     remember the end of the game's text log / print the text drawn since the last mark (read, not seen)
 #   dlg            print the open dialog (position, size, kind)         dwait [gone]   wait for a dialog to appear (or vanish)
 #   dplus [N]      slider arrow right N times (production dialogs)       dminus [N]     slider arrow left
 #   dend / dstart  drag the slider knob to its far end / back to the start
@@ -37,6 +38,8 @@ foreach ($raw in $Steps.Split(';')) {
       if ($t.Count -gt 2) { Snap $t[2] }
     }
     'back'  { Close-Dialog; Click-Wait 57 135 }
+    'mark'  { $script:mark = Text-Mark }
+    'txt'   { Text-Since ([long]$script:mark) }
     'dlg'   { $d = Get-Dialog; if ($d) { "dialog $($d.Kind) at ($($d.X),$($d.Y)) $($d.W)x$($d.H)" } else { 'no dialog' } }
     'dwait' { $ok = Wait-Dialog ($t.Count -lt 2); if (-not $ok) { "dwait: timed out" } }
     'dplus' { 1..$(if ($t.Count -gt 1) { [int]$t[1] } else { 1 }) | ForEach-Object { Dialog-Click 'plus' } }
