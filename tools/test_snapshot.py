@@ -8,7 +8,7 @@ import tempfile
 import unittest
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from snapshot import capture, ORDER_SIZES
+from snapshot import capture, ORDER_SIZES, TASK_SIZES
 from diff_snapshot import compare
 
 
@@ -40,6 +40,10 @@ class SnapshotTests(unittest.TestCase):
         manager = self.allocate(40, 0x6a43d4)
         self.allocate(6480 * 0x24, manager + 0xc)
         self.allocate(384 * 0xa8, manager + 0x10)
+        self.task_list = self.allocate(32, self.city + 0x270)
+        self.write(self.task_list, struct.pack('<I', 0x66aa48))
+        self.auxiliary = self.allocate(24, self.city + 0x274)
+        self.write(self.auxiliary + 0x14, struct.pack('<h', 4))
 
     def allocate(self, size, pointer=None, address=None):
         if address is None:
@@ -106,6 +110,32 @@ class SnapshotTests(unittest.TestCase):
         self.assertEqual(state['fields']['trade.0.deal_count'], 1)
         self.write(self.deal_list + 8, struct.pack('<i', 2))
         with self.assertRaisesRegex(ValueError, 'invalid deal list bounds'):
+            capture(self.read)
+
+    def test_task_chain_allocation_and_cycle_rejection(self):
+        nodes = [self.allocate(12), self.allocate(12)]
+        self.write(self.task_list + 8, struct.pack('<IIi', nodes[0], nodes[1], 2))
+        for slot, (vtable, size) in enumerate(TASK_SIZES.items()):
+            task = self.allocate(size)
+            self.write(task, struct.pack('<I', vtable))
+            self.write(nodes[slot], struct.pack('<III', nodes[1] if slot == 0 else 0,
+                                               nodes[0] if slot == 1 else 0, task))
+        state = capture(self.read)['result']
+        self.assertEqual(state['fields']['city.0.task_count'], 2)
+        self.assertEqual([state['blocks']['city.0.task.%d' % slot]['size'] for slot in range(2)], [20, 24])
+        self.write(nodes[1], struct.pack('<I', nodes[0]))
+        with self.assertRaisesRegex(ValueError, 'count/tail mismatch'):
+            capture(self.read)
+
+    def test_city_auxiliary_records_follow_pointers(self):
+        self.write(self.auxiliary + 8, struct.pack('<ii', 1, 1))
+        entries = self.allocate(4, self.auxiliary + 4)
+        record = self.allocate(4, entries)
+        self.write(record, struct.pack('<hh', 3, 5))
+        state = capture(self.read)['result']
+        self.assertEqual(state['blocks']['city.0.auxiliary_record.0']['hex'], '03000500')
+        self.write(self.auxiliary + 0x14, struct.pack('<h', 8))
+        with self.assertRaisesRegex(ValueError, 'auxiliary record bounds'):
             capture(self.read)
 
     def test_turn_change_fails(self):

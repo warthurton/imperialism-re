@@ -59,15 +59,21 @@ game turn/local power/phase, and both RNG states. Undecoded changes remain visib
 as raw block changes. Pointers/padding are not normalized: compare captures within one process
 for now. Equality establishes only equality of captured state.
 
+City task chains and auxiliary records at city +0x270/+0x274 are now included; evidence,
+embedded-list offsets and validation are in `docs/field_miner.md`. Task vtables select 20/24-byte
+allocations, and chain counts/links/tails are checked before a snapshot is saved.
+
 This is a partial oracle. It does not yet follow military objects, province pointer targets,
-city auxiliary objects, all nation pointer targets, or every manager/global. The field miner
-and constructor analysis must supply the remaining bounds and pointer layouts. Reads are not atomic; a turn-counter guard rejects
+all nation pointer targets, or every manager/global. The heuristic field miner
+(`tools/field_miner.py`) and constructor analysis guide the remaining bounds and pointer layouts.
+Reads are not atomic; a turn-counter guard rejects
 an advancing turn but cannot detect every concurrent write. Do not run during a turn or trace.
 
-Offline validation: `python -I tools/test_snapshot.py` passes eight tests using bounded synthetic
+Offline validation: `python -I tools/test_snapshot.py` passes ten tests using bounded synthetic
 memory: economic changes/identity, null manager, all order allocations and unit tail, unknown
 order rejection, indirect deal records and bounds, turn race, block removal/schema rejection,
-and CLI equality/difference exit codes with output limits.
+CLI equality/difference exit codes with output limits, task nodes/subclass sizes/cycle rejection,
+and city auxiliary record pointers/bounds.
 
 Live validation on 2026-10-31 (`oil_plant_built`, local power 2): the initial smaller capture
 passed eight checks; the expanded capture (`results/snapshot_live2_*`, local only) also passed
@@ -78,3 +84,7 @@ verify capture/diff plumbing, not the correctness of a lifted turn or determinis
 Final run with both RNG states (`snapshot_live3`) passed all eight checks: 491 -> 489 blocks,
 3,933 fields, 282 changed fields across 173 blocks. Idle bytes were identical and the same
 turn/cash checks passed. The number of live deal records can increase or decrease each turn.
+
+The city-container expansion (`snapshot_fields2`) also passed eight live checks, capturing
+3,947 fields and 505 -> 507 blocks. Both new containers were empty in all seven cities;
+nonempty traversal has code/disassembly evidence and synthetic tests, but still needs a live fixture.
