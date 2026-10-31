@@ -48,6 +48,7 @@ exported_all.txt
 new_entries.txt
 analyze3.log
 results/*.bin
+results/snapshot*.json
 # strings dumped from the game exe (local only; regenerate with tools/exe_strings.py)
 results/exe_strings*.tsv
 # tracer outputs and its build (tools/tracer/): regenerate; docs/trace_end_turn.tsv is the kept summary
