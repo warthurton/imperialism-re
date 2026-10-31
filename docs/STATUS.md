@@ -43,6 +43,33 @@ Last updated: 2026-10-31 (Armory and Indiaman verified, 0x4357b0 named, a group 
 - **Technology purchase** seen in play (Cotton Gin $1,000), `docs/technology.md`.
 - **Mac/iPad**: `docs/mac_ipad.md` and `tools/mac/make_wrapper.sh` (private Wine wrapper on a Mac, then stream or emulate to the iPad). Written without a Mac: untested, fix as you go.
 
+## Handoff: where the lift stands (written 2026-10-31, for the next agent)
+
+**Goal** (`docs/PLAN_reimplementation.md`): lift all single-player game logic into clean portable C (`core/`), proving each piece by differential tests against the running game. Multiplayer and DirectPlay are tabled.
+
+**Done and merged**
+* Tracer (`tools/tracer/`, `docs/tracer.md`): attaches to the game, finds which of 4,868 functions run. First clean result: one End Turn = 1,138 functions, 591 simulation, 219 of those unnamed. Table: `docs/trace_end_turn.tsv`.
+* Source files recovered from the exe's assert strings (`docs/source_tree.md`, `names/source_attribution.tsv`: assert 198, inferred 1,031, cut 243, prior 1,503, open 2,631), `Ambit_Assert` named, map code re-filed, multiplayer parked.
+* Verified rules with tested models in `reimpl/`: production, Armory, Shipyard, University, transport, trade, tech release (`docs/technology.md`, `reimpl/tech.c`), diplomacy. Card tables in `docs/card_tables.md`.
+* OCR tool for the manual/card (`docs/manual_ocr.md`, git-ignored output in `docs/manual/`), Mac/iPad notes (`docs/mac_ipad.md`, untested), LF/CRLF rules, the quoting rule in `AGENTS.md`.
+
+**Next, in order**
+1. **Snapshot tool** (`tools/snapshot.py` + diff): dump the whole game state (TGame, nations, Great Powers, cities, the map manager's 6,480 tiles x 0x24 bytes, TDiplomacyMgr, TTechMgr, trade tables, RNG seed) before and after an End Turn. Layouts exist for several (see `tools/read*.py`); the field miner (`tools/field_miner.py`, not written) should derive the rest from the decompile.
+2. **Decode the 219 unnamed simulation functions** the trace hit: `python -I tools/tracer/analyze_trace.py results/trace4 --unnamed nations_sim` (and `military_ai`, `map_sim`, `production`, `trade`); `--phase N` lists a phase in call order with callers. Name them in `names/names.tsv` with evidence.
+3. **More trace scenarios**: a war, a tech release (`tools/poke_techturn.py`), accepted offers (`prod_endturn.ps1 -Accept`), an Empire/colony turn, an AI-heavy later turn. Save fixtures with `harness/prod_save.ps1`.
+4. Narrow the 2,631 open source-file functions using trace evidence (functions that run together in one phase), then start `core/` M1 (load a save into typed structs, write it back byte-identical).
+
+**How to run a trace** (all local, nothing is committed): `python -I tools/split_source.py` (writes `src/`, needs the local decompile), `python -I tools/tracer/make_funclist.py`, build with `i686-w64-mingw32-clang -O2 -Wall -static -o results/trace_calls.exe tools/tracer/trace_calls.c`
+(the compiler is in scoop's `mingw-mstorsjo-llvm-ucrt`), `harness/prod_boot.ps1 -Fixture oil_plant_built -Restart`, then `harness/trace_endturn.ps1 -Name <new name>`, then `python -I tools/tracer/analyze_trace.py results/<name>`. End with `harness/prod_end.ps1`.
+
+**Gotchas learned the hard way**
+* **Never put multi-line text through the shell** (heredocs, `python -c`, long `-m`): use the Edit and Write tools, script files, `git commit -F`, and `sh tools/ship.sh "title" <body file>` (see `AGENTS.md`, Quoting rule).
+* `Remove-Item` on `C:\GOG ...` is blocked: use a new file name (the tracer now deletes a stale `<name>.stop` itself).
+* A crashed game can leave a dead process that Windows keeps listed (`HasExited = True`) with a "(Not Responding)" ghost window; the harness and readers ignore exited processes now. To clear the ghost: send `WM_SYSCOMMAND` `SC_CLOSE` to it, then press End Process in the dialog.
+* An interrupted End Turn leaves the game on a trade offer sheet (screen 8500); Escape may not reach it, clicking the red REJECT seal does; `prod_endturn.ps1` now also resumes from 8500/8800/8451.
+* Do not run two copies of the game; always `prod_end.ps1` at the end; `python` needs plain `python` (not `-I`) only for `tools/ocr_pdf.py` (PyMuPDF in the user site).
+* Branch workflow: `git switch -c topic/<name>`, grouped commits, `tools/ship.sh`; it leaves you on `main`.
+
 ## Next steps (suggested order)
 
 0. **The direction is now `docs/PLAN_reimplementation.md`**: lift all game logic into clean portable C, with a breakpoint tracer for real coverage, typed state structs, and a snapshot diff against the
@@ -50,7 +77,7 @@ Last updated: 2026-10-31 (Armory and Indiaman verified, 0x4357b0 named, a group 
    baseline numbers come from `tools/callgraph_stats.py` (216 of 5,290 game functions reachable by direct calls from the turn driver; about 100 have a meaning name).
    **New: the original source file names are in the exe** (assert strings, `docs/source_tree.md`): about 45 files (`UCity`, `UCountry`, `UCountryAuto`, `UArmyMgr`, `UNavy`, `UOcean`, `UMissionSubs`, `UTacPlayer`, `UUnit`, `UMap`, `UMapper`, ...),
    used as the module structure for the plan; `UMap`/`UMapper` re-filed to `map_sim`; `Ambit_Assert` named. Boundary zones narrowed by `tools/source_boundaries.py` (class and stub-order evidence, plus a labelled semantic prior):
-   2,631 functions still open. **Coverage tracer built** (`docs/tracer.md`, `tools/tracer/`): one End Turn runs 1,132 functions, 589 of them simulation code (about 220 unnamed: `analyze_trace.py --unnamed GROUP` is the decode queue). **Multiplayer is tabled** (groups `multiplayer` 262 and `directplay` 149 are parked and not counted: `docs/PLAN_reimplementation.md`).
+   2,631 functions still open. **Coverage tracer built** (`docs/tracer.md`, `tools/tracer/`): one End Turn runs 1,138 functions, 591 of them simulation code (219 unnamed: `analyze_trace.py --unnamed GROUP` is the decode queue; two independent traces agree on 98.3%). **Multiplayer is tabled** (groups `multiplayer` 262 and `directplay` 149 are parked and not counted: `docs/PLAN_reimplementation.md`).
 1. Done: University/Trade School, Transport, trade settlement, Shipyard, Armory, Indiaman. Left: the first-in-line rule and price formula (code notes in `docs/trade.md`; needs a Board of Trade
    with rival bids, so a fixture with more goods), and the full transport bar (unreachable with only food on the network: sliders stop at 'available', 10 of 15). Hussars $100 vs Skirmishers $200 not re-ordered.
 2. Diplomacy leftovers above (order Empire where it is offered, ally with a Great Power, make a grant) if wanted.

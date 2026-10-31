@@ -11,10 +11,16 @@ $root = $PSScriptRoot
 $sw = [Diagnostics.Stopwatch]::StartNew()
 function Stamp($m) { if ($Log) { "{0,5:N1}s {1}" -f $sw.Elapsed.TotalSeconds, $m } }
 $id = Get-ScreenId
-if ($id -ne 2013) { Close-DialogIfAny; Post-Key 0x1B; Start-Sleep -Milliseconds 400; $id = Get-ScreenId }   # Esc leaves a screen for the map
-if ($id -ne 2013) { Click-Wait 57 135; $id = Get-ScreenId }
-if ($id -ne 2013) { throw "not on the terrain map (screen id $id)" }
-Click-Wait 1160 955 0.5               # End Turn
+$midTurn = @(8500, 8800, 8451) -contains $id          # started while a turn is already running (an interrupted run, a traced run): just carry on
+if (-not $midTurn) {
+  if ($id -ne 2013) { Close-DialogIfAny; Post-Key 0x1B; Start-Sleep -Milliseconds 400; $id = Get-ScreenId }   # Esc leaves a screen for the map
+  if ($id -ne 2013) { Click-Wait 57 135; $id = Get-ScreenId }
+  if ($id -ne 2013) { throw "not on the terrain map (screen id $id)" }
+  Click-Wait 1160 955 0.5               # End Turn
+  # the turn can take seconds to leave the map (slowly under the tracer): wait for the first other screen before judging "back on the map" as "done"
+  $w = [Diagnostics.Stopwatch]::StartNew()
+  while ((Get-ScreenId) -eq 2013 -and $w.Elapsed.TotalSeconds -lt 90) { Start-Sleep -Milliseconds 200 }
+}
 $last = -1; $same = 0; $rejected = 0; $tried = @{}; $mark = Text-Mark; $seen = 0
 for ($i = 0; $i -lt 400; $i++) {
   $id = Get-ScreenId
