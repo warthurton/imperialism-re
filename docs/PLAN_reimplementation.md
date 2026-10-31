@@ -10,11 +10,13 @@ must behave the same, and we prove it by comparing against the running game, not
 |---|---|---|
 | Whole decompile | 10,937 | ~458k |
 | Library code (CRT, MFC, link stubs, framework, static init) | ~5,650 | ~190k |
-| **Game code** (everything else) | **5,290** | **~267k** |
-| of which has a Ghidra auto-name only (`FUN_xxxxxxxx`) | ~2,260 | |
-| of which carries a structural name (`TClass_vfN`, derived from vtables) | ~2,930 | |
+| **Game code in scope** (everything else, minus the parked multiplayer code below) | **4,989** | **~260k** |
+| of which has a Ghidra auto-name only (`FUN_xxxxxxxx`) | ~2,080 | |
+| of which carries a structural name (`TClass_vfN`, derived from vtables) | ~2,810 | |
 | of which has a **meaning** name assigned by us (`names/names.tsv`) | **~100** | |
-| Reachable by *direct* calls from the turn driver `TSimMgr_AdvancePhase` | 216 | ~19k |
+| Reachable by *direct* calls from the turn driver `TSimMgr_AdvancePhase` | 199 | ~18k |
+| **Parked: multiplayer** (`UMultiplayerMgr.cpp`, `WNetMgr.cpp`, the lounge/join/net-select screens, the Remote/Proxy/Host Great Power variants: group `multiplayer`) | 262 | ~12k |
+| **Parked: DirectPlay** (SDK wrappers, group `directplay`) | 149 | ~3k |
 
 Reading these honestly:
 * "Named" in the decompile mostly means *which class and vtable slot*, not *what it does*. Understanding is about 2% of the game code by count. The rules we decoded by playing
@@ -58,6 +60,14 @@ Reading these honestly:
 
 M0 to M2 are weeks of work and most of the value; M4 and M5 are the long tail (the AI is by far the largest group). I would not promise M5 until the tracer shows how
 much code the AI really executes.
+
+## Out of scope for now: multiplayer (tabled 2026-10-31)
+
+Multiplayer is parked completely: the two-player and network play code is not lifted, not traced and not counted in the numbers above. It is isolated in two groups so it cannot leak into the work:
+`multiplayer` (`Cross/UMultiplayerMgr.cpp` at 0x540840-0x54ecc0, `WNetMgr.cpp` at 0x5e2850-0x5e3f30, the `TLoungeDialog`, `TJoinSelectorDialog`, `TMultiMessagePicture`, `TMadnessButton`, `TNetMgr`,
+`TNetSelectPicture`, `TNetGameSelectPicture`, `TGameSetupMultiplayerPicture`, `TMultiplayerMgr` screens and classes, and the `TRemoteGreatPower`, `TProxyGreatPower`, `THostGreatPower` variants of the Great Power) and
+`directplay` (the DirectPlay wrappers). `core/` models one local human Great Power plus the AIs (`TClientGreatPower` and `TAutoGreatPower`); the remote variants are deliberately not modelled.
+`tools/callgraph_stats.py` lists both groups as parked and leaves them out of the game total. If the tracer later shows single-player code running inside a parked file, move that function out.
 
 ## Module structure: the original source files
 

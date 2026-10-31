@@ -36,8 +36,9 @@ Cross_UCountry	nations_sim
 Cross_UCountryAuto	nations_sim
 Cross_UNewspaper	nations_sim
 Cross_UCheaters	framework
-WNetMgr	framework
-DirectPlay	framework
+WNetMgr	multiplayer
+Cross_UMultiplayerMgr	multiplayer
+DirectPlay	directplay
 McAppUI	framework
 McAppStream	framework
 Cross_UHelpMgr	framework

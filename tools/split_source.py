@@ -112,6 +112,18 @@ for i in order:
         inside = {file_group[f] for f, (lo, hi) in ranges.items() if lo <= addr[i] <= hi}
         if len(inside) == 1:
             grp[i] = inside.pop()
+# Per-function attribution (tools/source_files.py + tools/source_boundaries.py write names/source_attribution.tsv): certain, inferred or cut-resolved functions
+# that are still unsorted join their source file's group.
+attrib = {}
+if os.path.exists(RE + 'names/source_attribution.tsv'):
+    for ln in open(RE + 'names/source_attribution.tsv', encoding='utf-8'):
+        a, n, fn, how, lines = ln.rstrip('\r\n').split('\t')
+        key = re.sub(r'\.cpp$', '', fn).replace('/', '_').replace('.more', '_more')
+        if how != 'boundary' and key in file_group:
+            attrib[int(a, 16)] = file_group[key]
+for i in order:
+    if grp[i] == 'unsorted' and addr[i] in attrib:
+        grp[i] = attrib[addr[i]]
 
 # Call graph: an unsorted function whose classified callers all share one group joins it (repeat until stable).
 by_addr = {addr[i]: i for i in range(len(blocks))}
