@@ -1,7 +1,7 @@
 # Status: where the project stands
 
 Update this file at every ship (and before ending a session). It is the first thing to read after `AGENTS.md`.
-Last updated: 2026-10-31.
+Last updated: 2026-10-31 (diplomacy decoded in part).
 
 ## Done and verified (in the running game unless noted)
 
@@ -17,6 +17,7 @@ Last updated: 2026-10-31.
 - **Test harness** (`harness/`): `prod_boot.ps1` loads a save from the title screen in about 11 s; `prod_do.ps1` chains clicks, hot-key screen
   changes (`go ...`), dialog steps from the dialog's real window rect; `prod_endturn.ps1` finishes a turn in about 7 s by screen id.
   State is read from memory (`tools/readcity.py`, `readview.py id`, `readtech.py`, `readprefs.py`). Screens, ids and the main menu: `docs/screens.md`.
+- **Diplomacy** (`docs/diplomacy.md`): manager data layout, setters, status codes seen in play, an overture experiment; tested model `reimpl/diplomacy.c`.
 - **Fixtures** (`saves/README.md`): `oil_t0` (oil age ready), `oil_refinery4`, and the earlier production ones.
 
 ## Open questions
@@ -32,9 +33,10 @@ Last updated: 2026-10-31.
 
 ## Next steps (in this order)
 
-1. **Diplomacy offers, readable**: start from the screens that carry them: the trade Offer Sheet (screen id 8500, Esc rejects, Return accepts; "Hurshen
-   offers 2 units of Food @ $87/unit", a "No more offers" box) and the Diplomacy screen (id 2008). Find the offer/minister classes
-   (`TDiplomacyMgr`, `TForeignMinister*`, `TDealList`), name them, and extract a clean, tested model like `reimpl/production.c`.
+1. **Diplomacy, continued** (`docs/diplomacy.md`, model `reimpl/diplomacy.c`, tool `tools/readdiplo.py`): the manager's data and its setters are decoded
+   and seen in play (status 4 = peace, 6 = war; scores; war fallout -50/-40/-9). Still open: where overtures are queued and applied at End Turn, where consulates
+   and embassies live, the war ripple, Pact/Empire/Peace acceptance. Next try: follow `TForeignMinister*` and the Great Power's virtual slots around 0x2a8 and
+   0x290, and watch memory around the Minor Nation objects while ordering a consulate.
 2. Power Plant limit and the out-of-fuel turn (fixture `oil_refinery4`, `poke_stock.py Fuel=...`).
 3. The next least-verified systems: training (University, Trade School), transport, trade settlement (`TTradeMgr_*` read in the code, never checked in play).
 4. Keep playing normally now and then with crash dumps armed (`dumps/`) to confirm the music fix.
