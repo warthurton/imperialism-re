@@ -73,10 +73,23 @@ The id written into the pending table when you click a country (read with `tools
 | Pact Dedge, Peace Pram (turn 2) | ids 0x12f, 0x130; status G2-M19 4 -> 3 (score 101 -> 111), G2-M11 6 -> 4 (score 40 -> 50); no cash change |
 | no overture | AI trades raised their scores with minors by 1-2 per turn |
 
+## The war ripple: solved, and predicted in advance [seen]
+
+`TDiplomacyMgr_ApplyWarFallout` (vf32), called from `SetStatus` when a war is declared (flag 1). With aggressor `a`, victim `v`, old score `s = score[a][v]`:
+
+1. the victim's score becomes **min(s - 50, 49)**;
+2. every *other independent* nation `i` changes **its own score with the aggressor** by `d = (90 - score[v][i]) * s / (divisor * 50)` (C division, truncating toward zero). The
+   divisor is **2** for a Minor Nation next to the victim (the neighbour test is a nation method; neighbours score 150 with each other), **4** for other Minor Nations,
+   **8** for a Great Power watching a Minor Nation (and 4 / 8 for Great Power / Minor Nation observers when the victim is a Great Power). A score already at 50 or more never falls below 50
+   (the floor); one below 50 is not pushed past 49.
+
+Check against the game, twice: **Pram** (victim score 90): victim 40; neighbours (90 - 150) * 90 / 100 = -54 -> floor 50; other minors (90 - 110) * 90 / 200 = -9 -> 81 (110 -> 101);
+Great Powers (their score with Pram is also 90) d = 0, unchanged. **Dedge** (victim score 110, predicted with `tools/predict_war.py` from the memory dump *before* ordering): victim 49
+(min(60, 49)), its three neighbours 50, all other minors 90 -> **79** ((90 - 110) * 110 / 200 = -11), Great Powers unchanged; the actual row after End Turn matched the prediction cell for cell.
+Peace uses the same routine with flag 0 (the victim moves by ((90 - s) * s) / 200 if that is negative, and d is halved): code only.
+
 ## Open
 
-* **The war ripple** (-50 target, -40 its neighbours, -9 other minors): not in `SetStatus`, `DeclareWar`, `ExecuteOvertures`, `TClientGreatPower_vf161/vf164`, `TRemoteMinor_vf18/vf50`
-  or the news poster `FUN_0055c9f0`. Seen once, for a war on a Minor Nation. Next: the nation-side handlers (`+0x2a8`, `+0x214`, `+0x1d4`) and the events 0x19 / 0x1a consumers.
 * The Empire overture's id (0x12d is a guess) and the conditions under which it is offered; what accepting an Alliance does on the Great Power side.
 * Aid: the Grants tab, the second table at +0xe0, and the effect seen in play.
 * Status codes 0, 1 and 5 as the game uses them (Empire); the war list at +0x18d4.
