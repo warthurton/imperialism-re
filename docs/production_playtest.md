@@ -290,4 +290,5 @@ The Shipyard is the ship-building yard at the top-right of the Industry screen (
 * Seen: two Traders took Fabric 20 -> 16 and Lumber 16 -> 8 at the click; at the next turn start the Interior Minister reported "New units are reporting for duty: 2 Traders. Our merchant
   capacity has increased to 20." and the ship icon on the Board of Trade went 16 -> 20 (+2 per Trader). That capacity is the per-turn limit on units sold plus bought (`docs/trade.md`).
 * One Indiaman (ordered in a later run of the same fixture): Fabric 20 -> 17, Lumber 16 -> 9 at the click; next turn "1 Indiaman. Our merchant capacity has increased to 20" (16 -> 20, +4, as modelled). `fast.ps1` controls `y1..y4` / `ya1..` / `ys1..` address the Shipyard's 2x2 ship grid.
+* **Clipper** (appears after the Streamlined Hulls tech, see `docs/technology.md`): Hull 25, Cargo 4, cost 2 Fabric + 6 Lumber, fifth ship at the right of the dialog.
 * Costs of the Frigate and Ship-of-the-Line were read from the dialog's text, not ordered. Model: `order_ship` / `complete_ships` in `reimpl/production.c`.
