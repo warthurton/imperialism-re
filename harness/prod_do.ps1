@@ -3,6 +3,7 @@
 #   c X Y        click (mirror coords) and wait for the screen to settle        m X Y   move the mouse (no wait)
 #   s NAME       screenshot to shots\NAME.png                                    w SEC   fixed wait
 #   cs X Y NAME  click, settle, screenshot (shorthand)
+# Screens by hot key:  go transport|industry|trade|diplomacy|tech|map [shotname]   (map = back arrow)
 # Named screens:  city = factory icon on the map (1133,295)   back = leave the screen (closes an open dialog first)
 #   plant = Power Plant site (1080,470)   refinery = Refinery site (930,420)   endturn = run prod_endturn.ps1
 #   (a site click waits until its dialog is on screen)
@@ -27,6 +28,13 @@ foreach ($raw in $Steps.Split(';')) {
     's'  { Snap $t[1] }
     'w'  { Start-Sleep -Milliseconds ([int]([double]$t[1] * 1000)) }
     'endturn' { & "$root\prod_endturn.ps1" }
+    'go' {    # hot keys 1-5 (manual: Hot Key List); 'map' = leave the screen with the back arrow
+      $keys = @{ transport = 0x31; industry = 0x32; trade = 0x33; diplomacy = 0x34; tech = 0x35 }
+      if ($t[1] -eq 'map') { Close-Dialog; Click-Wait 57 135 }
+      elseif ($keys.ContainsKey($t[1])) { Close-Dialog; Post-Key $keys[$t[1]]; Wait-Stable -Max 5 -Before '' }
+      else { throw "unknown screen '$($t[1])' (transport industry trade diplomacy tech map)" }
+      if ($t.Count -gt 2) { Snap $t[2] }
+    }
     'back'  { Close-Dialog; Click-Wait 57 135 }
     'dlg'   { $d = Get-Dialog; if ($d) { "dialog $($d.Kind) at ($($d.X),$($d.Y)) $($d.W)x$($d.H)" } else { 'no dialog' } }
     'dwait' { $ok = Wait-Dialog ($t.Count -lt 2); if (-not $ok) { "dwait: timed out" } }

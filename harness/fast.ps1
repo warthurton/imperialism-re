@@ -75,3 +75,15 @@ function Dialog-Click([string]$Control) {
   $mx = $script:MIR_X0 + ($d.X + $pos[0]) * $script:MIR_S; $my = $script:MIR_Y0 + ($d.Y + $pos[1]) * $script:MIR_S
   Click-Wait $mx $my
 }
+
+# ---- keys, sent as window messages (no dependence on which window has focus; a global keybd_event press stopped reaching the game) ----
+function Post-Key([int]$Vk) {
+  $pid_ = (Get-Process Imperialism -ErrorAction SilentlyContinue | Select-Object -First 1).Id
+  $f = [GW]::Windows([uint32]$pid_) | Where-Object { $_[1] -like 'Afx:*' } | Select-Object -First 1
+  if (-not $f) { throw 'game frame window not found' }
+  $g = [GW]::Children([IntPtr][int64]$f[0]) | Where-Object { $_ -match 'AmbitGameWindow' } | Select-Object -First 1
+  foreach ($h in @([IntPtr][int64]$f[0], [IntPtr][int64](($g -split ' ')[0]))) {
+    [GW]::PostMessage($h, 0x100, [IntPtr]$Vk, [IntPtr]0x40001) | Out-Null; Start-Sleep -Milliseconds 50
+    [GW]::PostMessage($h, 0x101, [IntPtr]$Vk, [IntPtr]([int64]0xC0040001)) | Out-Null
+  }
+}
