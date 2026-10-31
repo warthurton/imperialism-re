@@ -6,7 +6,11 @@ import json
 from pathlib import Path
 import struct
 import subprocess
+import sys
 from datetime import datetime, timezone
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from snapshot_graph import capture_graph
 
 # Allocation sizes checked against classes.tsv and TCity initialization at 0x4b24b0.
 ORDER_SIZES = {
@@ -190,6 +194,7 @@ def capture(read):
     block('map_manager', map_manager, 40)
     block('map_tiles', pointer(map_manager + 0xc), 6480 * 0x24)
     block('map_provinces', pointer(map_manager + 0x10), 384 * 0xa8)
+    capture_graph(read, block, fields)
     if read(game + 0x2c, 2) != game_raw[0x2c:0x2e]:
         raise RuntimeError('turn changed during capture; retry at an idle map screen')
     return {'result': {'schema': 1, 'blocks': blocks, 'fields': fields},
@@ -197,7 +202,9 @@ def capture(read):
                 'Live reads are not atomic; capture only while the game is idle.',
                 'Partial state: game, nations including known AI tails, cities/orders/population/pools, '
                 'diplomacy, technology, trade/deals, map manager/tiles/provinces and RNG. '
-                'City task chains and auxiliary records are captured. Military objects, '
+                'City task/auxiliary lists, minister lists, army records/stacks, province units, '
+                'national military rosters and global ships are captured. '
+                'Military missions, task forces/ports, army-record pointer targets, additional '
                 'province/nation pointer targets and other managers '
                 'are not captured.']}
 

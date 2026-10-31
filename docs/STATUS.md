@@ -1,20 +1,26 @@
 # Status: where the project stands
 
 Update this file at every ship (and before ending a session). It is the first thing to read after `AGENTS.md`.
-Last updated: 2026-10-31 (field miner, city auxiliary snapshot coverage; game stopped after each test).
+Last updated: 2026-10-31 (military snapshot graph, planning probe and later-turn fixture; game stopped after each test).
 
 ## Done and verified (in the running game unless noted)
 
 - **Snapshot oracle, partial** (`docs/snapshots.md`, `tools/snapshot.py`, `tools/diff_snapshot.py`):
   read-only capture of game/nations/cities/orders/population, diplomacy, technology, trade/deals,
-  map tiles/provinces and both RNG states. Semantic and raw-byte comparison. The single-session
+  map tiles/provinces, minister lists, military rosters/units/stacks, ships and both RNG states. Semantic and raw-byte comparison. The single-session
   `harness/prod_snapshot.ps1` checks idle identity, one completed turn, and byte agreement with
-  the existing city/tech/diplomacy readers before and after. Ten offline snapshot tests pass.
+  the existing city/tech/diplomacy readers before and after, plus military-root agreement.
+  Seventeen offline snapshot tests pass. Later-turn captures matched 517 units through
+  province/stack and national-roster roots; the saved fixture reloaded and passed ten live checks.
 - **Field miner, heuristic** (`tools/field_miner.py`, `docs/field_miner.md`): 8,779 functions
   analyzed, 8,702 candidate rows; unresolved scaling, nested pointer targets and dynamic indices
   stay separate. Counts and declaration-bound checks guide review, not automatic struct creation.
   Eleven miner tests pass. City task/auxiliary containers added to snapshots after code/disassembly
   review; live empty-container validation passed (nonempty traversal is synthetic-tested only).
+- **City planning probe** (`tools/tracer/city_planning.txt`, `harness/trace_city_planning.ps1`):
+  one measured turn after eight warmups hit the minister turn entry and vf33, but none of
+  the selected city-task producers/consumer. Populated minister raw lists are not evidence
+  of populated city task queues. The latter remain live-unverified (`docs/tracer.md`).
 - **Display shim** (`shim/`): windowed scaling, maximize, fullscreen with integer scale, mouse mapping, and an opt-in **text log** (installed build: `shim/build20.dll`;
   the previous one is `original/msvfw32_before_textlog.dll`). The game's music-loss crash is intermittent and **not proven fixed** (`winmm/` rebuilt from ogg-winmm).
 - **Decompile**: 10.9k functions named; `src/` groups (git-ignored) from `tools/split_source.py`, none left unsorted (the `late`/`laddr` rows are filing guesses,
@@ -37,7 +43,8 @@ Last updated: 2026-10-31 (field miner, city auxiliary snapshot coverage; game st
   1 expert + 2 Paper + cash ($500 Prospector ... $2,000 Engineer), charged at once, reported next turn; the Transport sliders and capacity bar; the Board of Trade (4 bids max, settlement in
   board order, **merchant marine 16 units limits sales plus purchases**, bottom line = cash change).
 - **Armory and Indiaman** (`docs/production_playtest.md`, `reimpl/production.c`): eight regiments with costs read from the dialog; Cuirassier + Sapper ordered for real and charged as modelled; Indiaman 3 Fabric + 7 Lumber, merchant capacity +4.
-- **Fixtures** (`saves/README.md`): `oil_t0`, `oil_refinery4`, `oil_plant_built` (turn 4, plant built, Refinery 4) and the earlier production ones.
+- **Fixtures** (`saves/README.md`): `oil_t0`, `oil_refinery4`, `oil_plant_built` (turn 4, plant built, Refinery 4),
+  `military_later` (city turn 13/game turn 14, 517 units, one ship) and the earlier production ones.
 
 ## Open questions
 
@@ -77,9 +84,28 @@ It exposed city +0x270/+0x274 containers. The task-list embedded header needed a
 confirmed in machine code after the first live read rejected it. Corrected `snapshot_fields2`
 passed all eight checks: 505 -> 507 blocks, 3,947 decoded fields, 269 changes across 173 blocks;
 idle bytes identical. The containers were empty: populated traversal remains live-unverified.
-Eleven miner tests and ten snapshot tests pass. No functions lifted this session.
-Next: populated city-task fixtures, remaining military/nation/province pointer targets,
-more fixture pairs and replay checks. M0 is not complete. Raw snapshots remain local and ignored.
+That revision passed eleven miner tests and ten snapshot tests.
+
+Military continuation: `tools/snapshot_graph.py` captures the Interior Minister (nation +0x98,
+not Foreign at +0x94), its list headers/nodes, Army Manager records/grouped stacks, direct
+province unit chains, all 23 national military rosters, Navy Manager and global ship chain.
+Province +0x98 points to TMilitaryUnit directly, not TArmyStack. Constructor/save/load
+evidence and bounds are in `docs/snapshots.md`. Raw minister node values are not dereferenced.
+`snapshot_planning2` passed ten checks after eight warmups: game turn 13 -> 14, 4,125 decoded
+fields, 1,918 -> 1,901 blocks, 238 changed fields across 225 blocks. Its 517 units matched
+the independent roster roots; no listed/placed discrepancies, one ship. Idle bytes identical.
+The 15-entry planning trace hit only BeginTurn (6), vf33 (6) and the phase driver (17).
+City task/auxiliary queues and the minister +0x18c list remained empty; army record/grouped-stack
+lists were also empty. Nonempty versions of those containers are synthetic-tested only.
+Saved `military_later.imp`; reload (`snapshot_fixture_later1`) passed ten checks at game turn
+14 -> 15, 1,901 -> 1,937 blocks, 262 changed fields across 241 blocks, again with 517 units
+before the turn and one ship. Seventeen snapshot and eleven miner tests pass. No functions lifted.
+All game sessions ended with settings restored, including the rejected trace harness exit-code
+check (fixed by retaining its process handle before exit). M0 is not complete; raw snapshots
+and traces remain local and ignored.
+Next: remaining naval task-force/port/mission and province/nation pointer targets; inspect
+city-task producer callers to select a scenario that actually exercises them; snapshot pairs
+for the remaining fixtures and replay checks. Do not repeat warmup-only tests as proof of task coverage.
 
 1. **Expand snapshot coverage** (`tools/snapshot.py` + diff, partial capture validated): remaining pointer targets and managers, then pairs for more fixtures. Use `tools/field_miner.py` to find candidate layouts and check them against constructors/save methods/disassembly. See `docs/snapshots.md` and `docs/field_miner.md` for bounds, evidence and current limits.
 2. **Decode the 219 unnamed simulation functions** the trace hit: `python -I tools/tracer/analyze_trace.py results/trace4 --unnamed nations_sim` (and `military_ai`, `map_sim`, `production`, `trade`); `--phase N` lists a phase in call order with callers. Name them in `names/names.tsv` with evidence.

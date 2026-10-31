@@ -1,0 +1,15 @@
+004bf770 TCityInteriorMinister_BeginTurn
+004bf8a0 TCityInteriorMinister_vf33
+004bfa50 TCityInteriorMinister_vf34
+004bfb20 TCityInteriorMinister_vf35
+004bff80 TCityInteriorMinister_vf43
+004c0090 TCityInteriorMinister_vf38
+004c02c0 TCityInteriorMinister_vf37
+004c04e0 TCityInteriorMinister_vf39
+004c05a0 TCityInteriorMinister_vf40
+004c0690 TCityInteriorMinister_vf41
+004c0730 TCityInteriorMinister_vf42
+004c2a30 TCityInteriorMinister_vf52
+0057da70 TSimMgr_AdvancePhase
+005aeca0 TCityTaskList_Add
+005aecc0 TCityTaskList_Process
