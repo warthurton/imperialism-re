@@ -23,6 +23,9 @@ Last updated: 2026-10-31 (end of the production, diplomacy and harness work; PR 
   (offer sheet 8500 Esc, results 8800 and Imperial Times 8451 Return). Memory readers (read-only): `tools/readcity.py`, `readview.py id`, `readtech.py`, `readprefs.py`,
   `readdiplo.py`, `readnations.py`, `readpending.py`, `readtext.py`; `predict_war.py`. Writers (fixtures only): `poke_stock.py`, `poke_tech.py L:19`.
   Screens, ids, the main menu and reading text: `docs/screens.md`.
+- **University, Transport, Trade** (`docs/production_playtest.md` end, `docs/transport.md`, `docs/trade.md`; models `reimpl/production.c`, `transport.c`, `trade.c`, self-tested): civilians cost
+  1 expert + 2 Paper + cash ($500 Prospector ... $2,000 Engineer), charged at once, reported next turn; the Transport sliders and capacity bar; the Board of Trade (4 bids max, settlement in
+  board order, **merchant marine 16 units limits sales plus purchases**, bottom line = cash change).
 - **Fixtures** (`saves/README.md`): `oil_t0`, `oil_refinery4`, `oil_plant_built` (turn 4, plant built, Refinery 4) and the earlier production ones.
 
 ## Open questions
@@ -37,8 +40,8 @@ Last updated: 2026-10-31 (end of the production, diplomacy and harness work; PR 
 
 ## Next steps (suggested order)
 
-1. The least-verified systems, each with a fixture, the text log and a tested model like production.c and diplomacy.c: **training** (University, Trade School), **transport** (the Transport/Ledger
-   screen, id 2014), **trade settlement** (`TTradeMgr_SettleTrades`, the Offer Sheet, Board of Trade bids).
+1. Done this round: University/Trade School, Transport, trade settlement (see above). Left in those areas: Armory/Shipyard dialogs (expected to match the University's), the transport capacity bar when full and the
+   demand lines, first-in-line rule for offers and the price update, buying ships.
 2. Diplomacy leftovers above (order Empire where it is offered, ally with a Great Power, make a grant) if wanted.
 3. Keep playing normally now and then with crash dumps armed (`dumps/`) to confirm the music fix.
 

@@ -232,3 +232,23 @@ skipping setup, not in the launch. Use a fixture whenever a test needs the oil-a
   start gave **180 power** (30 fuel, all burned) with the 900 still remembered: the order is re-applied up to what is available (`TPowerPlantOrder_vf14`: if the maximum is below the
   remembered amount it sets the maximum, then tries the remembered amount, which is refused).
 * Fixture `oil_plant_built` (turn 4, Power Plant built, Refinery capacity 4) is the starting point for these tests.
+
+## University (civilian units) and Trade School, re-checked with the text log (fixture `oil_plant_built`, 2 experts, 20 Paper, $44,400)
+
+The University is the collegiate building at the top-left of the Industry screen (about (260,260) in mirror units); its dialog is 376x439 (`Get-Dialog` kind `unit`).
+Dialog text is READ from the log: the cost block ("Cost:" workers, Paper, cash) and the "Available:" block under it.
+
+| Order | Cost, charged when the arrow is clicked | Seen |
+|---|---|---|
+| Miner | 1 expert worker, 2 Paper, $1,500 | Paper 20->18, cash 44,400->42,900, experts 2->1, labor 16->12 (the expert's 4 labor go with him, as the manual says) |
+| Prospector | 1 expert, 2 Paper, $500 | Paper 18->16, cash -> 42,400, experts 1->0, labor 8 |
+| Farmer | 1 expert, 2 Paper, $1,000 (information panel "Level 1") | read from the dialog |
+| Engineer | 1 expert, 2 Paper, $2,000 | read from the dialog |
+| Engineer with no expert left | refused: nothing charged | Paper and cash unchanged |
+
+* End Turn: the Interior Minister's report reads "New units are reporting for duty: 1 Prospector, 1 Miner"; labor stays at 8 and total workers 7 -> 5, so the experts are gone for good.
+  The order is **not** repeated the next turn (like the other non-recipe orders above).
+* The four pictures are a 2x2 grid: Miner and Prospector on the top row, Farmer, Engineer below; their set grows with technology (Rancher after Feed Grasses, Forester after
+  Iron Railroad Bridges, Driller after Oil Drilling), so address them by position (`pic1..4`, `add1..4`, `sub1..4` in `fast.ps1`'s `unit` dialog kind).
+* Trade School training (costs in the fourth run above) is modelled in `reimpl/production.c` next to the civilians (`train_worker`, `order_civilian`), self-tested.
+* Not tested: the Armory and Shipyard dialogs (the manual says they work "exactly like the University"; the `unit` controls are expected to match).
