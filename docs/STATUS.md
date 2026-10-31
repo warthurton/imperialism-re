@@ -39,6 +39,8 @@ Last updated: 2026-10-31 (Armory and Indiaman verified, 0x4357b0 named, a group 
 - `names/names.tsv`: 0x4357b0 is now `TScreenBuilder_HelpAndSmallWindows` (likely: a switch on window id building the Help topics/tips window and other small windows; read from code, not seen in play). The 8 unnamed map-reading functions at 0x557e10-0x55a160 and 0x563990 moved from `ui_screens` to `military_ai` (they read `g_MapMgr` and sit among TPortZone/TOcean code; `names/groups.tsv`). `map_sim`, `display` and a few `nations_sim` placements near 0x5149d0 are still guesses.
 - Slider quirk: clicking the slider track jumps proportionally and the right arrow adds one step; dragging the knob did not move it.
 
+- **Mac/iPad**: `docs/mac_ipad.md` and `tools/mac/make_wrapper.sh` (private Wine wrapper on a Mac, then stream or emulate to the iPad). Written without a Mac: untested, fix as you go.
+
 ## Next steps (suggested order)
 
 1. Done: University/Trade School, Transport, trade settlement, Shipyard, Armory, Indiaman. Left: the first-in-line rule and price formula (code notes in `docs/trade.md`; needs a Board of Trade
