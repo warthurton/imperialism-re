@@ -15,6 +15,8 @@ local. Saved games in `saves/` are fine (written by the game from a random world
   `python -I tools/name_classes.py` regenerates imperialism_named.c. Confidence: confirmed | likely | guess.
   Check the diff: rows can share identical text, so a blind replace can land on the wrong function.
 - `python -I tools/find_calls.py <regex>...` lists functions whose body matches all regexes.
+- **Keep `docs/STATUS.md` current** (done, open questions, next steps, how to resume): update it in the same PR whenever something is
+  verified, found open, or finished, and before ending a session. Notes that live only in a conversation are lost.
 - Say what is confirmed (seen in the running game or in the code) and what is a guess, in docs and commit messages.
 - Verified rules go three places: a table in `docs/production_playtest.md` (step / seen / notes), the self-checking model
   `reimpl/production.c` (build and run it; it must keep passing), and the confidence column in `docs/recipes.md`.
@@ -65,6 +67,6 @@ local. Saved games in `saves/` are fine (written by the game from a random world
   guess). Run `tools/audit_groups.py` after changing them.
 
 ## Where things are
-README.md (layout, rebuild), docs/ (screens.md, production_playtest.md, recipes.md, turn_phases.md, how_a_turn_works.md,
+README.md (layout, rebuild), docs/STATUS.md (read first), docs/ (screens.md, production_playtest.md, recipes.md, turn_phases.md, how_a_turn_works.md,
 trade_rows.txt), reimpl/production.c (tested model), saves/ (fixtures), harness/, tools/, classes.tsv, ghidra/,
 shim/ (display), winmm/ (music DLL rebuild).
