@@ -35,3 +35,13 @@ Prices move with the deals (Hardware 1,204 -> 1,191 -> 1,170..., Food 72 -> 67);
 Who is "first in line" (the favourite-trader table at `TDiplomacyMgr` +0x18a6 is the likely rule), how the price update works, the Deal Book/Trade Book tabs, the ship purchase
 (merchant marine grows through the Shipyard: +2 per Trader, 16 -> 20 seen, see production_playtest.md), and whether a bid that finds no offer carries over. Read from code only: the offer-sheet settlement order and the price formula.
 Harness: `harness/prod_endturn.ps1 -Accept` accepts every offer and prints each sheet's text.
+
+## Code notes (read from the decompile, not checked in play)
+* `TTradeMgr_SettleTrades` (0x5b8080): for each of the 17 commodity rows, every nation with a positive offer is paired with every nation with a negative (bid) entry for that row
+  that passes two `TDiplomacyMgr` checks (vtable +0x64 and +0x44 must both be false, i.e. not an embargo / not at war), and a deal record (buyer, seller, quantity, the pair's
+  relation score from the +0x79c matrix) is posted to the row's list through a method at vtable +0x38. The order of bidders in that list is the "first in line" order the manual describes;
+  `TTradeMgr_GetPartnerRank` (0x5b8da0) is the ranking helper (returns -1 for a pair that may not trade). Great Powers 0-6 are paired first, then minors 7-22, rows 0-6, 7-12, 13-16 are
+  walked in separate loops.
+* `TTradeMgr_UpdatePrice` (0x5b8ad0) per row: Fuel (row 12) = 3 x the Oil price; Steel, Fabric, Lumber, Paper and Arms (rows 8-11, 16) are derived from their inputs' prices
+  (about three times the average of the input prices, blended with a third of a finished-goods price); every other row moves with demand versus supply from last turn's
+  counts, capped at 32,000. In play Hardware fell 1,204 -> 1,191 after we sold 10 and Food 72 -> 67 after we bought 6; the exact formula was not reproduced.
