@@ -157,3 +157,33 @@ idle-dock watcher (it shrank the window after 10 s and broke hover scans). `shot
 replaces the fixed sleep after each click with "wait for the screen to start changing, then to settle" (a plain settle check
 returned before slow screen transitions had begun, so it first waits for a change). Map to construction dialog went from about 15 s
 of separate scripts to about 7 s. After entering a screen, move the mouse once before clicking a hotspot.
+
+## Oil Refinery (2026-10-30): built and run through the real UI
+
+Same gate as the Power Plant (the local power's tech-19 record = 2; see above), and again set up with `tools/poke_tech.py L:19` plus
+Oil 20 from `poke_stock.py`. The local power's index was 5 in this game (0 and 6 in the earlier ones), which is why the tool looks it up.
+
+| Step (real UI) | Seen | Notes |
+|---|---|---|
+| Click the "Site for Factory: Oil Refinery" (930,420) | dialog "Oil Refinery, Capacity: 2", cost shown as 2 Lumber + 2 Steel, text "two units of labor plus two units of oil to produce one unit of fuel" | manual: one Lumber and one Steel per point of capacity; a mill starts at capacity 2 |
+| OK | Lumber 20 -> 18, Steel 20 -> 18 at once; cash unchanged (50,000); capacity still 0 | scaffolding on the site |
+| Click the same site again while it is pending | dialog with Cancel; **Cancel refunds**: Lumber and Steel back to 20 | matches the game's "Cancel construction." strings 8099 |
+| Build again, end the turn | at the next turn start `cap_max` and `cap_left` for the Refinery = **2** (cash -150 upkeep only) | |
+| Production dialog: slider +1 | Oil 20 -> 18, labor 16 -> 14, `cap_left` 2 -> 1, order amount 1 | per unit 2 Oil + 2 labor + 1 capacity |
+| slider +1 again, then a third click | Oil 16, labor 12, `cap_left` 0, amount 2; the third click is **refused** (binding code 2 = capacity) | |
+| End turn | next turn start: **Fuel +2**, order repeats (Oil 16 -> 12, labor refilled 16 then -4 = 12, `cap_left` 0 again), production score 20 = 2 x 10 | same repeat rule as every other recipe |
+
+Not tested: expanding the Refinery with the button in its dialog, cancelling the Power Plant (probably refunds the $5,000), and
+building the sites on Normal/Hard settings (this game started with the six industries already built).
+
+`reimpl/production.c` now models both buildings (`build_refinery`, `cancel_refinery`, `build_power_plant`, `power_set_fuel`, and
+the turn-start completion / re-application in `city_begin_turn`); its self-test asserts the numbers in these two tables.
+
+## Reading the screen from memory
+
+`tools/readview.py` dumps the game's `TViewMgr` (global 0x6a21bc, 0xfc bytes). Diffing the dump on the capital screen and the terrain
+map showed that the **low half of the dword at +0x04 is the current screen id**: 0x7db (2011) = capital, 0x7dd (2013) = terrain map; a
+pointer at +0xf0 is set only on the map. `readview.py id` prints just that number. Dialogs (constructor, production sliders) are child
+windows and do not change this object, so a dialog still has to be told from a screenshot or found in another object (open question).
+It already paid for itself: a `back` click that a dialog swallowed was caught because the id stayed 2011, which a screenshot-settle
+check would have missed. `readcity.py` (stock, capacity, labor, cash) remains the way to read the economy.

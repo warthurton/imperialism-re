@@ -11,7 +11,7 @@ trade-table rows (0 Cotton, 1 Wool, 2 Timber, 3 Coal, 4 Iron, 5 Horses, 6 Oil, 7
 | 0x108 | TItemOrder | Lumber (9) | Timber (2) | - | 4 | likely |
 | 0x10c | TItemOrder | Paper (10) | Timber (2) | - | 4 | likely |
 | 0x110 | TItemOrder | Steel (11) | Iron (4) | Coal (3) | 2 | likely |
-| 0x114 | TItemOrder | Fuel (12) | Oil (6) | - | 6 | likely |
+| 0x114 | TItemOrder | Fuel (12) | Oil (6) | - | 6 | **confirmed in play** (2 Oil + 2 labor + 1 capacity per Fuel, see production_playtest.md) |
 | 0x118 | TItemOrder | Clothing (13) | Fabric (8) | - | 1 | likely |
 | 0x11c | TItemOrder | Furniture (14) | Lumber (9) | - | 5 | likely |
 | 0x120 | TItemOrder | Hardware (15) | Steel (11) | - | 3 | likely |
