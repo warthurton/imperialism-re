@@ -1,7 +1,7 @@
 # Status: where the project stands
 
 Update this file at every ship (and before ending a session). It is the first thing to read after `AGENTS.md`.
-Last updated: 2026-10-31 (diplomacy decoded in part).
+Last updated: 2026-10-31 (diplomacy overtures decoded).
 
 ## Done and verified (in the running game unless noted)
 
@@ -33,10 +33,9 @@ Last updated: 2026-10-31 (diplomacy decoded in part).
 
 ## Next steps (in this order)
 
-1. **Diplomacy, continued** (`docs/diplomacy.md`, model `reimpl/diplomacy.c`, tool `tools/readdiplo.py`): the manager's data and its setters are decoded
-   and seen in play (status 4 = peace, 6 = war; scores; war fallout -50/-40/-9). Still open: where overtures are queued and applied at End Turn, where consulates
-   and embassies live, the war ripple, Pact/Empire/Peace acceptance. Found since: status names (game strings 17361+code), the colour-code function, and the Great Power's
-   pending-overture table (+0xb2, one short per target; 0x131 War, 0x133 Consulate). Next: find who reads that table at End Turn, and order the other overtures to learn their ids.
+1. **Diplomacy, finish** (`docs/diplomacy.md`, `reimpl/diplomacy.c`, tools `readdiplo.py`, `readpending.py`, `readnations.py`): decoded and seen in play: the four matrices
+   (relation, status, turn, presence), all overture ids and costs (War 0x131, Consulate 0x133, Embassy 0x134, Alliance 0x12e, Pact 0x12f, Peace 0x130), placement and End Turn
+   execution, Pact/Peace effects. Still open: **the war ripple code** (-50 / -40 / -9, seen once), the Empire overture, Alliance on the Great Power side, aid in play.
 2. Power Plant limit and the out-of-fuel turn (fixture `oil_refinery4`, `poke_stock.py Fuel=...`).
 3. The next least-verified systems: training (University, Trade School), transport, trade settlement (`TTradeMgr_*` read in the code, never checked in play).
 4. Keep playing normally now and then with crash dumps armed (`dumps/`) to confirm the music fix.

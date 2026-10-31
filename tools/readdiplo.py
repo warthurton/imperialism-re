@@ -3,7 +3,8 @@ Three 23x23 short matrices (nation x nation; 0-6 = the seven Great Powers, 7-22 
   +0x79c  relationship score 0..255 (symmetric; below 50 only while at war)          TDiplomacyMgr_vf10 sets it
   +0xbbe  treaty status code (symmetric; 6 = war, 2 = counted as an ally by vf35)      vf28 reads it, vf29/vf30 set it
   +0xfe0  game turn the status last changed (symmetric)
-plus the 16-entry short tables at +0x1886 and +0x18a6 (indexed by Minor Nation).
+  +0x1402 diplomatic presence (symmetric): 0 none, 1 Trade Consulate, 2 Embassy     TDiplomacyMgr_GetPresence reads it
+plus the 16-entry short tables at +0x1886 (Great Power with the best relationship) and +0x18a6 (favourite trading partner), both indexed by nation number 7-22 (entries 0-6 unused).
 Usage: python -I readdiplo.py <label> [--full]    saves results/diplo_<label>.bin; prints a summary (--full prints all three matrices)
        python -I readdiplo.py diff <a> <b>         prints every matrix cell that differs between two saved dumps"""
 import ctypes, ctypes.wintypes as wt, os, struct, subprocess, sys
@@ -12,7 +13,7 @@ RE = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + '/'
 G_DIPLO = 0x6a43d0
 SIZE = 6364
 N = 23
-MATS = {'relation': 0x79c, 'status': 0xbbe, 'turn': 0xfe0}
+MATS = {'relation': 0x79c, 'status': 0xbbe, 'turn': 0xfe0, 'presence': 0x1402}
 
 
 def label(i):

@@ -42,7 +42,15 @@ typedef struct Diplo {
     short relation[NATIONS][NATIONS];           /* +0x79c  score 0..255, symmetric                        [confirmed] */
     short status[NATIONS][NATIONS];             /* +0xbbe  treaty status code, symmetric                  [confirmed] */
     short turn[NATIONS][NATIONS];               /* +0xfe0  game turn the status last changed, -1 = never  [confirmed] */
+    short presence[NATIONS][NATIONS];           /* +0x1402 0 none, 1 Trade Consulate, 2 Embassy, symmetric [confirmed in play] */
+    short pending[GREAT_POWERS][NATIONS];       /* each Great Power's object at +0xb2: the overture ordered for each target, -1 = none [confirmed] */
+    int   cash[GREAT_POWERS];                   /* each Great Power's money (nation+0x10) */
 } Diplo;
+
+/* Overture order ids, as written into the pending table [confirmed in play unless marked]. */
+enum Overture { OV_EMPIRE = 0x12d /* guess */, OV_ALLIANCE = 0x12e, OV_PACT = 0x12f, OV_PEACE = 0x130, OV_WAR = 0x131,
+                OV_CONSULATE = 0x133, OV_EMBASSY = 0x134 };
+enum { COST_CONSULATE = 500, COST_EMBASSY = 5000 };
 
 /* TDiplomacyMgr_GetStatus @ 004f1b10 */
 int get_status(const Diplo *d, int a, int b) { return d->status[a][b]; }
@@ -86,6 +94,49 @@ void set_status(Diplo *d, int a, int b, int code, int turn)
     case ST_WAR:                                /* the score drop is NOT here; it comes from code not found yet (docs/diplomacy.md) */
         break;
     }
+}
+
+/* TClientGreatPower_PlaceOverture @ 004ddfc0 [confirmed]: the order is written into the pending table; a Trade Consulate ($500) and an Embassy
+ * ($5,000) are paid at once, War, Pact, Peace and Alliance cost nothing. id -1 cancels and refunds. Returns 1 if the order was placed. */
+int place_overture(Diplo *d, int g, int target, int id)
+{
+    if (id == -1) {
+        if (d->pending[g][target] == OV_CONSULATE) d->cash[g] += COST_CONSULATE;
+        if (d->pending[g][target] == OV_EMBASSY) d->cash[g] += COST_EMBASSY;
+        d->pending[g][target] = -1;
+        return 1;
+    }
+    if (id == OV_CONSULATE || id == OV_EMBASSY) {
+        int cost = id == OV_CONSULATE ? COST_CONSULATE : COST_EMBASSY;
+        if (d->cash[g] < cost) return 0;
+        d->cash[g] -= cost;
+    }
+    d->pending[g][target] = (short)id;
+    return 1;
+}
+
+/* TDiplomacyMgr_ExecuteOvertures @ 004f01e0 [confirmed in play]: at End Turn each pending order is applied and the table cleared.
+ * Consulate and Embassy set the presence matrix; War calls DeclareWar (status 6) unless already at war; Pact (3) and Peace (4) go to the
+ * target, which for a Minor Nation always accepts (seen: Pact 4 -> 3 with the score +10, Peace 6 -> 4 with the score raised to 50). */
+void execute_overtures(Diplo *d, int g, int turn)
+{
+    for (int n = 0; n < NATIONS; n++) {
+        int id = d->pending[g][n];
+        if (id == -1) continue;
+        if (id == OV_CONSULATE) d->presence[g][n] = d->presence[n][g] = 1;
+        else if (id == OV_EMBASSY) d->presence[g][n] = d->presence[n][g] = 2;
+        else if (id == OV_WAR) { if (!is_at_war(d, g, n)) set_status(d, g, n, ST_WAR, turn); }
+        else if (id == OV_PACT) set_status(d, g, n, ST_PACT, turn);
+        else if (id == OV_PEACE) set_status(d, g, n, ST_PEACE, turn);
+        d->pending[g][n] = -1;
+    }
+}
+
+/* TGreatPower_ExecuteAid @ 004de5e0 [code, not seen in play]: foreign aid between nations with an embassy raises the score by
+ * 2 for $1,000, 4 for $3,000, 6 for $5,000 and 10 for $10,000. */
+int aid_bonus(int amount)
+{
+    switch (amount) { case 1000: return 2; case 3000: return 4; case 5000: return 6; case 10000: return 10; default: return 0; }
 }
 
 /* TDiplomacyMgr_CountAllies @ 004f2050 [code]: Great Powers with status 2 towards nation n. */
@@ -153,6 +204,35 @@ int main(void)
     /* the colour code: start-of-game scores 90 / 110 / 150 / 255 fall in levels 3, 4, 5 and 8; the war scores seen in play, 40 and 50, in levels 1 and 2 */
     CHECK(relationship_level(90) == 3 && relationship_level(110) == 4 && relationship_level(150) == 5 && relationship_level(255) == 8);
     CHECK(relationship_level(40) == 1 && relationship_level(50) == 2 && relationship_level(20) == 0 && relationship_level(240) == 7);
+
+    /* Overtures as ordered in the real game: consulate in Manx, embassy in Dedge, war on Pram (turn 1), then Pact and Peace (turn 2). */
+    {
+        Diplo e;
+        start_of_game(&e);
+        memset(e.pending, -1, sizeof e.pending);
+        e.cash[2] = 50000;
+        for (int a = 0; a < GREAT_POWERS; a++) for (int b = 0; b < GREAT_POWERS; b++) if (a != b) e.presence[a][b] = 2;   /* embassies between the Great Powers */
+        e.presence[2][19] = e.presence[19][2] = 1;                                                                        /* a starting consulate */
+
+        CHECK(place_overture(&e, 2, 13, OV_CONSULATE) && e.cash[2] == 49500 && e.pending[2][13] == 0x133);      /* $500 at once */
+        CHECK(place_overture(&e, 2, 19, OV_EMBASSY) && e.cash[2] == 44500 && e.pending[2][19] == 0x134);       /* $5,000 at once */
+        CHECK(place_overture(&e, 2, 11, OV_WAR) && e.cash[2] == 44500);                                        /* war is free */
+        CHECK(place_overture(&e, 2, 13, -1) && e.cash[2] == 45000 && e.pending[2][13] == -1);                  /* cancelling refunds */
+        CHECK(place_overture(&e, 2, 13, OV_CONSULATE) && e.cash[2] == 44500);
+        CHECK(e.presence[2][13] == 0);                                                                         /* nothing happens before End Turn */
+        execute_overtures(&e, 2, 1);
+        CHECK(e.presence[2][13] == 1 && e.presence[13][2] == 1 && e.presence[2][19] == 2);
+        CHECK(is_at_war(&e, 2, 11) && e.turn[2][11] == 1);
+        CHECK(e.pending[2][13] == -1 && e.pending[2][19] == -1 && e.pending[2][11] == -1);                     /* the table is cleared */
+
+        set_relationship(&e, 2, 11, 40);                                                                       /* the war score seen in play */
+        e.relation[2][19] = e.relation[19][2] = 101;
+        CHECK(place_overture(&e, 2, 19, OV_PACT) && place_overture(&e, 2, 11, OV_PEACE));
+        execute_overtures(&e, 2, 2);
+        CHECK(get_status(&e, 2, 19) == ST_PACT && e.relation[2][19] == 111 && e.turn[2][19] == 2);             /* 4 -> 3, 101 -> 111 */
+        CHECK(get_status(&e, 2, 11) == ST_PEACE && e.relation[2][11] == 50 && e.turn[2][11] == 2);             /* 6 -> 4, 40 -> 50 */
+        CHECK(aid_bonus(1000) == 2 && aid_bonus(3000) == 4 && aid_bonus(5000) == 6 && aid_bonus(10000) == 10 && aid_bonus(7) == 0);
+    }
 
     puts(fails ? "diplomacy model: FAILURES" : "diplomacy model: all checks pass");
     return fails != 0;
