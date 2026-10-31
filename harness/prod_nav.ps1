@@ -23,6 +23,7 @@ ClickAt 1015 216; Start-Sleep -Seconds 3       # briefing dialog X
 Shot 'p2_after_briefing_close'
 ClickAt 75 90; Start-Sleep -Seconds 3         # leave the newspaper -> map
 ClickAt 893 184; Start-Sleep -Seconds 2       # close the first map briefing (new games start with briefings On)
-& "$root\start_idle_dock.ps1"
+# idle-dock watcher is OFF: it shrinks the window after 10 s idle, which breaks hover scans (run start_idle_dock.ps1 to turn it on)
+# & "$root\start_idle_dock.ps1"
 & "$root\prod_prefs.ps1"
 & "$root\prod_music.ps1"

@@ -129,16 +129,26 @@ Observations:
 So the Fish-or-Meat input is one unit of either, taken from whichever is available. The power plant remains untested: it needs the
 oil-drilling technology (not available at the start of a game; the game text says it also enables Refinery and Power Plant).
 
-## Power plant: first attempt (2026-10-30, not finished)
+## Power plant (2026-10-30): built and run through the real UI
 
-* The game keeps technology in a single `TTechMgr` (vtable 0x66ad28, 0x63c bytes, pointer in global 0x6a43d8). Byte `+0x180+N` is
-  "tech N known" (N = string id - 17161: 1 High Pressure Steam Engine ... 19 Oil Drilling); a new game starts with 0, 1, 2 set. The game
-  itself tests `+0x193` before showing Oil (warehouse ledger, prospector, trade), and its grant routine `FUN_005afba0` only sets
-  side flags for a few other techs (4, 9, 0xb, 0xf, 0x15, 0x16, 0x18, 0x1b), none for Oil.
-* `tools/readtech.py` (read-only) finds the object; `tools/poke_tech.py 19` (fixture) marks Oil Drilling known.
-* Result: with the flag set, and again one turn later, the capital screen (all buildings, Capitol dialog) still shows **no
-  Refinery or Power Plant**. So `+0x193` alone does not make those buildings available. The help text says Oil Drilling "permits
-  constructing" them, and the help blocks 8097-8099 / 8597-8599 end in "Cancel construction.", so they are probably *built*
-  through the `TBuildingConstructionView` (not yet located in the UI), after which the order slot becomes usable.
-* Harness: `prod_vol.ps1 -Mode test` now also sets minister warnings and briefings Off through the registry before launch (a new game
-  still resets briefings to On, a loaded save keeps them); `harness/shot.ps1 <name>` takes a focused screenshot.
+**What gates it.** The capital screen (`TCityProductionView`, vf53 hot text and vf71 click handler) treats building types 6 (Oil
+Refinery) and 0xb (Power Plant) specially: the site is only live when `TTechMgr` per-power record `+0x268 + power*29 + 19` equals
+**2** ("owned"), where `power` is `g_Game+0x2e` (the local human; **0** in this game, not 1). The global known-tech byte `+0x193`
+is a different thing (it only unhides Oil in the warehouse, prospector and trade screens). A new game starts with techs 0-2 at 2 in
+every power's record. The sites are invisible hotspots: `harness/prod_hover.ps1` (hover grid, records the hot text) showed 14
+building names before and 16 after, the new ones being "Site for Factory: Oil Refinery" (930,420) and "...: Power Plant" (1080,470).
+`tools/poke_tech.py 0:19` sets the record (fixture; the real route is buying Oil Drilling at the University/Trade School).
+
+| Step (real UI) | Seen | Notes |
+|---|---|---|
+| Click the Power Plant site | constructor dialog: "Power Plant, Cost to Build $5,000", text "converts one unit of fuel into six units of power", "up to 100 units of fuel per turn" | matches game strings 8597/8598 |
+| OK | cash 50,000 -> 45,000 at once; scaffolding on the site; labor, stock unchanged | `TBuildingConstructionView` |
+| Next turn start | plant finished (building drawn); dialog "Power Plant, Production: 0" with a 0 slider | upkeep -$150 as usual |
+| Slider +1 (Fuel set to 20 beforehand with `poke_stock.py`) | **Fuel 20 -> 19, labor 16 -> 22**, labor+0x1e (power) = 6, a bulb "6" appears beside the labor icon | 1 fuel = 6 power, as predicted (`TPowerPlantOrder_vf16`: amount x 6) |
+| Next turn start, nothing touched | **Fuel 19 -> 18**, labor stays 22 (16 refilled + 6 power) | the order repeats like the others; the manual's "power is created the same turn it is used" holds |
+
+Not tested: the 100-fuel cap, shortage (Fuel 0), and the Refinery (not needed here).
+
+**Harness.** `prod_vol.ps1 -Mode test` now means effects 10% and music about 5% and also sets minister warnings and briefings Off in the
+registry before launch (a new game still resets briefings to On; a loaded save keeps them). `prod_nav.ps1` no longer starts the
+idle-dock watcher (it shrank the window after 10 s and broke hover scans). `shot.ps1` takes a focused screenshot.

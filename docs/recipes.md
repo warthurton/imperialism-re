@@ -46,7 +46,7 @@ Goods stock is `nation+0xb6+2*good`; the byte offsets below are those slots (0xc
 |---|---|---|---|
 | `TTrainingOrder` kind 1 (city+0x140) | 1 Paper and 100 cash per worker | one worker promoted a grade (via the labor object's vf at +0x4c) | likely |
 | `TTrainingOrder` kind 2 (city+0x144) | 2 Paper and 1,000 cash per worker | a further promotion | likely |
-| `TPowerPlantOrder` (city+0x1b4) | 1 Fuel per 6 units of power | raises the labor object's available labor (+0x1c) by the power amount; nation+0xb4 records it | likely |
+| `TPowerPlantOrder` (city+0x1b4) | 1 Fuel per 6 units of power | raises the labor object's available labor (+0x1c) by the power amount (labor+0x1e shows the power); the order repeats each turn | **confirmed in play** (docs/production_playtest.md) |
 | `TFoodProcessingOrder` (city+0x100) | food inputs (several stocks) | `Complete` adds the amount to Food stock (good 7) | likely |
 | `TPopGrowthOrder` (city+0x1d4) | nothing in stock | `Complete` adds the amount to both population sub-pools (+4 of the objects at labor+0x10 and +0x14) and the total (labor+8) | likely |
 | `TExpansionOrder` / `TCapacityOrder` | see capacity section | raise max capacity of a category (item 0xe/0xf variants raise labor-related caps, derived from a nation figure /4 or /3 depending on game option +0x8d1 < '3') | guess |
