@@ -1,4 +1,5 @@
 # Which source file each decompiled function belongs to. First matching rule wins.
+# NOTE: rows of kind late/laddr are last-resort heuristics (tried only on functions no other pass could place); treat the group as a filing guess, not proof.
 # Columns (tab separated): on | regex | group     on = name (function name) or body (function text)
 addr	0047f870-004833b0	directplay
 name	^TScreenBuilder_	ui_layouts
