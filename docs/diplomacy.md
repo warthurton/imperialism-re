@@ -28,7 +28,7 @@ Nations are numbered 0-6 for the Great Powers and 7-22 for the sixteen Minor Nat
 | Offset | Type | Meaning |
 |---|---|---|
 | +0x79c | 23x23 short, symmetric | **relationship score** 0-255 |
-| +0xbbe | 23x23 short, symmetric | **treaty status code**: 4 = the start value of every pair, **6 = war**, 2 = alliance (code), 3, 5 (code) |
+| +0xbbe | 23x23 short, symmetric | **treaty status code**; the names are the game's strings 17361 + code: 0 Member of our Empire, 1 Ruler of our Empire, 2 Alliance, 3 Non-Aggression Pact, **4 Peace** (every pair at the start), 5 Member, **6 War** (4 and 6 seen in the matrix in play) |
 | +0xfe0 | 23x23 short, symmetric | game turn the status last changed, -1 = never |
 | +4 (384 shorts), +0x304 (384 bytes) | | empty at the start (0 and 255); a history of some kind, unknown |
 | +0x1886, +0x18a6 | 16 shorts each | filled in during play (values like 3, 4, 96, 100); unknown |
@@ -45,9 +45,20 @@ consulate nations, and 255 / 256 with oneself. `readdiplo.py --full` prints the 
 * `SetStatusEx(a,b,code,flag)` (vf29) / `SetStatus` (vf30): writes both halves of the status matrix, stamps the turn into both halves of +0xfe0, tells each
   side if it is a Great Power, then acts on the code: 2 raises the score by 10 (event 0x1a), 3 raises it by 10, 4 lifts it to at least 50, 5 sets it to 255,
   6 starts a war (event 0x19; each nation's slot-18 handler gets 300). The decompiled switch is scrambled by register reuse, so the exact fall-through is a guess.
+* `RelationshipLevel(a,b)` (vf26): the score as the 8-level colour code on the diplomacy screen: below 21 -> 0, 50 -> 1, 80 -> 2, 101 -> 3, 136 -> 4, 171 -> 5, 206 -> 6, up to 240 -> 7, above -> 8.
+  So the start scores 90 / 110 / 150 / 255 are levels 3 / 4 / 5 / 8, and war's 40 and 50 are levels 1 and 2 (the manual: "dark green means they might join your Empire").
 * `IsAtWar` is `status == 6`; `CountAllies(n)` counts the Great Powers whose status with n is 2.
 * A Minor Nation answers a Great Power's overtures in `TMinor_HandleOffer` by message id: 0x12d (aid or bribe), 0x12f (status 3), 0x130 (status 4),
   each charging an amount.
+
+## Pending overtures live in the Great Power's own object [seen]
+
+Snapshots of all 23 nation objects (`tools/readnations.py`) before and after ordering showed that the only nation that changed was the local Great Power:
+cash at +0x10 (50,000 -> 49,500 for the consulate) and a **table of pending overtures at about +0xb2, one short per target nation** (entry for nation n at
++0xb2 + 2n, -1 = none). Ordering War on Pram (nation 11) wrote 305 (0x131) at +0xc8; ordering a Trade Consulate in Manx (nation 13) wrote 307 (0x133) at +0xcc;
+both were back to 0xFFFF after End Turn. So the overture order ids are 0x131 = War and 0x133 = Trade Consulate; `TMinor_HandleOffer` receives 0x12f and 0x130, which fits Pact
+(status 3) and Peace (status 4) in a sequence 0x12d Empire?, 0x12f Pact, 0x130 Peace, 0x131 War (the others not yet seen). Every nation also changes +0x8c / +0x8e each
+tick (a clock): ignore it when diffing.
 
 ## Experiment: overtures from the real UI (fixture `oil_t0`, local power index 2)
 
@@ -65,8 +76,9 @@ leave" step of a war. The relationship numbers 81 / 50 / 40 were seen once and o
 
 ## Open
 
-* Where pending overtures are queued and how End Turn applies them (likely a per-Great-Power order list; the candidates are `TClientGreatPower` /
-  `TAutoGreatPower` virtual methods near slot 0x2a8-0x2b0 and `TForeignMinister*`).
+* How End Turn turns a pending order (0x131 War, 0x133 Consulate, ...) into the change: the table is at +0xb2 of the Great Power; find who reads it (search for `+ 0xb2` /
+  `+ 0xc8` accesses on the nation, and the Great Power's virtual slots around 0x2a8-0x2b0).
+* The order ids of Embassy, Pact, Peace, Alliance and Empire (order each once and read the table).
 * Where consulates and embassies are stored (candidates: the Minor Nation object's per-nation table at +0x14, or the Great Power object).
 * The war ripple, the acceptance rules for Pact, Empire and Peace, and what Alliance does on the Great Power side.
 * Status codes 0, 1, 3 and 5 as the game uses them (only 4 and 6 were seen).

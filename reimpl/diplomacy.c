@@ -13,10 +13,30 @@
 
 enum { NATIONS = 23, GREAT_POWERS = 7 };        /* nations 0-6 are the Great Powers, 7-22 the sixteen Minor Nations */
 
-/* treaty status codes, TDiplomacyMgr_SetStatusEx switch @ 004f1b70 */
-enum Status { ST_ALLIANCE = 2, ST_PACT = 3, ST_PEACE = 4, ST_EMPIRE = 5, ST_WAR = 6 };
-/* 2 alliance and 6 war: [code] and 4 = the start value of every pair and 6 = war [confirmed in play]; 3 and 5 are [guess] as to meaning,
- * but the relationship effect each has is [code]. */
+/* treaty status codes. The names are the game's own strings 17361 + code [confirmed]; 4 (the start value of every pair) and 6 were also seen
+ * in the matrix in play. What each code does to the relationship score is read from TDiplomacyMgr_SetStatusEx @ 004f1b70 [code]. */
+enum Status {
+    ST_MEMBER_OF_OUR_EMPIRE = 0,                /* "Member of our Empire" */
+    ST_RULER_OF_OUR_EMPIRE = 1,                 /* "Ruler of our Empire" */
+    ST_ALLIANCE = 2,                            /* "Alliance" */
+    ST_PACT = 3,                                /* "Non-Aggression Pact" */
+    ST_PEACE = 4,                               /* "Peace" */
+    ST_EMPIRE = 5,                              /* "Member" (both in the same Empire): the score is set to 255 */
+    ST_WAR = 6                                  /* "War" */
+};
+
+/* TDiplomacyMgr_RelationshipLevel @ 004f19c0 [code]: the 0-255 score as the 8-level colour code on the diplomacy screen. */
+int relationship_level(int score)
+{
+    if (score < 0x15) return 0;
+    if (score < 0x32) return 1;
+    if (score < 0x50) return 2;
+    if (score < 0x65) return 3;
+    if (score < 0x88) return 4;
+    if (score < 0xab) return 5;
+    if (score < 0xce) return 6;
+    return 7 + (score > 0xf0);
+}
 
 typedef struct Diplo {
     short relation[NATIONS][NATIONS];           /* +0x79c  score 0..255, symmetric                        [confirmed] */
@@ -129,6 +149,10 @@ int main(void)
     /* the Empire sets the score to the maximum */
     set_status(&d, 2, 12, ST_EMPIRE, 5);
     CHECK(d.relation[2][12] == 255);
+
+    /* the colour code: start-of-game scores 90 / 110 / 150 / 255 fall in levels 3, 4, 5 and 8; the war scores seen in play, 40 and 50, in levels 1 and 2 */
+    CHECK(relationship_level(90) == 3 && relationship_level(110) == 4 && relationship_level(150) == 5 && relationship_level(255) == 8);
+    CHECK(relationship_level(40) == 1 && relationship_level(50) == 2 && relationship_level(20) == 0 && relationship_level(240) == 7);
 
     puts(fails ? "diplomacy model: FAILURES" : "diplomacy model: all checks pass");
     return fails != 0;
