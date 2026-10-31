@@ -36,6 +36,8 @@ typedef struct City {
     short plant_pending;        /* same for the Power Plant                                          [confirmed in play] */
     short workers[3];           /* untrained, trained, expert workers  [confirmed in play: left bar of the Industry screen] */
     short units_pending[4];     /* civilians paid for, reported at the next turn start (Miner, Prospector, Farmer, Engineer)  [confirmed in play] */
+    short ships_pending[4];     /* ships paid for (Trader, Indiaman, Frigate, Ship-of-the-Line); appear next turn  [confirmed in play] */
+    short merchant;             /* merchant marine capacity (units that can be sold or bought per turn)  [confirmed in play: 16 -> 20 for 2 Traders] */
     short refinery_expand_pending; /* an expansion (+2 capacity) has been paid for; completes at the next turn start  [confirmed in play] */
 } City;
 
@@ -300,6 +302,23 @@ int train_worker(City *c, int to_expert)
     return 1;
 }
 
+/* ---- Shipyard: each ship costs goods only (no labor, no cash, no worker), charged when the arrow is clicked (read from the dialog, then 2 Traders
+ * seen: Fabric 20 -> 16, Lumber 16 -> 8). Traders and Indiamen are merchant ships: "Our merchant capacity has increased to 20" at the next turn start,
+ * +2 per Trader (Cargo 2), +4 per Indiaman (Cargo 4, read); warships carry no cargo.  [confirmed in play for the Trader; costs of the others read] */
+enum Ship { TRADER, INDIAMAN, FRIGATE, SHIP_OF_THE_LINE };
+static const struct { short fabric, lumber, arms, cargo; } SHIP[4] = { { 2, 4, 0, 2 }, { 3, 7, 0, 4 }, { 2, 5, 2, 0 }, { 3, 8, 5, 0 } };
+int order_ship(City *c, int kind)
+{
+    if (c->stock[FABRIC] < SHIP[kind].fabric || c->stock[LUMBER] < SHIP[kind].lumber || c->stock[ARMS] < SHIP[kind].arms) return 0;
+    c->stock[FABRIC] -= SHIP[kind].fabric; c->stock[LUMBER] -= SHIP[kind].lumber; c->stock[ARMS] -= SHIP[kind].arms;
+    c->ships_pending[kind]++; return 1;
+}
+void complete_ships(City *c)
+{
+    int k;
+    for (k = 0; k < 4; k++) { c->merchant += c->ships_pending[k] * SHIP[k].cargo; c->ships_pending[k] = 0; }
+}
+
 static int fails;
 #define CHECK(c) do { if (!(c)) { printf("FAIL line %d: %s\n", __LINE__, #c); fails++; } } while (0)
 
@@ -423,6 +442,16 @@ int main(void)
         u.workers[0] = 2; u.workers[1] = 3; u.labor = 16; u.stock[PAPER] = 20; u.cash = 50000;
         CHECK(train_worker(&u, 0) && u.stock[PAPER] == 19 && u.cash == 49900 && u.labor == 15 && u.workers[1] == 4);
         CHECK(train_worker(&u, 1) && u.stock[PAPER] == 17 && u.cash == 48900 && u.labor == 13 && u.workers[2] == 1);
+    }
+
+    /* Shipyard, seen in play: two Traders. */
+    {
+        City y; memset(&y, 0, sizeof y);
+        y.stock[FABRIC] = 20; y.stock[LUMBER] = 16; y.stock[ARMS] = 10; y.merchant = 16;
+        CHECK(order_ship(&y, TRADER) && order_ship(&y, TRADER) && y.stock[FABRIC] == 16 && y.stock[LUMBER] == 8);
+        complete_ships(&y); CHECK(y.merchant == 20);              /* seen: "merchant capacity has increased to 20" */
+        CHECK(order_ship(&y, SHIP_OF_THE_LINE) && y.stock[ARMS] == 5 && y.stock[LUMBER] == 0);
+        CHECK(!order_ship(&y, SHIP_OF_THE_LINE));                 /* no Lumber left: refused */
     }
 
     puts(fails ? "production model: FAILURES" : "production model: all checks pass");

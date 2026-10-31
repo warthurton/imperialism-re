@@ -33,5 +33,5 @@ Prices move with the deals (Hardware 1,204 -> 1,191 -> 1,170..., Food 72 -> 67);
 
 ## Still open
 Who is "first in line" (the favourite-trader table at `TDiplomacyMgr` +0x18a6 is the likely rule), how the price update works, the Deal Book/Trade Book tabs, the ship purchase
-(merchant marine grows through the Shipyard), and whether a bid that finds no offer carries over. Read from code only: the offer-sheet settlement order and the price formula.
+(merchant marine grows through the Shipyard: +2 per Trader, 16 -> 20 seen, see production_playtest.md), and whether a bid that finds no offer carries over. Read from code only: the offer-sheet settlement order and the price formula.
 Harness: `harness/prod_endturn.ps1 -Accept` accepts every offer and prints each sheet's text.

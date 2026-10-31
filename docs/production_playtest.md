@@ -252,3 +252,19 @@ Dialog text is READ from the log: the cost block ("Cost:" workers, Paper, cash) 
   Iron Railroad Bridges, Driller after Oil Drilling), so address them by position (`pic1..4`, `add1..4`, `sub1..4` in `fast.ps1`'s `unit` dialog kind).
 * Trade School training (costs in the fourth run above) is modelled in `reimpl/production.c` next to the civilians (`train_worker`, `order_civilian`), self-tested.
 * Not tested: the Armory and Shipyard dialogs (the manual says they work "exactly like the University"; the `unit` controls are expected to match).
+
+## Shipyard (fixture `oil_plant_built`)
+
+The Shipyard is the ship-building yard at the top-right of the Industry screen (about (760,300) mirror units); its dialog is also 376x439 but laid out differently from the University's
+(the four ships are at the bottom: Trader, Indiaman top row, Frigate, Ship-of-the-Line below). Costs are goods only, no labor, no cash, no worker:
+
+| Ship | Cost (Fabric / Lumber / Arms) | Stats read |
+|---|---|---|
+| Trader | 2 / 4 / - | Hull 25, Cargo 2, no weapons |
+| Indiaman | 3 / 7 / - | Hull 40, Armor 5, Cargo 4 |
+| Frigate | 2 / 5 / 2 | Firepower 3, Range 5, Armor 10, Hull 35, Speed 4 |
+| Ship-of-the-Line | 3 / 8 / 5 | Firepower 6, Range 6, Armor 20, Hull 65, Speed 3 |
+
+* Seen: two Traders took Fabric 20 -> 16 and Lumber 16 -> 8 at the click; at the next turn start the Interior Minister reported "New units are reporting for duty: 2 Traders. Our merchant
+  capacity has increased to 20." and the ship icon on the Board of Trade went 16 -> 20 (+2 per Trader). That capacity is the per-turn limit on units sold plus bought (`docs/trade.md`).
+* Costs of the other three ships were read from the dialog's text, not ordered. Model: `order_ship` / `complete_ships` in `reimpl/production.c`.
