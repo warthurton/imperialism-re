@@ -4494,6 +4494,7 @@
 "005b0340": "TTechMgr_UnlockRegiment",
 "005b0500": "TTechMgr_UnlockShip",
 "00581260": "TGame_GetLocalPower",
+"0049d620": "Ambit_Assert",
 "0057d8b0": "TGame_GetTurn"
 },
 "vtables": {

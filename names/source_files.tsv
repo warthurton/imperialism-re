@@ -23,8 +23,8 @@ Cross_UGameWindow	display
 QuickDraw	display
 McWindow	display
 CDib	display
-Cross_UMap	display
-Cross_UMapper	display
+Cross_UMap	map_sim
+Cross_UMapper	map_sim
 Cross_USuperMap	display
 Cross_UNavy	military_ai
 Cross_UArmyMgr	military_ai

@@ -59,6 +59,13 @@ Reading these honestly:
 M0 to M2 are weeks of work and most of the value; M4 and M5 are the long tail (the AI is by far the largest group). I would not promise M5 until the tracer shows how
 much code the AI really executes.
 
+## Module structure: the original source files
+
+The exe's own assert strings name its source files (`docs/source_tree.md`): the game proper is `D:\Ambit\Cross\U*.cpp`. The `core/` modules should follow them: `city` (UCity, UCityMinister),
+`country` (UCountry, UCountryAuto), `army` (UArmyMgr, UDefenseMinister), `navy` (UNavy), `ocean` (UOcean), `missions` (UMissionSubs), `tactical` (UTacPlayer), `unit` (UUnit), `map` (UMap),
+`mapgen` (UMapper), `news` (UNewspaper), `multiplayer` (UMultiplayerMgr). Trade, tech and diplomacy sit in a zone between `UTacViews` and `UTradeViews` whose file name is not in the strings.
+Every function gets a file attribution from `names/source_attribution.tsv`, so work can be handed out and tracked per original file.
+
 ## What changes about how we work
 
 * **Stop exploratory playing for its own sake** (the Empire-overture test is parked; `docs/STATUS.md` still lists it). Play only to (a) build a fixture that reaches a code path
