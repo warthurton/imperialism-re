@@ -1,0 +1,29 @@
+# https://editorconfig.org  (kept in step with .gitattributes: LF by default, CRLF only for Windows-centric files)
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 4
+
+# Windows-centric files: CRLF
+[*.{ps1,psm1,psd1,bat,cmd,reg,def,rc,sln,vcxproj,ini,ini.example}]
+end_of_line = crlf
+
+# Tab-separated tables: a trailing tab is an empty last column, and names/groups rows must keep their tabs
+[*.tsv]
+indent_style = tab
+trim_trailing_whitespace = false
+
+# Markdown: two trailing spaces can be a line break
+[*.md]
+trim_trailing_whitespace = false
+
+[*.{json,yml,yaml}]
+indent_size = 2
+
+[Makefile]
+indent_style = tab

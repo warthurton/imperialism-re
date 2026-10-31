@@ -26,8 +26,9 @@ local. Saved games in `saves/` are fine (written by the game from a random world
 ## Gotchas
 - Write Python/PowerShell scripts with the Write tool, not inline heredocs (backslashes get mangled: `\a` becomes BEL, `\b`
   backspace, `\n` a real newline). If a one-liner is unavoidable use `chr(92)`, `chr(13)`, `chr(10)`.
-- Files in the working tree are CRLF (git autocrlf). To patch multi-line text, normalise CRLF to LF, edit, convert back, and
-  check `git diff --stat` for whole-file noise.
+- Line endings: `.gitattributes` and `.editorconfig` make everything LF except Windows-centric files (`.ps1`, `.bat`, `.cmd`, `.def`, `.ini`, `.ini.example`, ...), which are CRLF in the working tree; the repository stores LF for all of them, and the rules override `core.autocrlf`. Python patch scripts that edit a text file should read bytes/`newline=''`, normalise `
+` to `
+`, edit, and write back the original style. Check with `git ls-files --eol` (every row should read `i/lf` and `w/lf`, or `w/crlf` for the Windows-centric ones); `git diff --stat` must not show whole-file noise.
 - `python -I` ignores the script dir; scripts insert their own sys.path. Regexes over function bodies can backtrack
   catastrophically: prefer line-by-line checks.
 - `Remove-Item` on `C:\GOG ...` is blocked: build to a new filename and Move-Item.
