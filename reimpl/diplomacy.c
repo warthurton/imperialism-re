@@ -147,12 +147,46 @@ int count_allies(const Diplo *d, int n)
     return k;
 }
 
+/* TDiplomacyMgr_ApplyWarFallout @ 004eff40 (vf32), called from SetStatus when a war is declared (flag 1) [code; every number matches the war on Pram seen in play]:
+ *   1. the victim's score with the aggressor becomes min(score - 50, 49)                                   (seen: 90 -> 40)
+ *   2. every other independent nation i changes ITS score with the aggressor by
+ *          d = (90 - score[victim][i]) * old_score / (divisor * 50)      (C division, truncating)
+ *      divisor: victim a Great Power: 4 if i is a Great Power else 8; victim a Minor Nation: 8 if i is a Great Power, else 2 if i is a neighbour of the
+ *      victim, else 4. If i's score was below 50 it is capped at 49 when d would push it up past that; if it was 50 or more it never falls below 50.
+ *   (flag 0, used when peace is made: the victim's score moves by ((90 - s) * s) / 200 if that is negative, and d is halved: [guess]).
+ * Seen: Pram 90 -> 40; its neighbours (90 - 150) * 90 / 100 = -54 -> floored to 50; other minors (90 - 110) * 90 / 200 = -9 -> 81 (from 90) and 101 (from 110);
+ * Great Powers, whose score with Pram was also 90, get d = 0 and did not move. */
+void war_fallout(Diplo *d, int a, int victim, int flag, const char neighbour[NATIONS][NATIONS])
+{
+    int s = d->relation[a][victim];
+    if (flag == 1) {
+        set_relationship(d, a, victim, s - 0x32 < 0x31 ? s - 0x32 : 0x31);
+    } else {
+        int delta = ((0x5a - s) * s) / 200;
+        if (delta < 0) set_relationship(d, a, victim, delta + s);
+    }
+    for (int i = 0; i < NATIONS; i++) {
+        int div, delta, cur, now;
+        if (i == a || i == victim) continue;
+        if (!is_great_power(victim)) div = is_great_power(i) ? 8 : (neighbour[victim][i] ? 2 : 4);
+        else div = is_great_power(i) ? 4 : 8;
+        delta = ((0x5a - d->relation[victim][i]) * s) / (div * 0x32);
+        if (flag != 1) delta /= 2;
+        cur = d->relation[a][i];
+        now = cur + delta;
+        if (cur < 0x32) { if (delta > 0 && now > 0x31) now = 0x31; }
+        else if (now < 0x32) now = 0x32;
+        set_relationship(d, a, i, now);
+    }
+}
+
 /* The start of a game as read from memory (Introductory, spring 1815, turn 0) [confirmed in play]:
  * every pair has status 4 and turn -1; scores are 90 between a Great Power and anyone, 110 between two Minor Nations,
  * 150 between neighbouring Minor Nations, 110 between the human Great Power and its four starting consulate nations,
  * and 255 (minor) / 256 (great power) with itself. */
 void start_of_game(Diplo *d)
 {
+    memset(d, 0, sizeof *d);                    /* presence none, no pending orders, no cash: the caller sets what a test needs */
     for (int a = 0; a < NATIONS; a++)
         for (int b = 0; b < NATIONS; b++) {
             d->status[a][b] = ST_PEACE; d->turn[a][b] = -1;
@@ -232,6 +266,22 @@ int main(void)
         CHECK(get_status(&e, 2, 19) == ST_PACT && e.relation[2][19] == 111 && e.turn[2][19] == 2);             /* 4 -> 3, 101 -> 111 */
         CHECK(get_status(&e, 2, 11) == ST_PEACE && e.relation[2][11] == 50 && e.turn[2][11] == 2);             /* 6 -> 4, 40 -> 50 */
         CHECK(aid_bonus(1000) == 2 && aid_bonus(3000) == 4 && aid_bonus(5000) == 6 && aid_bonus(10000) == 10 && aid_bonus(7) == 0);
+    }
+
+    /* The war on Pram (nation 11) by the human power (nation 2), exactly as read from the game: Pram's neighbours are 12, 13 and 14. */
+    {
+        Diplo w; char nb[NATIONS][NATIONS];
+        start_of_game(&w);
+        memset(nb, 0, sizeof nb);
+        for (int i = 12; i <= 14; i++) { nb[11][i] = nb[i][11] = 1; w.relation[11][i] = w.relation[i][11] = 150; }
+        for (int i = 19; i <= 22; i++) w.relation[2][i] = w.relation[i][2] = 110;      /* the human power's four starting consulate nations */
+        set_status(&w, 2, 11, ST_WAR, 1);
+        war_fallout(&w, 2, 11, 1, nb);
+        CHECK(w.relation[2][11] == 40);                                                  /* the victim */
+        CHECK(w.relation[2][12] == 50 && w.relation[2][13] == 50 && w.relation[2][14] == 50);   /* its neighbours: floored at 50 */
+        CHECK(w.relation[2][7] == 81 && w.relation[2][8] == 81 && w.relation[2][10] == 81 && w.relation[2][15] == 81 && w.relation[2][18] == 81);
+        CHECK(w.relation[2][19] == 101 && w.relation[2][22] == 101);                     /* 110 - 9 */
+        CHECK(w.relation[2][0] == 90 && w.relation[2][1] == 90 && w.relation[2][3] == 90 && w.relation[2][6] == 90);  /* Great Powers: unchanged */
     }
 
     puts(fails ? "diplomacy model: FAILURES" : "diplomacy model: all checks pass");

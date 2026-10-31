@@ -33,7 +33,7 @@ Last updated: 2026-10-31 (diplomacy overtures decoded).
 
 1. **Diplomacy, finish** (`docs/diplomacy.md`, `reimpl/diplomacy.c`, tools `readdiplo.py`, `readpending.py`, `readnations.py`): decoded and seen in play: the four matrices
    (relation, status, turn, presence), all overture ids and costs (War 0x131, Consulate 0x133, Embassy 0x134, Alliance 0x12e, Pact 0x12f, Peace 0x130), placement and End Turn
-   execution, Pact/Peace effects. Still open: **the war ripple code** (-50 / -40 / -9, seen once), the Empire overture, Alliance on the Great Power side, aid in play.
+   execution, Pact/Peace effects, **the war ripple** (formula, predicted a second war exactly). Still open: the Empire overture, Alliance on the Great Power side, aid in play.
 2. (done) Power Plant limit and the out-of-fuel turn.
 3. The next least-verified systems: training (University, Trade School), transport, trade settlement (`TTradeMgr_*` read in the code, never checked in play).
 4. Keep playing normally now and then with crash dumps armed (`dumps/`) to confirm the music fix.
