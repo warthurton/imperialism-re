@@ -41,8 +41,35 @@ The game calls one assert hook, `Ambit_Assert` (0x49d620), about 360 times with 
 `UTradeViews.cpp` has no trade logic anchor: the trade manager's code (`TTradeMgr`, 0x5b8080) is in the zone after `UTestDialogs.cpp`, so it lives in a file whose name does not appear (possibly a `UTrade.cpp` with no assert). The same
 may hold for tech (`TTechMgr`, 0x5aef30) and diplomacy (`TDiplomacyMgr`): they sit in the 0x5a9d90-0x5ba7a0 range between `UTacViews` and `UTradeViews`.
 
+## Narrowing the boundary zones (`tools/source_boundaries.py`)
+
+Only about 1,230 of the 5,996 non-library functions carry or sit between assert anchors of the same file. The rest lie in 'boundary' zones between two anchored files. Inside a zone the files switch exactly
+once (a translation unit is contiguous), so the question is where. The resolver is deliberately conservative: it labels only functions on the evidence side of every best cut and leaves the stretch in
+between open. Labels in `names/source_attribution.tsv`, strongest first:
+
+| Label | Meaning | Functions |
+|---|---|---|
+| `assert` | the function calls the assert hook with its file name | 198 |
+| `inferred` | between two asserts of the same file | 1,031 |
+| `cut` | placed by **hard evidence**: its class (the methods of a class already attributed are all in one file) or the position of its exception-handler stub | 243 |
+| `prior` | placed by the **semantic prior** only: a view/dialog class belongs in the `*Views`/`*Dialogs` file, other classes in the logic file; weaker, circular with our own class naming, treat as likely | 1,503 |
+| `boundary` | still open (one of the two files) | 2,631 |
+
+Evidence that was tested and what it showed:
+* **Exception-handler stubs**: about 19% of functions store a stub address in their frame (`puStack_8 = &UNK_0062a8f6`). The stubs lie in one region in link order, and for the certain functions the stub address
+  of a file's functions forms an interval with **no file out of order** (29 files). It orders functions but only bounds the cut (a function past A's last known stub is not in A's known part), so it helps near the edges.
+* **Runtime-class addresses** (`classes.tsv`, `classVA`): the `CRuntimeClass` objects are laid out in link order too (17 files, **no file out of order**, tight clusters). Same limit: a monotone order, not a cut.
+* **Call-graph votes** were tried and removed: UI code calls into game logic, so callers of a logic function vote for the UI file and pull the cut the wrong way. This had put 133 city-production functions
+  into `UCityDialogs.cpp` before the check against our groups caught it (`tools/source_groups_check.py`: `UCity.cpp` is now 170 production functions, as it should be).
+* **Data strings**: file names sit in the string pool next to the strings of their own file (the class name `TMapMgr` right before `UMap.cpp`'s name), roughly within 0x150 bytes, but pool order is too fuzzy to cut on.
+
+The biggest zones still open: `UOceanViews|USetupScreens` (342), `UMapper|UMissionSubs` (298), `UMissionSubs|UMultiplayerMgr` (204), `USetupScreens|USmallViews` (178), `IncludeView|McAppStream` (157),
+`UDiplomacyViews|UDisplayMgr` (131), `UTestDialogs|UTradeViews` (130). The ones holding trade, tech and diplomacy logic (`UTacViews|UTestDialogs`, `UTestDialogs|UTradeViews`) probably contain a file with no assert at all.
+The tracer from the plan (real call trees) is the next independent source of evidence.
+
 ## What this changes
 
 * The reimplementation's modules can follow the original files (city, country, country-auto, army, navy, ocean, missions, tactical, unit, map, mapper) instead of our guessed groups. See `docs/PLAN_reimplementation.md`.
-* Boundary zones can be narrowed further: class names in the string pool sit next to their file's name, and a class's methods belong to its file. Not done yet.
-* Corrections made from this: `UMap.cpp` and `UMapper.cpp` functions moved from `display` / `framework` to `map_sim` (`map_sim` grew from 19 to 125 functions); `Ambit_Assert` named (0x49d620).
+* Corrections made from this: `UMap.cpp` and `UMapper.cpp` functions moved from `display` / `framework` to `map_sim` (`map_sim` grew from 19 to over 120 functions); `Ambit_Assert` named (0x49d620).
+* **Multiplayer is tabled**: `UMultiplayerMgr.cpp` resolves to 0x540840-0x54ecc0 (190 functions), `WNetMgr.cpp` to 0x5e2850-0x5e3f30; with the lounge/join/net-select screens and the Remote/Proxy/Host Great Power classes they form the
+  parked group `multiplayer` (262 functions), next to the parked `directplay` group (149).

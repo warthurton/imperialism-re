@@ -12,6 +12,7 @@ import collections, glob, os, re, sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 SRC = os.path.join(os.path.dirname(HERE), 'src')
 LIB = ('crt', 'mfc', 'link_stubs', 'static_init', 'dtor_wrappers', 'framework')
+PARKED = ('multiplayer', 'directplay')       # tabled on purpose: not part of the lift (docs/PLAN_reimplementation.md)
 HEAD = re.compile(r'^// (\S+) @ ([0-9a-f]{8})', re.M)
 CALL = re.compile(r'\b(?:thunk_)?(FUN_([0-9a-f]{8})|[A-Za-z_][A-Za-z0-9_]*)\s*\(')
 
@@ -88,8 +89,8 @@ def main():
         reach_l[g] += funcs[a][2]
     print('%-14s %7s %7s %9s | %9s %7s %9s' % ('group', 'funcs', 'named', 'lines', 'reachable', 'named', 'lines'))
     for g in sorted(tot, key=lambda k: -tot[k]):
-        print('%-14s %7d %7d %9d | %9d %7d %9d%s' % (g, tot[g], nam[g], lines[g], reach[g], reach_n[g], reach_l[g], '   (library)' if g in LIB else ''))
-    game = [g for g in tot if g not in LIB]
+        print('%-14s %7d %7d %9d | %9d %7d %9d%s' % (g, tot[g], nam[g], lines[g], reach[g], reach_n[g], reach_l[g], '   (library)' if g in LIB else ('   (parked)' if g in PARKED else '')))
+    game = [g for g in tot if g not in LIB and g not in PARKED]
     print('%-14s %7d %7d %9d | %9d %7d %9d' % ('GAME TOTAL', sum(tot[g] for g in game), sum(nam[g] for g in game), sum(lines[g] for g in game),
                                              sum(reach[g] for g in game), sum(reach_n[g] for g in game), sum(reach_l[g] for g in game)))
     print('start points: %s; direct calls only (vtable calls not followed)' % ', '.join(starts))

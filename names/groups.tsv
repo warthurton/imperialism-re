@@ -2,6 +2,10 @@
 # NOTE: rows of kind late/laddr are last-resort heuristics (tried only on functions no other pass could place); treat the group as a filing guess, not proof.
 # Columns (tab separated): on | regex | group     on = name (function name) or body (function text)
 addr	0047f870-004833b0	directplay
+# Multiplayer is TABLED (parked, not part of the lift): UMultiplayerMgr.cpp and WNetMgr.cpp (ranges from tools/source_boundaries.py) and the multiplayer setup screens in other files
+addr	00540840-0054ecc0	multiplayer
+addr	005e2850-005e3f30	multiplayer
+name	^T(LoungeDialog|JoinSelectorDialog|MultiMessagePicture|MadnessButton|NetMgr|NetSelectPicture|NetGameSelectPicture|GameSetupMultiplayerPicture|MultiplayerMgr|RemoteGreatPower|ProxyGreatPower|HostGreatPower)_	multiplayer
 # UMapper.cpp (assert strings, tools/source_files.py) is the map generator (TMapMaker): game logic, filed by an older rule under framework
 addr	00529960-0052e350	map_sim
 name	^TScreenBuilder_	ui_layouts
@@ -58,3 +62,5 @@ laddr	004b0970-004b09ff	framework
 laddr	005420a0-005421ff	nations_sim
 laddr	005498d0-00549fff	nations_sim
 laddr	005c3670-005c36ff	military_ai
+laddr	00516090-005178ff	map_sim
+laddr	00494700-004947ff	display

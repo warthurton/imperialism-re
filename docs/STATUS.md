@@ -49,7 +49,8 @@ Last updated: 2026-10-31 (Armory and Indiaman verified, 0x4357b0 named, a group 
    running game as the proof. First actions: the tracer, the snapshot dump and diff, the field miner. Exploratory playing is parked (the items below stay as open questions, not as the plan);
    baseline numbers come from `tools/callgraph_stats.py` (216 of 5,290 game functions reachable by direct calls from the turn driver; about 100 have a meaning name).
    **New: the original source file names are in the exe** (assert strings, `docs/source_tree.md`): about 45 files (`UCity`, `UCountry`, `UCountryAuto`, `UArmyMgr`, `UNavy`, `UOcean`, `UMissionSubs`, `UTacPlayer`, `UUnit`, `UMap`, `UMapper`, ...),
-   used as the module structure for the plan; `UMap`/`UMapper` re-filed to `map_sim`; `Ambit_Assert` named.
+   used as the module structure for the plan; `UMap`/`UMapper` re-filed to `map_sim`; `Ambit_Assert` named. Boundary zones narrowed by `tools/source_boundaries.py` (class and stub-order evidence, plus a labelled semantic prior):
+   2,631 functions still open. **Multiplayer is tabled** (groups `multiplayer` 262 and `directplay` 149 are parked and not counted: `docs/PLAN_reimplementation.md`).
 1. Done: University/Trade School, Transport, trade settlement, Shipyard, Armory, Indiaman. Left: the first-in-line rule and price formula (code notes in `docs/trade.md`; needs a Board of Trade
    with rival bids, so a fixture with more goods), and the full transport bar (unreachable with only food on the network: sliders stop at 'available', 10 of 15). Hussars $100 vs Skirmishers $200 not re-ordered.
 2. Diplomacy leftovers above (order Empire where it is offered, ally with a Great Power, make a grant) if wanted.

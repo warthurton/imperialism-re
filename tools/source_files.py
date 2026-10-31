@@ -12,7 +12,7 @@ import collections, glob, os, re, sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 HEAD = re.compile(r'^// (\S+) @ ([0-9a-f]{8})', re.M)
-CALL = re.compile(r'FUN_0049d620\(\s*(s_[A-Za-z0-9_]+_([0-9a-f]{8}))\s*(?:,\s*(0x[0-9a-f]+|\d+))?')
+CALL = re.compile(r'(?:FUN_0049d620|Ambit_Assert)\(\s*(s_[A-Za-z0-9_]+_([0-9a-f]{8}))\s*(?:,\s*(0x[0-9a-f]+|\d+))?')    # the hook is named Ambit_Assert since names.tsv row 0049d620
 
 
 def file_strings():
