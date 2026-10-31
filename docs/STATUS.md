@@ -31,9 +31,10 @@ Last updated: 2026-10-31 (Armory and Indiaman verified, 0x4357b0 named, a group 
 
 ## Open questions
 
-- **Diplomacy leftovers**: the Empire overture (id 0x12d is a guess; not offered at the relationship tried), what an Alliance does on the Great Power side (Kem did not ally), foreign aid
+- **Diplomacy leftovers**: the Empire overture (id 0x12d is a guess; not offered at the relationship tried; the manual and the card say it needs an Embassy and friendly relations, so try it where an Embassy exists: `docs/card_tables.md`), what an Alliance does on the Great Power side (Kem did not ally), foreign aid
   in play (Grants tab; table at Great Power +0xe0), the peace version of the fallout routine, status codes 0, 1 and 5. The Offer Sheet's settlement logic (`TTradeMgr_SettleTrades`) is read, not tested.
 - **Dialog identity**: a dialog's size gives its kind (production 276x149, construction 320x320) but not which building it belongs to (the text log can now tell: read the dialog's strings).
+- **Quick reference card** (`docs/card_tables.md`, read by eye; the manual in `docs/manual/` is git-ignored and rebuilt by `tools/ocr_pdf.py`, see `docs/manual_ocr.md`): terrain and levels, unit stats for three eras and the navy, the diplomacy chart; matches the Armory, Shipyard and recipes seen in play.
 - **Technology**: `docs/technology.md`. The microscope and hot key 5 are the same screen; buying is one click, $ charged at once, "Purchasing" then "Purchased in <year>". Techs are released by the calendar (random turn inside a window per tech, tools/dump_techtable.py); prices are a fixed table. Open: the other techs' effects, AI buying.
 - Briefings through the registry survive a loaded save but not a new game; the Library and Load screens have no found way out except choosing.
 - `names/names.tsv`: 0x4357b0 is now `TScreenBuilder_HelpAndSmallWindows` (likely: a switch on window id building the Help topics/tips window and other small windows; read from code, not seen in play). The 8 unnamed map-reading functions at 0x557e10-0x55a160 and 0x563990 moved from `ui_screens` to `military_ai` (they read `g_MapMgr` and sit among TPortZone/TOcean code; `names/groups.tsv`). `map_sim`, `display` and a few `nations_sim` placements near 0x5149d0 are still guesses.
