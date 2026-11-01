@@ -4,7 +4,7 @@ Agent instructions (single source for Claude Code, GitHub Copilot and other codi
 
 **Start of every session: read this file, then `docs/STATUS.md`** (what is done, what is open, what to do next, how to resume). Follow its links to the other docs (see "Where things are" at the end).
 
-Public fan project (MIT): reverse engineering and display modernization for Imperialism (1997, GOG). Learning
+Public fan project (MIT): reverse engineering and portable reimplementation for Imperialism (1997, GOG). Learning
 exercise. NEVER commit game files, decompiler output, discs or third-party binaries (see .gitignore; vendor_untrusted/
 is proprietary and local only). Check `git ls-files` for binaries before shipping. Raw memory dumps (`results/*.bin`) stay
 local. Saved games in `saves/` are fine (written by the game from a random world, no code or assets).
@@ -36,9 +36,13 @@ local. Saved games in `saves/` are fine (written by the game from a random world
 - `python -I` ignores the script dir; scripts insert their own sys.path. Regexes over function bodies can backtrack
   catastrophically: prefer line-by-line checks.
 - `Remove-Item` on `C:\GOG ...` is blocked: build to a new filename and Move-Item.
-- Maintained display/music builds live in sibling `imperialism-compat`; `shim/build.sh`
-  and `winmm/build.sh` delegate there (override with `IMPERIALISM_COMPAT`). Read that repo's
-  instructions before changing its code. The DLLs are 32-bit; game DLLs are locked while it runs.
+- Maintained display/music builds live in the `compat/` Git submodule; initialize it with
+  `git submodule update --init compat`. `shim/build.sh` and `winmm/build.sh` delegate there
+  (override with `IMPERIALISM_COMPAT`). Compat was purposefully extracted to separate
+  runtime compatibility work from this repo's decompilation/reimplementation research.
+  Read Compat's own instructions before changing its code. Commit Compat changes in its
+  repository first, then update and commit the gitlink here to an available upstream revision.
+  The DLLs are 32-bit; game DLLs are locked while it runs.
 - Vtable calls hide callers: search for `+ 0xNN))(` patterns, not function names. A call through an array
   (`(**(code **)(*(int *)*puVar3 + 200))()`) looks different from one through a named local.
 - Read the game's manual: `pdftotext -layout "C:\GOG Games\Imperialism\Imperialism - manual.pdf" out.txt`. It names every screen,
@@ -82,6 +86,7 @@ local. Saved games in `saves/` are fine (written by the game from a random world
 ## Where things are
 Read first: this file, then **`docs/STATUS.md`** (state, open questions, next steps, how to resume). Keep both current (see Workflow).
 - `README.md`: layout and rebuild.
+- `CHANGELOG.md`: project history and the intentional Compat/RE separation.
 - `shim/README.md`: Imperialism Compat split, legacy build entry points and `harness/prod_compat.ps1` acceptance/restore behavior.
 - `docs/original_code_style.md`: evidence-backed assessment of the original C++/MFC/Ambit architecture, tables, switches and decompiler limits.
 - `docs/snapshots.md`: partial read-only state capture, semantic/raw diff, coverage limits and validation.
@@ -91,5 +96,5 @@ Read first: this file, then **`docs/STATUS.md`** (state, open questions, next st
   `docs/production_playtest.md` + `docs/recipes.md` (production, Power Plant, Refinery, University, Shipyard; `reimpl/production.c`),
   `docs/diplomacy.md` (`reimpl/diplomacy.c`), `docs/transport.md` (`reimpl/transport.c`), `docs/trade.md` + `docs/trade_rows.txt` (`reimpl/trade.c`).
 - `saves/` (fixtures, `saves/README.md`), `harness/` (game driving), `tools/` (readers, pokes, decompile tooling), `names/`, `classes.tsv`, `ghidra/`,
-  `shim/` and `winmm/` (build entry points for the separate Imperialism Compat repository).
+  `compat/` (pinned Imperialism Compat submodule), `shim/` and `winmm/` (legacy build entry points).
 - A new doc or model goes in this list in the same PR.

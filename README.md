@@ -1,4 +1,4 @@
-# Imperialism (1997) – reverse engineering and modernization workspace
+# Imperialism (1997) – reverse engineering and reimplementation workspace
 
 An unofficial, non-commercial fan project. I did it for three reasons: I like the game, I could not find anything like
 it already out there, and it is a learning exercise in decompilation and reverse engineering.
@@ -15,10 +15,18 @@ What is here is original work: build entry points, analysis tooling, and notes o
 This repo holds our own code, tools and notes. It deliberately does **not** hold game files, decompiler output
 or third-party binaries (see `.gitignore`); everything excluded can be regenerated with the scripts below.
 
+The display shim and music build tooling were purposefully extracted into
+[Imperialism Compat](https://github.com/warthurton/imperialism-compat) to separate
+runtime compatibility work from decompilation, research and portable game-logic
+reimplementation. Compat has its own build, tests, CI and releases. This repository
+references a specific Compat revision through the `compat/` Git submodule so the
+RE harness can test that revision without maintaining a second copy of its source.
+
 ## What is here
 
 | Path | What |
 |---|---|
+| `compat/` | Pinned Git submodule of Imperialism Compat: maintained runtime display/music code, build tooling and release documentation. |
 | `shim/` | Compatibility build entry point for [Imperialism Compat](https://github.com/warthurton/imperialism-compat), the standalone display/music repository. `archive_winmm_patch/` preserves the retired runtime patcher. |
 | `winmm/` | Compatibility entry point for Compat's GOG-codec music build; both codec alternatives and CI packages live in Compat. |
 | `tools/` | `patch_winmm_file.py` (binary-patches the three buffer races in GOG's stock winmm.dll; fallback if you keep GOG's DLL), class/vtable naming, string-table and resource dumpers. |
@@ -32,16 +40,29 @@ or third-party binaries (see `.gitignore`); everything excluded can be regenerat
 
 ## Rebuild / install
 
-Clone [Imperialism Compat](https://github.com/warthurton/imperialism-compat) beside this
-checkout, or set `IMPERIALISM_COMPAT` to its directory. Maintained display source and
-music build tooling now live there; [shim/README.md](shim/README.md) explains the split.
+Clone this repository with its pinned Compat submodule:
+
+```sh
+git clone --recurse-submodules https://github.com/warthurton/imperialism-re.git
+```
+
+For an existing checkout, or after pulling a changed submodule pin:
+
+```sh
+git submodule update --init compat
+```
+
+The legacy build commands use `compat/` by default. Set `IMPERIALISM_COMPAT` to use
+another Compat checkout; [shim/README.md](shim/README.md) explains the boundary and
+how to update the recorded revision. Read Compat's own instructions before editing it.
 
 * Shim: `shim/build.sh build.dll`, then (game closed) copy over `msvfw32.dll` in the game folder.
 * Music DLL: `winmm/build.sh "C:/GOG Games/Imperialism/libvorbisfile-3.dll"`, copy `winmm/build/winmm.dll` over the game's `winmm.dll`.
   Keep GOG's original (`original/winmm.dll`, not in git) to roll back.
 * Standalone acceptance: `harness/prod_compat.ps1 -Name compat_unique_name` tests the
-  sibling builds with both music variants, restores installed DLLs/INIs with hash checks
-  and finishes with the game stopped. Build the Compat artifacts first.
+  `compat/` builds with both music variants, restores installed DLLs/INIs with hash checks
+  and finishes with the game stopped. Build the Compat artifacts first; pass
+  `-CompatRoot <path>` to test another checkout.
 * Decompile: `analyzeHeadless … -postScript ExportC.java <out.c>`; then `CreateEntries.java` with a list of vtable/factory
   entry points, `ExportNew.java`, and `tools/name_classes.py` to get `imperialism_named.c`.
 * Crash dumps: HKLM `...\Windows Error Reporting\LocalDumps\Imperialism.exe` (full dumps into `dumps/`), open with lldb

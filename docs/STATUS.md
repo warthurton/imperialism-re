@@ -1,16 +1,38 @@
 # Status: where the project stands
 
 Update this file at every ship (and before ending a session). It is the first thing to read after `AGENTS.md`.
-Last updated: 2026-10-31 (Imperialism Compat split; military snapshot continuation remains next).
+Last updated: 2026-11-01 (Compat submodule integration; military snapshot continuation remains next).
 
 ## Done and verified (in the running game unless noted)
 
+- **Compat submodule integration** (repository/build configuration): `compat/` records
+  the separate Imperialism Compat repository at a specific revision. Initialize with
+  `git submodule update --init compat`, or clone RE with `--recurse-submodules`.
+  The legacy build commands and default acceptance-harness path now use this pinned
+  checkout; `IMPERIALISM_COMPAT` / `-CompatRoot` can select another checkout explicitly.
+  The extraction deliberately separates runtime compatibility and releases (Compat)
+  from decompilation, analysis and portable-core reimplementation (RE). The game harness
+  remains here. See `CHANGELOG.md` and `shim/README.md`; the portable-core handoff below
+  is unchanged. No new live-game validation is implied by this configuration change.
+  The pin is Compat `02ed0881196e168e2a2cc8598c906a841a0625cf`, tagged as
+  [v0.1.0-preview.1](https://github.com/warthurton/imperialism-compat/releases/tag/v0.1.0-preview.1).
+  Both default legacy build commands passed from that tree; missing-checkout guards
+  and PowerShell parsing/line endings passed. Compat's tag CI published the preview
+  with all three ZIPs and checksums. Its full guide/backdrop evidence live in Compat.
+- **Compat documentation/backdrop follow-up** (native/resource inspection): all original
+  display-shim functions are annotated; executable bitmap 281 provides the stock
+  128-pixel heraldic tile, with plain-brown fallback and an opt-out. No artwork is shipped.
+  Native rendering/fallback/logging, music and package checks passed in Compat.
+  The new `compat_backdrop1` live run and restored-shim baseline `snapshot_focus_baseline1`
+  both stopped at the existing foreground-focus guard before fixture input. Cleanup
+  stopped the game/restored settings; the Compat wrapper restored original DLLs/INIs.
+  Startup confirmed the new bitmap loaded and the mirror initialized, not full gameplay.
 - **Imperialism Compat split**: maintained display source and music build tooling moved
   to https://github.com/warthurton/imperialism-compat. One repo, display and music artifact
   groups, with two alternative music ZIPs: installed GOG codecs or source-built libogg
   1.3.6/libvorbis 1.3.7. Windows CI passed the initial public push and the packaging
   integrity follow-up (Compat PR #1). Both legacy build entry
-  points here delegate to the sibling checkout; `shim/README.md` describes setup.
+  points here now delegate to the pinned `compat/` submodule; `shim/README.md` describes setup.
   `harness/prod_compat.ps1` passed ten snapshot checks with each music variant and display
   together (`compat_acceptance1`, game turn 5 -> 6). Original DLLs/INIs restored and
   hash-checked; game stopped and settings restored. Native tests also passed for both
