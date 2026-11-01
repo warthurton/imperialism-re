@@ -38,6 +38,7 @@ vendor_untrusted/
 src/
 
 winmm/build/
+shim/build/
 results/city_*.json
 !results/city_h_queued.json
 !results/city_i_after.json

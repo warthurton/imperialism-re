@@ -9,7 +9,7 @@ Everything excluded can be regenerated from your copy with the scripts below. Th
 endorsed by the rights holders of *Imperialism*; the name belongs to them. If a rights holder objects to anything here,
 open an issue and it will be removed.
 
-What is here is original work: a display shim, build scripts, analysis tooling, and notes on how the game works
+What is here is original work: build entry points, analysis tooling, and notes on how the game works
 (trade, turn phases, class layout), with every guess marked by a confidence level in `names/names.tsv`.
 
 This repo holds our own code, tools and notes. It deliberately does **not** hold game files, decompiler output
@@ -19,8 +19,8 @@ or third-party binaries (see `.gitignore`); everything excluded can be regenerat
 
 | Path | What |
 |---|---|
-| `shim/` | `shim.c`: proxy `msvfw32.dll`. Windowed scaling, resizing, F11 fullscreen on the brown backdrop, mouse mapping, blocks the game's self-minimize. `build.sh` builds it. `archive_winmm_patch/` = the retired runtime patcher for GOG's winmm.dll. |
-| `winmm/` | `build.sh`: rebuilds the music DLL from the maintained open-source ogg-winmm (pinned commit), linked against the game's own libvorbisfile. |
+| `shim/` | Compatibility build entry point for [Imperialism Compat](https://github.com/warthurton/imperialism-compat), the standalone display/music repository. `archive_winmm_patch/` preserves the retired runtime patcher. |
+| `winmm/` | Compatibility entry point for Compat's GOG-codec music build; both codec alternatives and CI packages live in Compat. |
 | `tools/` | `patch_winmm_file.py` (binary-patches the three buffer races in GOG's stock winmm.dll; fallback if you keep GOG's DLL), class/vtable naming, string-table and resource dumpers. |
 | `ghidra/` | Headless-Ghidra scripts (`ExportC` = full decompile, `CreateEntries` = create functions Ghidra missed, `ExportNew`). |
 | `lib_matches.tsv`, `lib_names.json` | MFC 4.21 and C-runtime functions found in the exe by matching the original static libs (`tools/match_lib.py` + `apply_lib_names.py`): 1,183 named. Needs the VC++ 5.0 disc (see below). |
@@ -32,9 +32,16 @@ or third-party binaries (see `.gitignore`); everything excluded can be regenerat
 
 ## Rebuild / install
 
+Clone [Imperialism Compat](https://github.com/warthurton/imperialism-compat) beside this
+checkout, or set `IMPERIALISM_COMPAT` to its directory. Maintained display source and
+music build tooling now live there; [shim/README.md](shim/README.md) explains the split.
+
 * Shim: `shim/build.sh build.dll`, then (game closed) copy over `msvfw32.dll` in the game folder.
 * Music DLL: `winmm/build.sh "C:/GOG Games/Imperialism/libvorbisfile-3.dll"`, copy `winmm/build/winmm.dll` over the game's `winmm.dll`.
   Keep GOG's original (`original/winmm.dll`, not in git) to roll back.
+* Standalone acceptance: `harness/prod_compat.ps1 -Name compat_unique_name` tests the
+  sibling builds with both music variants, restores installed DLLs/INIs with hash checks
+  and finishes with the game stopped. Build the Compat artifacts first.
 * Decompile: `analyzeHeadless … -postScript ExportC.java <out.c>`; then `CreateEntries.java` with a list of vtable/factory
   entry points, `ExportNew.java`, and `tools/name_classes.py` to get `imperialism_named.c`.
 * Crash dumps: HKLM `...\Windows Error Reporting\LocalDumps\Imperialism.exe` (full dumps into `dumps/`), open with lldb

@@ -1,10 +1,21 @@
 # Status: where the project stands
 
 Update this file at every ship (and before ending a session). It is the first thing to read after `AGENTS.md`.
-Last updated: 2026-10-31 (original code-style assessment added; military snapshot continuation remains next).
+Last updated: 2026-10-31 (Imperialism Compat split; military snapshot continuation remains next).
 
 ## Done and verified (in the running game unless noted)
 
+- **Imperialism Compat split**: maintained display source and music build tooling moved
+  to https://github.com/warthurton/imperialism-compat. One repo, display and music artifact
+  groups, with two alternative music ZIPs: installed GOG codecs or source-built libogg
+  1.3.6/libvorbis 1.3.7. Windows CI passed the initial public push and the packaging
+  integrity follow-up (Compat PR #1). Both legacy build entry
+  points here delegate to the sibling checkout; `shim/README.md` describes setup.
+  `harness/prod_compat.ps1` passed ten snapshot checks with each music variant and display
+  together (`compat_acceptance1`, game turn 5 -> 6). Original DLLs/INIs restored and
+  hash-checked; game stopped and settings restored. Native tests also passed for both
+  variants. This does not establish long-term music stability. No release published or
+  forum message sent. The portable-core milestone and snapshot gaps below remain open.
 - **Original architecture assessment** (`docs/original_code_style.md`, code/metadata inspection):
   substantial C++ inheritance/virtual dispatch through Ambit and MFC, combined with imperative
   methods, fixed tables, global managers and localized large dispatch/layout routines.
@@ -26,7 +37,7 @@ Last updated: 2026-10-31 (original code-style assessment added; military snapsho
   one measured turn after eight warmups hit the minister turn entry and vf33, but none of
   the selected city-task producers/consumer. Populated minister raw lists are not evidence
   of populated city task queues. The latter remain live-unverified (`docs/tracer.md`).
-- **Display shim** (`shim/`): windowed scaling, maximize, fullscreen with integer scale, mouse mapping, and an opt-in **text log** (installed build: `shim/build20.dll`;
+- **Display shim** (maintained in Imperialism Compat): windowed scaling, maximize, fullscreen with integer scale, mouse mapping, and an opt-in **text log** (installed build: `shim/build20.dll`;
   the previous one is `original/msvfw32_before_textlog.dll`). The game's music-loss crash is intermittent and **not proven fixed** (`winmm/` rebuilt from ogg-winmm).
 - **Decompile**: 10.9k functions named; `src/` groups (git-ignored) from `tools/split_source.py`, none left unsorted (the `late`/`laddr` rows are filing guesses,
   audited with `tools/audit_groups.py`); big functions via `ghidra/Probe.java` (Board of Trade builder 0x4601b0 = `TScreenBuilder_BoardOfTrade`).
