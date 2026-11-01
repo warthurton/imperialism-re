@@ -17,6 +17,8 @@ Game Controls (top-bar icon) -> Load Game -> slot 0.
 | `oil_plant_built.imp` ("T4 plant built refinery 4") | Same world, turn 4: Power Plant built and Refinery capacity 4, cash $44,400; set Fuel with `poke_stock.py` to test the plant |
 | `military_later.imp` ("militarylater") | Same oil world after nine more End Turns with offers rejected; city turn 13 / game turn 14, local power 2, cash $43,050, Refinery 4, Power Plant built, no new local orders. Snapshot sees 517 military units across the national/province roots and one ship; city task lists and grouped-stack/army-record lists are empty. Reloaded and validated for another turn. |
 
+| `play_fall1817.imp` ("Play Fall 1817 turn 11") | Played by hand from `t0_clean_start` (Brosoptendall, power 3): Fall 1817, cash $74,252, all mills capacity 4 (clothing/furniture 2), two ports (timber, fish), rail port-to-capital, consulates with Twelt and four more minors, Iron/Cotton/Wool stocks near 0, 29 idle labor. No techs beyond the starting two. |
+
 Add new fixtures here with a one-line description (what turn, what orders, what stock) so tests can name them.
 
 ## Naming saves

@@ -92,6 +92,11 @@ Last updated: 2026-11-01 (Compat submodule integration; military snapshot contin
 - **Fixtures** (`saves/README.md`): `oil_t0`, `oil_refinery4`, `oil_plant_built` (turn 4, plant built, Refinery 4),
   `military_later` (city turn 13/game turn 14, 517 units, one ship) and the earlier production ones.
 
+## Play session notes (2026-11-01, 11 turns by hand from `t0_clean_start`, fixture `play_fall1817`)
+
+Seen in play, not modelled: production and trade orders persist between turns, but Trade School and Capitol worker orders reset every turn; the Interior Minister advice popup (390x282) appears even with briefings Off and swallows clicks (dismiss at mirror (820,760)); the expansion popup OK is at mirror (875,724); a Port needs no rail and a coastal one adds fish/timber, a Depot needs rail; early rail cannot cross hills or mountains, so mountain gold/coal/iron cannot reach the network until a later tech; sleeping a unit removes it from the cycle until clicked on the map; a stray click on a working unit opens a "Civilian Report" popup that blocks End Turn (Confirm at (685,630)). Lumber Mill and Food Processing have two sliders (dialog 276x189, kind `production2`); the Trade School is 276x299 (kind `school`). `prod_endturn.ps1 -Show` prints offers and rejects; `-Want 'Timber|Coal'` accepts only those commodities.
+Economy result: cash $50k -> $74k, but raw Iron/Cotton/Wool ran out and 29 labor sat idle by turn 11. Lesson: bid on what the mills lack (Iron, Coal, Cotton) from turn 1, accept those offers, keep 2 Clothing and 2 Furniture back for Capitol workers, build ports for timber and fish early.
+
 ## Open questions
 
 - **Diplomacy leftovers**: the Empire overture (id 0x12d is a guess; not offered at the relationship tried; the manual and the card say it needs an Embassy and friendly relations, so try it where an Embassy exists: `docs/card_tables.md`), what an Alliance does on the Great Power side (Kem did not ally), foreign aid
