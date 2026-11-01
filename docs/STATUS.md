@@ -5,6 +5,14 @@ Last updated: 2026-11-01 (Compat submodule integration; military snapshot contin
 
 ## Done and verified (in the running game unless noted)
 
+- **Readable Compat source**: advance the `compat/` pin to the module-based readability
+  refactor (`649f6d9`, Compat PR #4, Windows CI passed). Startup, display/input,
+  graphics, text capture, import patching and diagnostics
+  have separate C files, beginner-oriented comments and a 100-column CI style check.
+  Compat README lists behavior changes and every option; developer/CI instructions
+  are separate. Native and package checks passed; existing live-focus limits remain.
+  Maintainer observation: music loss/crashes appear fixed, but not proven in every case.
+
 - **Compat submodule integration** (repository/build configuration): `compat/` records
   the separate Imperialism Compat repository at a specific revision. Initialize with
   `git submodule update --init compat`, or clone RE with `--recurse-submodules`.
@@ -14,7 +22,7 @@ Last updated: 2026-11-01 (Compat submodule integration; military snapshot contin
   from decompilation, analysis and portable-core reimplementation (RE). The game harness
   remains here. See `CHANGELOG.md` and `shim/README.md`; the portable-core handoff below
   is unchanged. No new live-game validation is implied by this configuration change.
-  The pin is Compat `02ed0881196e168e2a2cc8598c906a841a0625cf`, tagged as
+  The initial release pin was Compat `02ed0881196e168e2a2cc8598c906a841a0625cf`, tagged as
   [v0.1.0-preview.1](https://github.com/warthurton/imperialism-compat/releases/tag/v0.1.0-preview.1).
   Both default legacy build commands passed from that tree; missing-checkout guards
   and PowerShell parsing/line endings passed. Compat's tag CI published the preview

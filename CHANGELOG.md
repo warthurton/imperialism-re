@@ -2,6 +2,10 @@
 
 ## 2026-11-01
 
+- Advance the Compat source pin to its readability refactor, with focused C modules,
+  explanatory Windows comments and separate user/developer documentation. Music
+  loss/crashes appear fixed in observed use, without proof across every case.
+
 - Pin Compat preview `v0.1.0-preview.1` (`02ed088`), with documented display internals,
   optional stock backdrop reuse and CI-published release packages. Game artwork is
   loaded from the owner's executable and is not distributed with the shim.
