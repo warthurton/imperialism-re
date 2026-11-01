@@ -1,10 +1,11 @@
 # Test both standalone Compat music builds in the game; restore installed files/settings on every exit.
-param([string]$Name = 'compat_live', [string]$CompatRoot = (Join-Path (Split-Path (Split-Path $PSScriptRoot)) 'imperialism-compat'))
+param([string]$Name = 'compat_live', [string]$CompatRoot = (Join-Path (Split-Path $PSScriptRoot) 'compat'))
 $ErrorActionPreference = 'Stop'
 if ($Name -notmatch '^compat_[A-Za-z0-9_-]+$') { throw 'Name must start with compat_ and use simple filename characters' }
 $repository = Split-Path $PSScriptRoot
 $gameDirectory = 'C:\GOG Games\Imperialism'
 $backup = Join-Path $repository "results\trace_$Name"
+if (-not (Test-Path -LiteralPath (Join-Path $CompatRoot 'build.py'))) { throw 'Initialize Compat with git submodule update --init compat, or pass -CompatRoot for another checkout' }
 if (Test-Path -LiteralPath $backup) { throw 'Use a fresh Name; backup already exists' }
 if (Get-Process Imperialism -ErrorAction SilentlyContinue | Where-Object { -not $_.HasExited }) { throw 'Close the running game before this test' }
 $display = Join-Path $CompatRoot 'build\msvfw32.dll'
