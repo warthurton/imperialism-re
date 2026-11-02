@@ -17,29 +17,38 @@
 | +0x24 short | **turns of work left**; set by SetOrder from a table, decremented each End Turn | confirmed |
 | +0x26 short | -1 | unknown |
 
-## Orders (TCivUnit_vf13 = SetOrder(order, target), 0x5c29f0; TCivUnit_vf11 = End Turn tick, 0x5c2a90)
+## Orders (TCivUnit_vf13 = SetOrder(order, target), 0x5c29f0; TCivUnit_vf11 = End Turn tick, 0x5c2a90; completion = FUN_004d4390)
 
 SetOrder stores the code at +8, the target at +0xc and the duration from this table (indexed by code): `0:0 1:0 2:0 3:0 4:0 5:1 6:3 7:3 8:1 9:0 10:3 11:3 12:4 13:1` turns.
-The tick: orders **5-8 and 10-13** count `+0x24` down and, at 0, finish (`FUN_004d4390`: apply the work) and reset the state to 0; **2 (sleep) persists**; any other code resets to 0 at once.
-`FUN_005c2980`: the unit still takes orders (is in the Next Unit cycle) when the code is 0, 2 or 3... but see the observation below.
+The tick: orders **5-8 and 10-13** count `+0x24` down and, at 0, finish through `FUN_004d4390` (switch on `code - 5`) and reset the state to 0; **2 (sleep) persists**; any other code resets to 0 at once.
 
-| Code | Meaning | Status |
+| Code | Meaning | Evidence |
 |---|---|---|
 | 0 | idle | confirmed |
-| 2 | **Sleep** (button at game (621,166)); stays until woken | confirmed (button press changed 0 -> 2) |
-| 3 | probably **redeploy** (a move: "Redeploying" in the report, duration 0, target in +0xc) | likely (the report text; code seen on a unit that had deployed) |
-| 4 | **No orders this turn** (button at (592,166)); skipped by Next Unit, reset by the tick | confirmed (button press 0 -> 4) |
-| 5 | **Engineer lays rail** (1 turn, $100 charged when ordered) | confirmed |
-| 6, 7 | 3-turn jobs: the Engineer's **Depot** (3 turns seen) and probably **Port** | likely, which is which untested |
-| 8 | 1-turn job: probably a **Prospector search** | guess |
-| 10, 11, 12, 13 | 3, 3, 4, 1 turn jobs: the Miner/Farmer/Rancher/Forester/Driller improvements and Fort | guess |
+| 1 | **a move or search ordered to a tile**: the unit's tile (+6) changes at once, +0xc keeps the tile it came from (what Rescind restores). A Prospector's "search this tile" reads 1 (seen) | confirmed in play |
+| 2 | **Sleep** (button (621,166)); persists | confirmed (0 -> 2 on the button) |
+| 3 | redeploy ("Redeploying" in the report) | likely |
+| 4 | **No orders this turn** (button (592,166)); reset by the tick | confirmed (0 -> 4) |
+| 5 | **Engineer lays rail**: completion calls MapMgr slot 0x68 = `0x513f60` (adds both rail bits), sets +0x26 = 9001; 1 turn, $100 at once | confirmed (rail order seen, code) |
+| 6 | **Depot**: completion calls MapMgr slot 0x124 = `0x5145b0` (sets tile flag 0x10, charges $2,000 at order time), 3 turns | confirmed by code and by the 3-turn depot in play |
+| 7 | **Port**: slot 0x128 = `0x5147d0` (sets flag 0x04, $3,000), 3 turns | code-confirmed, not ordered in this check (the earlier ports in play took the same time) |
+| 8 | **Prospect**: completion does `tile+0x0d \|= 1 << nation` (the prospected mask) and, for the AI, may report a find (+0x26 = 9007); 1 turn. The AI path (`production.c`) sets it for Prospectors (type 1). A human's order reads 1 first (see above) | code-confirmed |
+| 10 | **Improve a tile one level** (Miner type 0 or type-8 units use resource slot 1, others slot 0: `MapMgr +0xc8` reads the level, `+0xcc` writes level+1); 3 turns. The AI calls it for farm/mine tiles | code-confirmed; which unit types: not tested |
+| 11 | 3-turn job with **no case in the completion switch** (so nothing is applied there; probably handled elsewhere, e.g. Rancher/Forester work) | open |
+| 12 | **Fort**: slot 0x12c = `0x5149d0`, 4 turns, applies to the province (+ province record) | code-confirmed (matches "forts are built throughout the province") |
+| 13 | **Developer buys land**: sets tile `+0x18` = nation (land bought in a minor); 1 turn | code-confirmed (the AI calls it for type 7) |
+| 9 | no work, duration 0 | unused |
 
-* "Time to completion: N months" in the Civilian Report is `(+0x24 - 1) * 3` (rail 0 months, depot 3 months after its first End Turn): consistent with the depot taking three End Turns.
+Unit types seen in the AI order code: 0 Miner, 1 Prospector, 2 Farmer, 4 Engineer, 7 **Developer**; 3, 5, 6, 8 are the remaining civilians (Rancher, Forester, Driller, and one more: untested).
+
+* "Time to completion: N months" in the Civilian Report is `(+0x24 - 1) * 3` (rail 0 months, depot 3 months after its first End Turn).
 * Selecting a unit with Next Unit clears a sleeping/no-orders state (+8 back to 0, +0xc to -1) in the cases seen.
 * Units given work are not in the cycle; the cycle (Next Unit) walks the list in order and skips units that are asleep, skipped, or working.
+* **Correction recorded here**: the prospected flag is tile `+0x0d` (bit = nation), not `+0x01` (`docs/map.md`).
+* Tool: `tools/vtable_slots.py <vtable> <offsets...>` reads exe vtable slots and follows the `jmp` thunks (used for MapMgr 0x6587e0).
 
 ## Open
 
-* Which code is Depot, Port, Fort, Prospect, Mine, Farm, Ranch, Forest, Drill: find the callers of SetOrder with literals (many take 0/1/2/4 only; the build orders come from the construction popup and the unit toolbar), or order each once and read `+8`.
-* What `FUN_004d4390` does at completion (rail, depot, port, prospect, development level) and where developed levels are stored.
-* The cycle order and the "needs orders" test for the autoplayer, to replace pixel guesses by `readunits.py sel`.
+* Code 11, and which unit types use 3, 5, 6, 8 and exactly which tile kinds each improvement code applies to (order one Farmer and one Miner improvement and read +8).
+* Developed levels: stored by MapMgr slot 0xcc (not yet located on the tile).
+* The autoplayer's "needs orders" test: a unit is in the Next Unit cycle when +8 is 0 (FUN_005c2980 also lets 3 through), so `readunits.py` + `+0x08 == 0` replaces pixel guesses.

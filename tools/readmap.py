@@ -13,7 +13,9 @@ Field decode (CONFIRMED = seen against the running game and the code; GUESS = on
                       10 oil-type A 11-12 oil-type B 13 scrub forest 15 hardwood forest (14: one tile)                     CONFIRMED by crosstab with the card tables
   tile +0x11, +0x12   resource slot 1 and 2, signed byte, -1 = none: 0 cotton 1 wool 2 timber 3 coal 4 iron 5 horses 6 oil 17 grain 18 fruit
                       19 fish 20 livestock 21 gold 22 gems. The game stores hidden deposits here too (shown only once prospected).   CONFIRMED (code + crosstab)
-  tile +0x01 bit 0    prospected flag (mountain tiles a Prospector searched)                                                     CONFIRMED on my tiles
+  tile +0x0d          PROSPECTED bit mask: bit n = Great Power n has searched this tile (prospect completion does `+0x0d |= 1 << nation`, 0x4d4390 case 8;
+                      my nation 3 -> value 8, a tile five AIs searched = 127).   CONFIRMED by the code and the data. (An earlier version of this tool used
+                      +0x01 bit 0; that was a wrong guess: +0x01 is something else, probably a deposit/terrain flag, undecoded.)
   tile +0x14 (short)  province index 0-119, 0xffff on the sea; province +0 and +1 = owning nation (same value), +4 = the town's tile index   CONFIRMED
   tile +0x20 (dword)  pointer to the unit standing on the tile (moves with the unit)                                              CONFIRMED by a moving unit
   tile +0x10          index inside the currently visible window (9 x 8 tiles); a VIEW detail that changes when the map scrolls, not game state
@@ -80,6 +82,17 @@ def sbyte(b):
     return b - 256 if b > 127 else b
 
 
+_LOCAL = []
+
+
+def local_nation():
+    """index of the local human power (from readcity.py's "client powers" line), looked up once"""
+    if not _LOCAL:
+        out = subprocess.check_output([sys.executable, '-I', RE + 'tools/readcity.py', 'now']).decode()
+        _LOCAL.append(int(out.split('client (local human) powers: [(')[1].split(',')[0]))
+    return _LOCAL[0]
+
+
 DIRS = ['NE', 'E', 'SE', 'SW', 'W', 'NW']
 
 
@@ -96,7 +109,7 @@ def tile_info(tiles, prov, i):
     res = [RES.get(sbyte(r[o]), str(sbyte(r[o]))) for o in (0x11, 0x12) if sbyte(r[o]) != -1]
     unit = struct.unpack('<I', r[0x20:0x24])[0]
     return {'i': i, 'x': i % W, 'y': i // W, 'terrain': TERRAIN.get(r[0], str(r[0])), 'kind': KIND.get(r[0x13], str(r[0x13])), 'resources': res,
-            'prospected': bool(r[1] & 1), 'province': province_of(tiles, i), 'owner': owner_of(tiles, prov, i), 'unit_ptr': unit or None}
+            'prospected_by': [n for n in range(8) if r[0x0d] >> n & 1], 'prospected': bool(r[0x0d] >> local_nation() & 1), 'province': province_of(tiles, i), 'owner': owner_of(tiles, prov, i), 'unit_ptr': unit or None}
 
 
 def main():
