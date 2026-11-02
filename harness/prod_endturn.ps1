@@ -5,7 +5,9 @@
 #   id 8800 = trade results book (Sold / Bought / Bottom Line)   id 8451 = the Imperial Times newspaper: Return moves on from both
 #   any other id: logged with a screenshot (shots\et_<id>.png), then tried in turn: Return, the old "next" click (62,136), the
 #   newspaper exit (75,90), Escape.
-param([switch]$Log, [switch]$Accept)
+#   -Show: like -Accept for the printing (every offer sheet and the results book are printed) but offers are still REJECTED unless -Accept is also given
+#   -Want 'Timber|Cotton|Wool|Food': accept only offers for these commodities (regex alternation), reject the rest; prints each sheet
+param([switch]$Log, [switch]$Accept, [switch]$Show, [string]$Want = '')
 $root = $PSScriptRoot
 . "$root\gw.ps1"; . "$root\focus.ps1"; . "$root\fast.ps1"
 $sw = [Diagnostics.Stopwatch]::StartNew()
@@ -27,11 +29,17 @@ for ($i = 0; $i -lt 400; $i++) {
   if ($id -ne $last) { Stamp "screen id $id"; $last = $id; $same = 0 } else { $same++ }
   if ($id -eq 2013 -and $i -gt 3) { break }
   if ($id -eq 8500) {
-    if ($Accept) { Start-Sleep -Milliseconds 500; $seen++; "--- offer sheet $seen"; Text-Since $mark; $mark = Text-Mark; Post-Key 0x0D }
+    $take = [bool]$Accept
+    if ($Accept -or $Show -or $Want) {
+      Start-Sleep -Milliseconds 500; $sheet = @(Text-Since $mark); $mark = Text-Mark
+      "--- offer sheet $($seen + $rejected + 1)"; $sheet
+      if ($Want -and -not $Accept) { $take = [bool](($sheet -join ' ') -match "offers \d+ units of ($Want) @") }   # -Want accepts only the named commodities
+    }
+    if ($take) { $seen++; Post-Key 0x0D }
     else { Post-Key 0x1B; $rejected++ }
     Start-Sleep -Milliseconds 350; continue
   }
-  if ($id -eq 8800 -or $id -eq 8451) { Start-Sleep -Milliseconds 400; if ($Accept) { "--- screen $id"; Text-Since $mark; $mark = Text-Mark }; Post-Key 0x0D; Start-Sleep -Milliseconds 350; continue }   # trade results book, Imperial Times
+  if ($id -eq 8800 -or $id -eq 8451) { Start-Sleep -Milliseconds 400; if ($Accept -or $Show -or $Want) { "--- screen $id"; Text-Since $mark; $mark = Text-Mark }; Post-Key 0x0D; Start-Sleep -Milliseconds 350; continue }   # trade results book, Imperial Times
   if ($id -ne 2013 -and $same -eq 6) {            # an unfamiliar screen that does not move on by itself
     if (-not $tried[$id]) { $tried[$id] = 0; Snap "et_$id" | Out-Null }
     $n = $tried[$id]; $tried[$id] = $n + 1

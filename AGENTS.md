@@ -91,6 +91,7 @@ Read first: this file, then **`docs/STATUS.md`** (state, open questions, next st
 - `docs/original_code_style.md`: evidence-backed assessment of the original C++/MFC/Ambit architecture, tables, switches and decompiler limits.
 - `docs/snapshots.md`: partial read-only state capture, semantic/raw diff, coverage limits and validation.
 - `docs/field_miner.md`: conservative field-access index, unresolved arithmetic, allocation checks and layout evidence.
+- `docs/map.md`: the map in memory (108 x 60 tiles, terrain, resources, owner, rail, depots and ports, the **connected** flag); readers `tools/readmap.py`, `tools/readstructs.py`; `tools/poke_tile.py` is a test-only writer. **Play with player-visible information only**; hidden map data only for specific tests.
 - `docs/screens.md`: manual-based screen names, ids, main menu, hot keys, reading on-screen text. `docs/turn_phases.md`, `docs/how_a_turn_works.md`: the turn.
 - Verified game rules, each with a tested model in `reimpl/`:
   `docs/production_playtest.md` + `docs/recipes.md` (production, Power Plant, Refinery, University, Shipyard; `reimpl/production.c`),

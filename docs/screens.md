@@ -49,6 +49,21 @@ a global key press (`keybd_event`) stopped reaching the game partway through a s
 game frame and the `AmbitGameWindow` worked every time. `prod_do.ps1 "go industry|transport|trade|diplomacy|tech|map"` uses that and
 `readview.py id` to confirm: transport 2014, industry 2011, trade 2009, diplomacy 2008, tech 2300, map 2013.
 
+## Clicking by window messages (`harness/msgclick.ps1`, spike 2026-11-01)
+
+Mouse clicks can be sent straight to the game's own windows, in game pixels, with no focus, no mirror scaling, no cursor movement, and **with the game minimized** (checked: the Trade School plus/minus
+charged and refunded $100 while both the game frame and the mirror were minimized). The Compat shim relays real clicks with `SendMessage` (WM_MOUSEMOVE, WM_LBUTTONDOWN with MK_LBUTTON, WM_LBUTTONUP) to the
+deepest visible child window under the pointer, in that window's **client** coordinates (`compat/src/input.c`, `resolve_target`); `msgclick.ps1` does the same.
+* **Map, toolbar, screens**: target the 640x480 `AmbitGameWindow` with game pixels (mirror = 10.4 + 1.993 x). Example: factory icon (563,131) opens the Industry screen, back arrow (23,50).
+* **Dialogs** are `AmbitMcWindow` children of the frame. Their window rect includes a 3 px border and 26 px caption, so a control position measured from the window's top-left (the `$script:DLG` numbers in `fast.ps1`) must have **(3,26) subtracted** for the message. Wrong offsets simply do nothing.
+* **Choose the dialog by size** (`Get-Dialog`): a second visible `AmbitMcWindow` (a side panel, 182x329) can come first when enumerating. Handles change every time a dialog opens, so look them up per click.
+* **Closing a dialog**: post `WM_SYSCOMMAND` `SC_CLOSE` (0xF060) to it (what the shim does for the title-bar X) **for the production, Trade School, University and other non-modal windows only**.
+* **MODAL POPUPS CRASH THE GAME if closed with SC_CLOSE** (2 of 2 tries, 2026-11-01): the empty/real "Construction Options" popup (328 x 70 or 328 x 238; opened by clicking the selected Engineer's own tile) runs in MFC `CWnd::RunModalLoop`.
+  Destroying it with SC_CLOSE leaves the loop calling through a freed window: access violation at address 0, `eip=0`, return address 0x60a718 = `CWnd__RunModalLoop`+0x10e (dumps `dumps/Imperialism.exe.31068.dmp` and `.27904.dmp`, read with `tools/dumpinfo.py`).
+  Close it with its **Cancel button** (`msgclick.ps1 dcancel`, posted click). Also: a `SendMessage` click that opens a modal popup does not return until the popup closes, so a script using it hangs; use the posted click `gp X Y` for any click that can open a popup (Engineer's own tile, a working unit's tile).
+* **Selecting and building (seen 2026-11-01)**: `Next Unit` is (563,166) game pixels (cycles Engineer, Farmer, Prospector...; read which one from the text log `552,253 Engineer`). A posted click (`gp X Y`) on a map tile deploys or orders the selected unit; a click on a *working* unit's tile opens the Civilian Report (300 x 200 popup: Rescind / Confirm; Confirm worked only by a mirror click, `prod_do.ps1 "c 685 630"`); a first click on an idle unit selects it, a second on the selected unit's own tile opens the Construction Options popup, whose Depot button was clicked by mirror click (`c 273 498` for a 328x140 popup at (97,176)). Posted dialog clicks (`dp`, `dcancel`) did **not** register on these popups in my tests.
+* Not needed: hovering the real cursor, `Ensure-Focus`, the mirror. Not yet tried: slider drags (WM_MOUSEMOVE with MK_LBUTTON between down and up), right-click, the construction popups, the Civilian Report/advice popups.
+
 ## Reading what is on screen
 
 Screenshots are the slow way. The display shim can log every string the game draws (it hooks `TextOutA`, `ExtTextOutA`, `TabbedTextOutA`, `DrawTextA`)

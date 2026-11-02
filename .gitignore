@@ -62,3 +62,5 @@ results/idle*
 # generated from the copyrighted manual/guides, and the local Ollama host
 docs/manual/
 tools/ocr.local.json
+results/game.pid
+results/textlog.orig

@@ -54,7 +54,7 @@ function Get-Dialog {
     if ($o.Class -eq 'AmbitGameWindow') { $game = $o } elseif ($o.Class -eq 'AmbitMcWindow' -and $o.Vis) { $dlg = $o }
   }
   if (-not $game -or -not $dlg) { return $null }
-  $kind = if ($dlg.W -eq 320 -and $dlg.H -eq 320) { 'construct' } elseif ($dlg.W -eq 276 -and $dlg.H -eq 149) { 'production' } elseif ($dlg.W -eq 376 -and $dlg.H -eq 439) { 'unit' } else { 'other' }
+  $kind = if ($dlg.W -eq 320 -and $dlg.H -eq 320) { 'construct' } elseif ($dlg.W -eq 276 -and $dlg.H -eq 149) { 'production' } elseif ($dlg.W -eq 276 -and $dlg.H -eq 189) { 'production2' } elseif ($dlg.W -eq 376 -and $dlg.H -eq 439) { 'unit' } elseif ($dlg.W -eq 276 -and $dlg.H -eq 299) { 'school' } else { 'other' }
   @{ X = $dlg.L - $game.L; Y = $dlg.T - $game.T; W = $dlg.W; H = $dlg.H; Kind = $kind }
 }
 
@@ -67,6 +67,10 @@ function Wait-Dialog([bool]$Present = $true, [double]$Max = 3) {
 # control positions inside a dialog, in game pixels from the dialog's top-left (measured on the Steel Mill, Refinery and Power Plant dialogs)
 $script:DLG = @{
   production = @{ close = @(262, 12); plus = @(241, 123); minus = @(77, 122); expand = @(229, 47); knob = @(76, 123); end = @(236, 123) }
+  # two-slider mills (Lumber Mill: Lumber and Paper, 276x189): plus/minus = first slider (Lumber), plus2/minus2 = second (Paper); measured from a screenshot, not yet checked by clicking
+  production2 = @{ close = @(262, 12); expand = @(229, 46); plus = @(240, 132); minus = @(76, 132); plus2 = @(240, 162); minus2 = @(76, 162) }
+  # Trade School (276x299): plus/minus = untrained -> trained ($100 + 1 Paper), plus2/minus2 = trained -> expert ($1,000 + 2 Paper); measured from a screenshot
+  school = @{ close = @(261, 12); plus = @(242, 188); minus = @(78, 188); plus2 = @(242, 269); minus2 = @(78, 269) }
   construct  = @{ ok = @(273, 301); cancel = @(39, 301) }
   # unit centres (University; the Armory and Shipyard are expected to match): picture N = select, add N / sub N = its arrows, 2x2 grid (column 1 = rows 1-3, column 2 = row 1)
   unit       = @{ close = @(361, 12); pic1 = @(248, 111); add1 = @(268, 151); sub1 = @(228, 151); pic2 = @(327, 111); add2 = @(347, 151); sub2 = @(307, 151); pic3 = @(248, 193); add3 = @(268, 235); sub3 = @(228, 235); pic4 = @(248, 278); add4 = @(268, 318); sub4 = @(228, 318); a1 = @(248, 111); aa1 = @(268, 151); as1 = @(228, 151); a2 = @(327, 111); aa2 = @(347, 151); as2 = @(307, 151); a3 = @(248, 195); aa3 = @(268, 235); as3 = @(228, 235); a4 = @(327, 195); aa4 = @(347, 235); as4 = @(307, 235); a5 = @(248, 278); aa5 = @(268, 318); as5 = @(228, 318); a6 = @(327, 278); aa6 = @(347, 318); as6 = @(307, 318); a7 = @(248, 362); aa7 = @(268, 402); as7 = @(228, 402); a8 = @(327, 362); aa8 = @(347, 402); as8 = @(307, 402); y1 = @(54, 302); ya1 = @(83, 335); ys1 = @(25, 335); y2 = @(143, 302); ya2 = @(172, 335); ys2 = @(114, 335); y3 = @(54, 380); ya3 = @(83, 413); ys3 = @(25, 413); y4 = @(143, 380); ya4 = @(172, 413); ys4 = @(114, 413) }

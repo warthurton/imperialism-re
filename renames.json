@@ -1244,8 +1244,8 @@
 "004dab00": "TAutoGreatPower_vf49",
 "004dab20": "TGreatPower_EndOfTurn",
 "004dae70": "TAutoGreatPower_vf51",
-"004db7d0": "TAutoGreatPower_vf52",
-"004dbac0": "TAutoGreatPower_vf53",
+"004db7d0": "TGreatPower_UpdateStructureConnections",
+"004dbac0": "TGreatPower_FloodFillRail",
 "004e7550": "TAutoGreatPower_vf54",
 "004dca60": "TAutoGreatPower_vf55",
 "004e7590": "TAutoGreatPower_vf56",
@@ -4495,7 +4495,10 @@
 "005b0500": "TTechMgr_UnlockShip",
 "00581260": "TGame_GetLocalPower",
 "0049d620": "Ambit_Assert",
-"0057d8b0": "TGame_GetTurn"
+"0057d8b0": "TGame_GetTurn",
+"004dbbb0": "TGreatPower_BuildGatherMap",
+"00512b50": "TMapMgr_GetNeighbours",
+"00512cc0": "TMapMgr_NeighbourInDirection"
 },
 "vtables": {
 "00645fc8": "CDib_vtable",
