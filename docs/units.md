@@ -52,3 +52,4 @@ Unit types seen in the AI order code: 0 Miner, 1 Prospector, 2 Farmer, 4 Enginee
 * Code 11, and which unit types use 3, 5, 6, 8 and exactly which tile kinds each improvement code applies to (order one Farmer and one Miner improvement and read +8).
 * Developed levels: stored by MapMgr slot 0xcc (not yet located on the tile).
 * The autoplayer's "needs orders" test: a unit is in the Next Unit cycle when +8 is 0 (FUN_005c2980 also lets 3 through), so `readunits.py` + `+0x08 == 0` replaces pixel guesses.
+* **Verified live (fixture play_fall1817)**: `readunits.py needs` flagged 3 of 7 units (+08 = 0); four Next Unit clicks cycled through exactly those 3 (Engineer 1015, Farmer 1016, Prospector 362) and wrapped. So "needs orders" = +08 in (0, 3) is a working autoplay selector.
