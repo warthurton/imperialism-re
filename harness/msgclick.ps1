@@ -23,6 +23,11 @@ function Send-Click([IntPtr]$h, [int]$x, [int]$y) {      # move, press, release,
   [GW]::SendMessage($h, 0x0201, [IntPtr]1, (Lparam $x $y)) | Out-Null; Start-Sleep -Milliseconds 80
   [GW]::SendMessage($h, 0x0202, [IntPtr]0, (Lparam $x $y)) | Out-Null; Start-Sleep -Milliseconds 350
 }
+function Post-Click([IntPtr]$h, [int]$x, [int]$y) {
+  [GW]::PostMessage($h, 0x0200, [IntPtr]0, (Lparam $x $y)) | Out-Null; Start-Sleep -Milliseconds 120
+  [GW]::PostMessage($h, 0x0201, [IntPtr]1, (Lparam $x $y)) | Out-Null; Start-Sleep -Milliseconds 120
+  [GW]::PostMessage($h, 0x0202, [IntPtr]0, (Lparam $x $y)) | Out-Null; Start-Sleep -Milliseconds 700
+}
 function Game-Handle { Handle-Of ([GW]::Children($fh) | Where-Object { $_ -match 'AmbitGameWindow' } | Select-Object -First 1) }
 function Dialog-Handle {
   $d = Get-Dialog; if (-not $d) { throw 'no dialog open' }
@@ -32,8 +37,12 @@ foreach ($raw in $Steps.Split(';')) {
   $t = $raw.Trim().Split(' ', [StringSplitOptions]::RemoveEmptyEntries)
   if (-not $t) { continue }
   switch ($t[0]) {
-    'g'      { Send-Click (Game-Handle) ([int]$t[1]) ([int]$t[2]) }
+    'g'      { Send-Click (Game-Handle) ([int]$t[1]) ([int]$t[2]) }      # synchronous: do NOT use on a click that opens a modal popup (it blocks until the popup closes)
+    'gp'     { Post-Click (Game-Handle) ([int]$t[1]) ([int]$t[2]) }      # posted (returns at once): use for clicks that open a construction/report popup, then close it with 'dcancel'
     'd'      { Send-Click (Dialog-Handle) ([int]$t[1] - 3) ([int]$t[2] - 26) }
+    'dp'     { Post-Click (Dialog-Handle) ([int]$t[1] - 3) ([int]$t[2] - 26); Start-Sleep -Milliseconds 400 }   # posted click in a dialog (position from the window's top-left): use for MODAL popups (Civilian Report: Confirm (228,153), Rescind (95,153) in the 300x200 window)
+    'dcancel' { Post-Click (Dialog-Handle) 43 24; Start-Sleep -Milliseconds 400 }   # Cancel of the 328x70 empty "Construction Options" popup: window position (46,50) minus the (3,26) offset; posted, never SC_CLOSE. Other popup sizes have the buttons elsewhere (untested)
+    # dclose: NON-MODAL dialogs only (production, school, university...). On the modal Construction Options popup SC_CLOSE crashes the game: use dcancel (docs/screens.md)
     'dclose' { [GW]::PostMessage((Dialog-Handle), 0x0112, [IntPtr]0xF060, [IntPtr]0) | Out-Null; Start-Sleep -Milliseconds 600 }
     'w'      { Start-Sleep -Milliseconds ([int]([double]$t[1] * 1000)) }
     'id'     { "screen id " + (Get-ScreenId) }

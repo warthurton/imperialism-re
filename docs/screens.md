@@ -57,7 +57,10 @@ deepest visible child window under the pointer, in that window's **client** coor
 * **Map, toolbar, screens**: target the 640x480 `AmbitGameWindow` with game pixels (mirror = 10.4 + 1.993 x). Example: factory icon (563,131) opens the Industry screen, back arrow (23,50).
 * **Dialogs** are `AmbitMcWindow` children of the frame. Their window rect includes a 3 px border and 26 px caption, so a control position measured from the window's top-left (the `$script:DLG` numbers in `fast.ps1`) must have **(3,26) subtracted** for the message. Wrong offsets simply do nothing.
 * **Choose the dialog by size** (`Get-Dialog`): a second visible `AmbitMcWindow` (a side panel, 182x329) can come first when enumerating. Handles change every time a dialog opens, so look them up per click.
-* **Closing a dialog**: post `WM_SYSCOMMAND` `SC_CLOSE` (0xF060) to it (what the shim does for the title-bar X).
+* **Closing a dialog**: post `WM_SYSCOMMAND` `SC_CLOSE` (0xF060) to it (what the shim does for the title-bar X) **for the production, Trade School, University and other non-modal windows only**.
+* **MODAL POPUPS CRASH THE GAME if closed with SC_CLOSE** (2 of 2 tries, 2026-11-01): the empty/real "Construction Options" popup (328 x 70 or 328 x 238; opened by clicking the selected Engineer's own tile) runs in MFC `CWnd::RunModalLoop`.
+  Destroying it with SC_CLOSE leaves the loop calling through a freed window: access violation at address 0, `eip=0`, return address 0x60a718 = `CWnd__RunModalLoop`+0x10e (dumps `dumps/Imperialism.exe.31068.dmp` and `.27904.dmp`, read with `tools/dumpinfo.py`).
+  Close it with its **Cancel button** (`msgclick.ps1 dcancel`, posted click). Also: a `SendMessage` click that opens a modal popup does not return until the popup closes, so a script using it hangs; use the posted click `gp X Y` for any click that can open a popup (Engineer's own tile, a working unit's tile).
 * Not needed: hovering the real cursor, `Ensure-Focus`, the mirror. Not yet tried: slider drags (WM_MOUSEMOVE with MK_LBUTTON between down and up), right-click, the construction popups, the Civilian Report/advice popups.
 
 ## Reading what is on screen
