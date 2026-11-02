@@ -161,6 +161,14 @@ def main():
                 print('(%d,%d) %s%s%s gatherer id %s' % (info['x'], info['y'], ','.join(names) or 'rail',
                       ' rail ' + ' '.join('%s->(%d,%d)' % (DIRS[b], *linked_tile(i, b)) for b in range(6) if rail & (1 << b)) if rail else '',
                       ' [owner %s]' % info['owner'], r[5] if r[5] != 255 else '-'))
+    elif cmd == 'window':
+        # the tiles currently shown: +0x10 is the index inside the visible window (not game state, but it tells where the view is)
+        vis = [(tiles[i * STRIDE + 0x10], i % W, i // W) for i in range(N) if tiles[i * STRIDE + 0x10] != 0xff]
+        print(len(vis), 'tiles with a window index; distinct values', sorted(set(v[0] for v in vis))[:5], '...')
+        for v, x, y in sorted(vis)[:20]:
+            print(v, (x, y))
+        if vis:
+            xs = [v[1] for v in vis]; ys = [v[2] for v in vis]; print('x', min(xs), max(xs), 'y', min(ys), max(ys))
     elif cmd == 'units':
         for i in range(N):
             info = tile_info(tiles, prov, i)
@@ -172,4 +180,5 @@ def main():
         print(__doc__)
 
 
-main()
+if __name__ == '__main__':
+    main()

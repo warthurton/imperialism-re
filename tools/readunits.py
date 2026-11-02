@@ -30,6 +30,11 @@ def describe(p, o):
     return {'addr': p, 'type': t, 'name': TYPE.get(t, '?'), 'x': tile % W, 'y': tile // W, 'id': struct.unpack_from('<I', o, 0x20)[0], 'nation': struct.unpack_from('<I', o, 0x18)[0]}
 
 
+if 'sel2' in sys.argv:       # just the selected unit's order code (+08), -1 if none
+    sel = u32(u32(0x6a43dc) + 4)
+    o = rd(sel, 0x28) if sel else None
+    print(struct.unpack_from('<h', o, 8)[0] if o else -1)
+    sys.exit()
 if 'sel' in sys.argv:
     sel = u32(u32(0x6a43dc) + 4)
     o = rd(sel, 0x28) if sel else None
