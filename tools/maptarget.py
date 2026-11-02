@@ -11,6 +11,7 @@ import readmap as rm
 
 g = rm.Game(); tiles, prov = g.load()
 me = rm.local_nation()
+MAX_LEVEL = 3        # guess: levels I-III in the manual; the real cap depends on technology (to be confirmed by trying)
 
 
 def window_origin():
@@ -45,7 +46,7 @@ def main():
     if o is None:
         print('scroll'); return
     ox, oy = o
-    busy = busy_targets()
+    busy = busy_targets() - {st}          # tiles other units stand on (the selected unit's own tile is fine)
     best = None
     for i in range(rm.N):
         r = tiles[i * rm.STRIDE:(i + 1) * rm.STRIDE]
@@ -56,9 +57,9 @@ def main():
             if r[0] not in (2, 3) or r[0x13] not in (8, 9) or r[0x0d] >> me & 1:
                 continue
         elif cmd == 'farmer':          # farm / plantation / orchard tiles (grain 17, fruit 18, cotton 0 visible from the terrain)
-            if r[0x13] not in (2, 5, 6):
+            if r[0x13] not in (2, 5, 6) or r[0x0c] & 15 >= MAX_LEVEL:    # developed level of slot 0 = low nibble of tile +0x0c (FUN_00513660)
                 continue
-        elif not (r[0x0d] >> me & 1 and res & {3, 4, 21, 22}):   # miner: a mineral we have prospected
+        elif not (r[0x0d] >> me & 1 and res & {3, 4, 21, 22}) or r[0x0c] >> 4 >= MAX_LEVEL:   # miner: a prospected mineral; slot 1 level = high nibble
             continue
         x, y = i % rm.W, i // rm.W
         mx, my, gx, gy = to_game(x, y, ox, oy)
@@ -66,7 +67,8 @@ def main():
             continue
         if cmd != 'prospect' and rm.sbyte(r[0x11]) == -1 and rm.sbyte(r[0x12]) == -1 and cmd == 'miner':
             continue
-        d = abs(x - ox) + abs(y - oy)          # nearest the selected unit (which is in the middle of the screen)
+        lvl = (r[0x0c] & 15) if cmd == 'farmer' else (r[0x0c] >> 4) if cmd == 'miner' else 0
+        d = lvl * 100 + abs(x - ox) + abs(y - oy)          # lowest level first, then nearest the selected unit (which is in the middle of the screen)
         if best is None or d < best[0]:
             best = (d, x, y, gx, gy)
     print('scroll' if best is None else '%d %d %d %d' % best[1:])

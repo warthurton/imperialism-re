@@ -109,7 +109,7 @@ def tile_info(tiles, prov, i):
     res = [RES.get(sbyte(r[o]), str(sbyte(r[o]))) for o in (0x11, 0x12) if sbyte(r[o]) != -1]
     unit = struct.unpack('<I', r[0x20:0x24])[0]
     return {'i': i, 'x': i % W, 'y': i // W, 'terrain': TERRAIN.get(r[0], str(r[0])), 'kind': KIND.get(r[0x13], str(r[0x13])), 'resources': res,
-            'prospected_by': [n for n in range(8) if r[0x0d] >> n & 1], 'prospected': bool(r[0x0d] >> local_nation() & 1), 'province': province_of(tiles, i), 'owner': owner_of(tiles, prov, i), 'unit_ptr': unit or None}
+            'level': (r[0x0c] & 15, r[0x0c] >> 4), 'prospected_by': [n for n in range(8) if r[0x0d] >> n & 1], 'prospected': bool(r[0x0d] >> local_nation() & 1), 'province': province_of(tiles, i), 'owner': owner_of(tiles, prov, i), 'unit_ptr': unit or None}
 
 
 def main():
