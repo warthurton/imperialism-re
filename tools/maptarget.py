@@ -21,6 +21,12 @@ def window_origin():
     return None
 
 
+def to_game_win(x, y, ox, oy):
+    # anchored on the visible-window origin (+0x10 == 0 tile); used after a toolbar "Search In" scroll, where no unit is centred
+    mx = 22 + 126 * (x - ox) + 63 * ((y & 1) - (oy & 1)); my = 140 + 130 * (y - oy)
+    return mx, my, round((mx - 10.4) / 1.993), round((my - 34.5) / 1.993)
+
+
 def to_game(x, y, ox, oy):
     # anchored on the SELECTED unit: Next Unit (and any order that selects a unit) scrolls the map so that unit's tile sits at mirror (589 + 63*(row odd), 530)
     mx = 589 + 126 * (x - ox) + 63 * (y & 1); my = 530 + 130 * (y - oy)
@@ -41,6 +47,11 @@ def main():
     cmd = sys.argv[1] if len(sys.argv) > 1 else 'prospect'
     st = selected_tile()
     o = None if st is None or st < 0 else (st % rm.W, st // rm.W)
+    conv = to_game
+    if len(sys.argv) > 2 and cmd == 'prospect':          # prospect <shift>: window-origin mode, shift = rows the real top row lies above the +0x10 == 0 tile (0 or 1);
+        w = window_origin()                              # click candidates from a different shift if the first misses (a wrong guess hits another tile or nothing)
+        o = None if w is None else (w[0], w[1] - int(sys.argv[2]))
+        conv = to_game_win
     if cmd not in ('prospect', 'farmer', 'miner'):
         print(__doc__); return
     if o is None:
@@ -62,7 +73,7 @@ def main():
         elif not (r[0x0d] >> me & 1 and res & {3, 4, 21, 22}) or r[0x0c] >> 4 >= MAX_LEVEL:   # miner: a prospected mineral; slot 1 level = high nibble
             continue
         x, y = i % rm.W, i // rm.W
-        mx, my, gx, gy = to_game(x, y, ox, oy)
+        mx, my, gx, gy = conv(x, y, ox, oy)
         if not (60 < mx < 1000 and 120 < my < 940):
             continue
         if cmd != 'prospect' and rm.sbyte(r[0x11]) == -1 and rm.sbyte(r[0x12]) == -1 and cmd == 'miner':
