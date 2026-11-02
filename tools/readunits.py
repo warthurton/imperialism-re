@@ -9,7 +9,7 @@ import ctypes, ctypes.wintypes as wt, os, struct, subprocess, sys
 
 RE = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + '/'
 W = 108
-TYPE = {}     # filled in docs/units.md once confirmed: code -> name
+TYPE = {0: 'Miner', 1: 'Prospector', 2: 'Farmer', 4: 'Engineer', 7: 'Developer'}   # 3/5/6/8 untested, see docs/units.md
 pid = int(subprocess.check_output(['powershell', '-NoProfile', '-Command', '(Get-Process Imperialism | Where-Object { -not $_.HasExited } | Select-Object -First 1).Id']).decode().strip())
 k32 = ctypes.WinDLL('kernel32', use_last_error=True); k32.OpenProcess.restype = wt.HANDLE
 h = k32.OpenProcess(0x0010 | 0x0400, False, pid)
@@ -52,6 +52,8 @@ for i in range(count + 2):
     print('  #%d %s%08x type %d %-10s tile (%d,%d) id %d  +08=%d +0c=%d +24=%d' % (
         i, '*' if data == sel else ' ', data, d['type'], d['name'], d['x'], d['y'], d['id'],
         struct.unpack_from('<h', o, 8)[0], struct.unpack_from('<h', o, 0xc)[0], struct.unpack_from('<h', o, 0x24)[0]))
+    if 'needs' in sys.argv and struct.unpack_from('<h', o, 8)[0] in (0, 3):
+        print('      NEEDS ORDERS')   # the Next Unit cycle visits units with +08 of 0 (or 3)
     if 'raw' in sys.argv:
         print('      ', ' '.join('%02x' % b for b in o))
     node = nxt
