@@ -21,7 +21,8 @@ def window_origin():
 
 
 def to_game(x, y, ox, oy):
-    mx = 22 + 126 * (x - ox) + 63 * ((y & 1) - (oy & 1)); my = 140 + 130 * (y - oy)
+    # anchored on the SELECTED unit: Next Unit (and any order that selects a unit) scrolls the map so that unit's tile sits at mirror (589 + 63*(row odd), 530)
+    mx = 589 + 126 * (x - ox) + 63 * (y & 1); my = 530 + 130 * (y - oy)
     return mx, my, round((mx - 10.4) / 1.993), round((my - 34.5) / 1.993)
 
 
@@ -37,8 +38,9 @@ def busy_targets():
 
 def main():
     cmd = sys.argv[1] if len(sys.argv) > 1 else 'prospect'
-    o = window_origin()
-    if cmd != 'prospect':
+    st = selected_tile()
+    o = None if st is None or st < 0 else (st % rm.W, st // rm.W)
+    if cmd not in ('prospect', 'farmer', 'miner'):
         print(__doc__); return
     if o is None:
         print('scroll'); return
@@ -47,13 +49,24 @@ def main():
     best = None
     for i in range(rm.N):
         r = tiles[i * rm.STRIDE:(i + 1) * rm.STRIDE]
-        if r[0x10] == 0xff or r[0] not in (2, 3) or r[0x13] not in (8, 9) or rm.owner_of(tiles, prov, i) != me or r[0x0d] >> me & 1 or i in busy:
+        if rm.owner_of(tiles, prov, i) != me or i in busy:
+            continue
+        res = {rm.sbyte(r[0x11]), rm.sbyte(r[0x12])}
+        if cmd == 'prospect':
+            if r[0] not in (2, 3) or r[0x13] not in (8, 9) or r[0x0d] >> me & 1:
+                continue
+        elif cmd == 'farmer':          # farm / plantation / orchard tiles (grain 17, fruit 18, cotton 0 visible from the terrain)
+            if r[0x13] not in (2, 5, 6):
+                continue
+        elif not (r[0x0d] >> me & 1 and res & {3, 4, 21, 22}):   # miner: a mineral we have prospected
             continue
         x, y = i % rm.W, i // rm.W
         mx, my, gx, gy = to_game(x, y, ox, oy)
         if not (60 < mx < 1000 and 120 < my < 940):
             continue
-        d = abs(x - ox - 4) + abs(y - oy - 3)          # prefer tiles near the middle of the screen
+        if cmd != 'prospect' and rm.sbyte(r[0x11]) == -1 and rm.sbyte(r[0x12]) == -1 and cmd == 'miner':
+            continue
+        d = abs(x - ox) + abs(y - oy)          # nearest the selected unit (which is in the middle of the screen)
         if best is None or d < best[0]:
             best = (d, x, y, gx, gy)
     print('scroll' if best is None else '%d %d %d %d' % best[1:])
