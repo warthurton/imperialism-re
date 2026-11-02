@@ -3,7 +3,8 @@ tiles are 6,480 records of 0x24 bytes at +0xc, a 108 x 60 grid (index = y * 108 
 Usage: python -I readmap.py summary                       counts per terrain / kind / owner
        python -I readmap.py ascii [nation]                the grid as terrain letters (whole world, or only the nation's provinces)
        python -I readmap.py find <kind> [nation] [--unprospected]    list tiles of a kind (e.g. mountain, hills, forest, sea) in a nation
-       python -I readmap.py units [nation]                tiles that carry a unit pointer (+0x20), with the pointer and its vtable
+       python -I readmap.py structures [nation]           towns, capitals, ports, depots and rail pieces (with the tiles they link to) and their gatherer ids
+       python -I readmap.py units [nation]            tiles that carry a unit pointer (+0x20), with the pointer and its vtable
        python -I readmap.py dump <file>                   save the raw tile bytes (results/*.bin is git-ignored)
        python -I readmap.py diff <a.bin> <b.bin>          changed tiles, ignoring the viewport index (+0x10)
 Field decode (CONFIRMED = seen against the running game and the code; GUESS = only a pattern in the data, see docs/map.md):
@@ -16,7 +17,19 @@ Field decode (CONFIRMED = seen against the running game and the code; GUESS = on
   tile +0x14 (short)  province index 0-119, 0xffff on the sea; province +0 and +1 = owning nation (same value), +4 = the town's tile index   CONFIRMED
   tile +0x20 (dword)  pointer to the unit standing on the tile (moves with the unit)                                              CONFIRMED by a moving unit
   tile +0x10          index inside the currently visible window (9 x 8 tiles); a VIEW detail that changes when the map scrolls, not game state
-  tile +0x05, +0x06, +0x17, +0x1c, +0x0c, +0x0d, +0x02   GUESS: gatherer / structure fields (ports, depots, rail) near my ports; undecoded
+  tile +0x1c flags    0x04 port, 0x10 depot, 0x20 town, 0x08 national capital, 0x01/0x02 other town bits: ordinary town 0x22 (34), minor capital 0x29 (41),
+                      Great Power capital 0x3f (63 = town + capital + port + depot, as the manual says), a built depot 34 -> 50, a built port 0 -> 4.   CONFIRMED by
+                      the 7 + 16 capitals, my timber port and fish port, and AI ports and depots appearing in an end-turn diff; the 0x01 and 0x02 bits are a guess
+  tile +0x17          the same rail mask as the LOCAL PLAYER can see it: equal to +0x06 on my own rail, 0 on every AI rail (20 tiles differ in the saved game), so it
+                      looks like a fog-of-war copy. An autoplayer that plays with visible information only should read +0x17, not +0x06.   LIKELY (pattern, not tested by scouting)
+  tile +0x06          true rail mask, one bit per neighbour: 0 NE, 1 E, 2 SE, 3 SW, 4 W, 5 NW; odd rows are shifted half a tile to the right, so for an odd row
+                      NE = (x+1,y-1), NW = (x,y-1), SE = (x+1,y+1), SW = (x,y+1) and for an even row NE = (x,y-1), NW = (x-1,y-1), SE = (x,y+1), SW = (x-1,y+1).
+                      Both ends of a rail piece carry opposite bits.   CONFIRMED on my capital-to-port line (1, 40, 4) and on AI rail appearing in a diff
+  tile +0x05          id of the structure (depot, port or capital) that gathers this tile, 255 = none; a depot or port claims its own tile and the six neighbours that are
+                      land and not already claimed (my capital 4, timber port 2, fish port 3)   CONFIRMED pattern, meaning of the id numbers unknown
+  tile +0x0c, +0x0d, +0x02, +0x16, +0x19, +0x1e, +0x03/+0x04   undecoded (+0x0c = 1 on the capital and two coastal neighbours)
+Checked: all 36 rail links in the whole world are reciprocal (a piece pointing at a neighbour is pointed back at), which confirms the bit order and the staggered-row geometry.
+Not yet tested: developed levels; fog for ports/depots; no controlled Engineer build was run (the evidence is the saved game's existing structures plus one end-turn diff).
 """
 import ctypes, ctypes.wintypes as wt, os, struct, subprocess, sys, collections
 
@@ -67,6 +80,17 @@ def sbyte(b):
     return b - 256 if b > 127 else b
 
 
+DIRS = ['NE', 'E', 'SE', 'SW', 'W', 'NW']
+
+
+def linked_tile(i, bit):
+    """the neighbouring tile in rail-mask direction `bit` (0 NE, 1 E, 2 SE, 3 SW, 4 W, 5 NW); odd rows are shifted half a tile right"""
+    x, y = i % W, i // W
+    odd = y & 1
+    dx, dy = [(1 if odd else 0, -1), (1, 0), (1 if odd else 0, 1), (0 if odd else -1, 1), (-1, 0), (0 if odd else -1, -1)][bit]
+    return x + dx, y + dy
+
+
 def tile_info(tiles, prov, i):
     r = tiles[i * STRIDE:(i + 1) * STRIDE]
     res = [RES.get(sbyte(r[o]), str(sbyte(r[o]))) for o in (0x11, 0x12) if sbyte(r[o]) != -1]
@@ -111,6 +135,19 @@ def main():
             ok = (word in FIND and r[0] == FIND[word][1]) or word == info['kind'] or word in info['resources']
             if ok and (nation is None or info['owner'] == nation) and (not only_un or not info['prospected']):
                 print(info)
+    elif cmd == 'structures':
+        for i in range(N):
+            r = tiles[i * STRIDE:(i + 1) * STRIDE]
+            info = tile_info(tiles, prov, i)
+            if nation is not None and info['owner'] != nation:
+                continue
+            f, rail = r[0x1c], r[0x06]
+            names = [n for bit, n in ((0x08, 'capital'), (0x04, 'port'), (0x10, 'depot'), (0x20, 'town')) if f & bit]
+            if names or rail:
+                links = [linked_tile(i, b) for b in range(6) if rail & (1 << b)]
+                print('(%d,%d) %s%s%s gatherer id %s' % (info['x'], info['y'], ','.join(names) or 'rail',
+                      ' rail ' + ' '.join('%s->(%d,%d)' % (DIRS[b], *linked_tile(i, b)) for b in range(6) if rail & (1 << b)) if rail else '',
+                      ' [owner %s]' % info['owner'], r[5] if r[5] != 255 else '-'))
     elif cmd == 'units':
         for i in range(N):
             info = tile_info(tiles, prov, i)

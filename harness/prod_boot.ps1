@@ -7,8 +7,12 @@ param([string]$Fixture = 'oil_t0', [ValidateSet('test','sound','normal')][string
 $root = $PSScriptRoot
 $src = Join-Path (Split-Path $root) "saves\$Fixture.imp"
 if (-not (Test-Path $src)) { throw "no such fixture: $src" }
-if ($Restart) { Get-Process Imperialism -ErrorAction SilentlyContinue | Where-Object { -not $_.HasExited } | Stop-Process -Force; Start-Sleep -Seconds 2 }
-if (Get-Process Imperialism -ErrorAction SilentlyContinue | Where-Object { -not $_.HasExited }) { throw 'the game is already running: use -Restart (loading from the title screen needs a fresh launch)' }
+# -Restart stops only the game THIS harness started (pid in results\game.pid); a game the user runs themselves is never killed, the script stops instead.
+$pidFile = Join-Path (Split-Path $root) 'results\game.pid'
+$ours = if (Test-Path $pidFile) { [int](Get-Content $pidFile) } else { 0 }
+if ($Restart) { Get-Process Imperialism -ErrorAction SilentlyContinue | Where-Object { -not $_.HasExited -and $_.Id -eq $ours } | Stop-Process -Force; Start-Sleep -Seconds 2 }
+$running = @(Get-Process Imperialism -ErrorAction SilentlyContinue | Where-Object { -not $_.HasExited })
+if ($running.Count) { throw "Imperialism is already running (pid $($running.Id -join ', ')); it is not ours to kill unless it is the harness game. Ask the user to close it, or stop it with prod_end.ps1 -All when they say so." }
 & "$root\prod_vol.ps1" -Mode $Volumes
 # Windows' compatibility assistant adds 'IgnoreFreeLibrary' to the exe after a crash, which makes it load the SYSTEM winmm (no music).
 $layerKey = 'HKCU:\Software\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\Layers'; $exePath = 'C:\GOG Games\Imperialism\Imperialism.exe'
@@ -20,6 +24,7 @@ $ini = 'C:\GOG Games\Imperialism\imperialism_shim.ini'
 if (-not (Test-Path $ini) -or -not (Select-String -Path $ini -Pattern '^\[text_log\]' -Quiet)) { Add-Content -Path $ini -Value "`r`n[text_log]`r`nenabled=1" }
 $sw = [Diagnostics.Stopwatch]::StartNew()
 $game = Start-Process $exePath -WorkingDirectory 'C:\GOG Games\Imperialism' -PassThru
+New-Item -ItemType Directory -Force (Split-Path $pidFile) | Out-Null; Set-Content -Path $pidFile -Value $game.Id
 $t = 0; while ((Mirror) -eq [IntPtr]::Zero -and $t -lt 60) { Start-Sleep -Milliseconds 500; $t++ }
 Start-Sleep -Seconds 3; Wait-Stable -Max 12
 Click-Wait 240 340                    # Ship in the Bottle -> Load Saved Game screen

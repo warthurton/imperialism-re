@@ -15,10 +15,14 @@
   | +0x01 bit 0 | prospected flag | confirmed on my mountains |
   | +0x20 (dword) | pointer to the unit on the tile (vtable 0x66ee60 for my civilians; moves with the unit) | confirmed by a moving unit |
   | +0x10 | index inside the visible window (9 x 8 tiles): changes when the map scrolls, **not game state** | confirmed (the user scrolled the view; 72 tiles renumbered) |
-  | +0x05, +0x06, +0x17, +0x1c, +0x0c, +0x0d, +0x02, +0x16 | probably gatherer / structure / rail / level fields: +0x05 changed 255 -> 1..3 on small clusters of tiles when AI or I built something, +0x1c rose 34 -> 50 on one tile | **undecoded**: next, diff before/after an Engineer builds a depot, a port and rail |
+  | +0x1c | structure flags: 0x04 port, 0x10 depot, 0x20 town, 0x08 national capital (0x01 / 0x02: other town bits, a guess). Ordinary town 34, minor capital 41, Great Power capital 63 (town + capital + port + depot), built depot 34 -> 50, built port 0 -> 4 | confirmed (7 + 16 capitals, my two ports, AI port and depot appearing in a turn diff) |
+  | +0x06 | true rail mask: bit 0 NE, 1 E, 2 SE, 3 SW, 4 W, 5 NW; odd rows are shifted half a tile right (odd row: NE = (x+1,y-1), NW = (x,y-1), SE = (x+1,y+1), SW = (x,y+1); even row: NE = (x,y-1), NW = (x-1,y-1), SE = (x,y+1), SW = (x-1,y+1)); both ends of a piece carry opposite bits | confirmed: all 36 rail links in the world are reciprocal, and my capital-to-port line reads 1, 40, 4 |
+  | +0x17 | the same rail mask **as the local player can see it**: equal to +0x06 on my rail, 0 on all AI rail (20 tiles differ), a fog-of-war copy | likely (pattern only; test by scouting) |
+  | +0x05 | id of the structure (depot, port, capital) that gathers the tile, 255 = none; a structure claims its own tile and the neighbouring land tiles not already claimed (my capital 4, timber port 2, fish port 3) | confirmed pattern; the numbering is unknown |
+  | +0x0c, +0x0d, +0x02, +0x16, +0x19, +0x1e | undecoded (+0x0c = 1 on the capital and two coastal neighbours) | open |
   | +0x03 = +0x04 | 0-80, always equal | unknown (art variant?) |
-* **Caution for autoplay**: the unprospected deposits (and the gems and iron under a mountain) are readable from memory before the player would know them. That is legal for a test bot but not what a player sees: decide
-  whether an autoplayer should use them or only prospected tiles (`prospected` flag) and the deposit icons the Prospector toolbar already shows.
+* **Rule for autoplay (decided by the user, 2026-11-01)**: when we are just playing the game, use **player-visible information only**: prospected tiles (the `prospected` flag), the deposit icons the toolbar shows, what is on screen.
+  The unprospected deposits (and any other hidden data) are readable from memory, and may be used **only to test something specific faster** (a fixture, a decode, a rule check), never while playing. `readmap.py find ... --unprospected` is such a test aid.
 * **How it was checked**: per-offset histograms of the 6,480 tiles; the owner map rebuilt from provinces (my country lies at x 44-57, y 39-56 with sea to its west, as on screen); a turn-end diff (152 tiles changed, mostly the
   scrolled window and moving units); the unit pointers of my 7 civilians.
-* **Open**: structures (depot, port, rail) and their "connected" state; the capital's tile; developed levels (the Farmer / Miner / Forester level of a tile); per-tile unit object layout (type, order, cycle order); fog.
+* **Open**: whether a depot is "connected" (the green/red lights; probably derived from rail reaching the capital, not stored per tile), fog for ports and depots; the capital's tile; developed levels (the Farmer / Miner / Forester level of a tile); per-tile unit object layout (type, order, cycle order); fog.
