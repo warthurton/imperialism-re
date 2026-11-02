@@ -52,6 +52,33 @@ def main():
         w = window_origin()                              # click candidates from a different shift if the first misses (a wrong guess hits another tile or nothing)
         o = None if w is None else (w[0], w[1] - int(sys.argv[2]))
         conv = to_game_win
+    if cmd == 'tile':      # tile X Y -> game pixels of that tile, anchored on the selected unit (any tile, no eligibility test)
+        tx, ty = int(sys.argv[2]), int(sys.argv[3])
+        if o is None:
+            print('scroll'); return
+        mx, my, gx, gy = to_game(tx, ty, o[0], o[1]); print('%d %d %d %d' % (tx, ty, gx, gy)); return
+    if cmd == 'engineer':   # 'here' if the selected Engineer stands on a tile worth a depot, else game pixels of the nearest such tile, else 'none'
+        def worth(i):        # own land, nobody gathers it yet (+0x05 = 255), no structure, and it carries something to gather (visible farm kinds or a prospected mineral)
+            r = tiles[i * rm.STRIDE:(i + 1) * rm.STRIDE]
+            if r[0x05] != 255 or r[0x1c] or rm.owner_of(tiles, prov, i) != me or r[0] == 5:
+                return False
+            res = {rm.sbyte(r[0x11]), rm.sbyte(r[0x12])}
+            return r[0x13] in (2, 5, 6) or bool(r[0x0d] >> me & 1 and res & {3, 4, 21, 22})
+        if o is None:
+            print('none'); return
+        if worth(st):
+            print('here'); return
+        best = None
+        for i in range(rm.N):
+            if worth(i) and i not in busy_targets():
+                x, y = i % rm.W, i // rm.W
+                d = abs(x - o[0]) + abs(y - o[1])
+                if best is None or d < best[0]:
+                    best = (d, x, y)
+        if best is None:
+            print('none'); return
+        mx, my, gx, gy = to_game(best[1], best[2], o[0], o[1])
+        print('%d %d %d %d' % (best[1], best[2], gx, gy) if 60 < mx < 1000 and 120 < my < 940 else 'scroll'); return
     if cmd not in ('prospect', 'farmer', 'miner'):
         print(__doc__); return
     if o is None:
