@@ -19,6 +19,8 @@ Game Controls (top-bar icon) -> Load Game -> slot 0.
 
 | `play_fall1817.imp` ("Play Fall 1817 turn 11") | Played by hand from `t0_clean_start` (Brosoptendall, power 3): Fall 1817, cash $74,252, all mills capacity 4 (clothing/furniture 2), two ports (timber, fish), rail port-to-capital, consulates with Twelt and four more minors, Iron/Cotton/Wool stocks near 0, 29 idle labor. No techs beyond the starting two. |
 
+| `depot_unconnected.imp` ("Depot unconnected Fall1818") | `play_fall1817` plus four more turns: a Depot built on the farm tile (48,50) with **no rail to it**, cash about $88,700, game turn 14. Structure list reads depot `connected=0`. Used for the "connected" research (`docs/map.md`). The Engineers sit at (47,48) (rail end beside the capital) and (45,50). |
+
 Add new fixtures here with a one-line description (what turn, what orders, what stock) so tests can name them.
 
 ## Naming saves
