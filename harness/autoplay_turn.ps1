@@ -4,7 +4,7 @@
 # usage: autoplay_turn.ps1 [-Turns 1]      needs a running game on the terrain map (prod_boot.ps1 first). Modal popups are never opened here.
 param([int]$Turns = 1)
 $root = $PSScriptRoot; $re = Split-Path $root
-. "$root\gw.ps1"; . "$root\fast.ps1"
+. "$root\gw.ps1"; . "$root\focus.ps1"; . "$root\fast.ps1"
 $py = (Get-Command python).Source
 function Needs { (& $py -I "$re\tools\readunits.py" needs | Select-String 'NEEDS ORDERS').Count }
 function Selected { & $py -I "$re\tools\readunits.py" sel }
