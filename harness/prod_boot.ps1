@@ -20,7 +20,7 @@ if (((Get-ItemProperty $layerKey -ErrorAction SilentlyContinue).$exePath) -match
 . "$root\gw.ps1"; . "$root\focus.ps1"; . "$root\fast.ps1"
 Copy-Item $src 'C:\GOG Games\Imperialism\Save\slot0.imp' -Force
 # The shim can log every string the game draws (imperialism_text.log); switch that on so tests can READ screens (tools/readtext.py, prod_do "mark" / "txt").
-. "$root\textlog.ps1"; Set-TextLog -On       # sets [text_log] enabled=1 (the user's value is remembered and put back by prod_end.ps1)
+. "$root\textlog.ps1"; Set-TextLog -On; Set-TestHook       # sets [text_log] enabled=1 (the user's value is remembered and put back by prod_end.ps1)
 $sw = [Diagnostics.Stopwatch]::StartNew()
 $game = Start-Process $exePath -WorkingDirectory 'C:\GOG Games\Imperialism' -PassThru
 New-Item -ItemType Directory -Force (Split-Path $pidFile) | Out-Null; Set-Content -Path $pidFile -Value $game.Id

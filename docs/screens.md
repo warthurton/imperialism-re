@@ -72,3 +72,11 @@ to `imperialism_text.log` in the game folder when `imperialism_shim.ini` has `[t
 prints what a screen drew: the Board of Trade's prices and quantities, the diplomacy "Information:" panel (Provinces / Military / Industry), hot text, the load
 screen's slot names. Positions are in the game's own 640x480 coordinates (or the off-screen bitmap's). Installed build: `shim/build20.dll` (build 17 plus the
 text log; the previous shim is saved as `original/msvfw32_before_textlog.dll`, and the log does nothing unless the ini switches it on).
+
+## The shim test hook (2026-11-02): clicking modal popups without focus
+
+`compat` branch `topic/test-click-hook` (local commit 5d5add0, not pushed): with `[test_hook] enabled=1` in `imperialism_shim.ini` the mirror window accepts `WM_APP+0x40` (0x8040) whose lParam = MAKELPARAM(x, y) in **game pixels**; the shim replays move / press / release through its normal mouse path (`input_relay_mouse`), so it needs no focus, no cursor and works on the modal pop-ups (Construction Options, advice, Civilian Report) whose buttons ignored posted dialog clicks.
+`harness/msgclick.ps1 "hc X Y"` sends it (PostMessage, returns at once); `harness/textlog.ps1` switches the flag on in `prod_boot.ps1` and puts the user's value back in `prod_end.ps1`. Verified: Next Unit, opening and cancelling the 328x70 popup, the advice OK.
+Buttons in game pixels: advice OK (406,364); Civilian Report Confirm (339,299); Construction Options option button = popup + (34, text y + 10), Cancel = popup + (46, height - 17), popup origin from `Get-Dialog`.
+Bug found on the way: game pixels are measured from the DWM source rectangle's own corner (it starts at (8,29) inside the frame window), not from the frame window's corner.
+The installed `msvfw32.dll` is now the built one with the hook (disabled by default); the previous one is in `results/shim_backup/msvfw32.dll.before_testhook`.

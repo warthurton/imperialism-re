@@ -79,6 +79,80 @@ def main():
             print('none'); return
         mx, my, gx, gy = to_game(best[1], best[2], o[0], o[1])
         print('%d %d %d %d' % (best[1], best[2], gx, gy) if 60 < mx < 1000 and 120 < my < 940 else 'scroll'); return
+    if cmd == 'rail':
+        # Connect an unconnected depot to the rail network with the selected Engineer. Output: "lay GX GY" (the Engineer stands at one end of the next missing
+        # piece: click the other end), "move GX GY" (deploy him to that end first), or "none". Uses only what the player sees: our own rail (+0x17), our land, terrain.
+        if o is None:
+            print('none'); return
+        W = rm.W
+        def rail(i):
+            return tiles[i * rm.STRIDE + 0x17]
+        def nbrs(i):
+            return [(b, rm.linked_tile(i, b)) for b in range(6) if 0 <= rm.linked_tile(i, b)[0] < W and 0 <= rm.linked_tile(i, b)[1] < rm.H]
+        def idx(t):
+            return t[1] * W + t[0]
+        def can(i):           # early rail: plains, forest, farmland on our own land (hills, mountains, swamp need technology)
+            r = tiles[i * rm.STRIDE:(i + 1) * rm.STRIDE]
+            return r[0] in (0, 1, 7) and rm.owner_of(tiles, prov, i) == me
+        capital = [i for i in range(rm.N) if tiles[i * rm.STRIDE + 0x1c] & 0x08 and rm.owner_of(tiles, prov, i) == me]
+        if not capital:
+            print('none'); return
+        # tiles already tied to the capital by rail
+        net = set(capital); stack = list(capital)
+        while stack:
+            i = stack.pop()
+            for b, t in nbrs(i):
+                j = idx(t)
+                if rail(i) >> b & 1 and j not in net:
+                    net.add(j); stack.append(j)
+        depots = [i for i in range(rm.N) if tiles[i * rm.STRIDE + 0x1c] & 0x10 and rm.owner_of(tiles, prov, i) == me and i not in net]
+        occupied = busy_targets() - {o[1] * W + o[0]}
+        best = None
+        for d in depots:
+            # breadth-first search from the depot over tiles rail can cross, to the nearest tile of the network (ports/depots count as network ends only if in `net`)
+            # Prefer to end on a plain rail tile: a click onto a town/port tile was not accepted in play (linking onto (47,48) was), so structure tiles are goals only as a fallback.
+            for goals in ({j for j in net if not tiles[j * rm.STRIDE + 0x1c]}, net):
+                prev = {d: None}; queue = [d]; goal = None
+                while queue and goal is None:
+                    nxt = []
+                    for i in queue:
+                        for b, t in nbrs(i):
+                            j = idx(t)
+                            if j in prev:
+                                continue
+                            if j in goals:
+                                prev[j] = i; goal = j; break
+                            if can(j):
+                                prev[j] = i; nxt.append(j)
+                        if goal is not None:
+                            break
+                    queue = nxt
+                if goal is not None:
+                    break
+            if goal is None:
+                continue
+            path = []; k = goal
+            while k is not None:
+                path.append(k); k = prev[k]
+            path.reverse()            # depot ... goal
+            for a, b2 in zip(path, path[1:]):
+                bit = [rm.linked_tile(a, bb) for bb in range(6)].index((b2 % W, b2 // W))
+                if not (rail(a) >> bit & 1):
+                    if a in occupied or b2 in occupied:      # another unit stands there: clicking it opens its Civilian Report instead of giving an order
+                        break
+                    dist = abs(a % W - o[0]) + abs(a // W - o[1])
+                    if best is None or dist < best[0]:
+                        best = (dist, a, b2)
+                    break
+        if best is None:
+            print('none'); return
+        _, a, b2 = best
+        here = o[1] * W + o[0]
+        for tile, word in ((b2, 'lay'), (a, 'move')) if here == a else ((a, 'move'),):
+            mx, my, gx, gy = to_game(tile % W, tile // W, o[0], o[1])
+            if 60 < mx < 1000 and 120 < my < 940:
+                print('%s %d %d' % (word, gx, gy)); return
+        print('none'); return
     if cmd not in ('prospect', 'farmer', 'miner'):
         print(__doc__); return
     if o is None:

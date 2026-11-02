@@ -15,7 +15,11 @@ function Clear-Popups([long]$Mark = -1) {
     $d = Get-Dialog; $txt = if ($Mark -ge 0) { (Text-Since $Mark) -join "`n" } else { '' }
     if (($d -and $d.W -eq 390 -and $d.H -eq 282) -or $txt -match 'Advice from your') {
       Write-Host "  advice popup ($(($txt -split "`n" | Where-Object { $_ -match 'Advice|Resources|Minister' } | Select-Object -First 2) -join ' | ')): OK"
-      Click-Wait 820 760; $Mark = Text-Mark; Start-Sleep -Milliseconds 300
+      & "$root\msgclick.ps1" 'hc 406 364' | Out-Null; $Mark = Text-Mark; Start-Sleep -Milliseconds 300     # OK button, by the shim's test hook (no focus needed)
+    } elseif (($d -and $d.W -eq 300 -and $d.H -eq 200) -or $txt -match 'Civilian Report') {
+      # clicking a unit that is already working opens its Civilian Report (Rescind / Confirm): keep its orders with Confirm (mirror (685,630) = game (339,299))
+      Write-Host '  civilian report: Confirm'
+      & "$root\msgclick.ps1" 'hc 339 299' | Out-Null; $Mark = Text-Mark; Start-Sleep -Milliseconds 300
     } else { break }
   }
 }
@@ -37,15 +41,22 @@ function Build-Depot($sel) {
   if ($txt -notmatch 'Construction Options' -or -not $d) { Clear-Popups $m; return $false }
   $line = ($txt -split "`n") | Where-Object { $_ -match '^\d+,\d+ \(\$[\d,]+\) A connected Depot' } | Select-Object -First 1
   if ($line -and $line -match '^(\d+),(\d+) ') {
-    $p = Mirror-Game ($d.X + 34) ($d.Y + [int]$Matches[2] + 10); Write-Host "  depot: $line"
-    Click-Wait $p[0] $p[1]; Start-Sleep -Milliseconds 500
+    Write-Host "  depot: $line"
+    & "$root\msgclick.ps1" "hc $($d.X + 34) $($d.Y + [int]$Matches[2] + 10)" | Out-Null; Start-Sleep -Milliseconds 500
     if ((Needs) -lt $before) { return $true }
   }
-  if (Get-Dialog) { $c = Mirror-Game ($d.X + 46) ($d.Y + $d.H - 17); Click-Wait $c[0] $c[1] }      # Cancel (never SC_CLOSE: that crashes the game)
+  if (Get-Dialog) { & "$root\msgclick.ps1" "hc $($d.X + 46) $($d.Y + $d.H - 17)" | Out-Null; Start-Sleep -Milliseconds 500 }      # Cancel (never SC_CLOSE: that crashes the game)
   return $false
 }
 function Engineer-Order($sel) {
-  $t = (& $py -I "$re\tools\maptarget.py" engineer); $before = Needs
+  $before = Needs
+  # First priority: an unconnected depot gathers nothing, so lay the next missing piece of rail towards the network ($100, one turn per piece).
+  $r = (& $py -I "$re\tools\maptarget.py" rail)
+  if ($r -match '^(lay|move) (\d+) (\d+)$') {
+    Click-Game "$($Matches[2]) $($Matches[3])"; Start-Sleep -Milliseconds 400
+    if ((Needs) -lt $before) { Write-Host "  engineer $r"; return }
+  }
+  $t = (& $py -I "$re\tools\maptarget.py" engineer)
   if ($t -eq 'here') { if (Build-Depot $sel) { return } }
   elseif ($t -match '^\d+ \d+ (\d+) (\d+)$') {
     Click-Game "$($Matches[1]) $($Matches[2])"; Start-Sleep -Milliseconds 400     # redeploy (one turn); next turn he is idle on the tile and 'here' fires
@@ -55,7 +66,7 @@ function Engineer-Order($sel) {
 }
 function Order-Unit($sel) {
   if ($sel -match "'type': 4,") { Engineer-Order $sel; return }
-  $kind =if ($sel -match "'type': 1,") { 'prospect' } elseif ($sel -match "'type': 2,") { 'farmer' } elseif ($sel -match "'type': 0,") { 'miner' } else { $null }
+  $kind = if ($sel -match "'type': 1,") { 'prospect' } elseif ($sel -match "'type': 2,") { 'farmer' } elseif ($sel -match "'type': 0,") { 'miner' } else { $null }
   if (-not $kind) { Sleep-Unit; return }
   $before = Needs
   # Try the screen as Next Unit left it (the unit is centred). A Prospector with nothing there scrolls with the toolbar "Search In" tiles; after a scroll no unit is
@@ -76,7 +87,10 @@ for ($t = 1; $t -le $Turns; $t++) {
   Clear-Popups; Post-Key 0x57; Start-Sleep -Milliseconds 500
   $n = Needs; $guard = 0
   while ($n -gt 0 -and $guard -lt 15) {
-    Click-Game '563 166'; Start-Sleep -Milliseconds 500      # Next Unit selects one that needs orders
+    $m = Text-Mark; Click-Game '563 166'; Start-Sleep -Milliseconds 500      # Next Unit selects one that needs orders
+    # The cycle also offers garrisons and fleets (the toolbar then shows "Force Size: N"); memory's selected-civilian slot still names the OLD civilian then, so every
+    # click would go to the wrong unit. Send them to sleep (until the next 'w') and look again.
+    if (((Text-Since $m) -join "`n") -match 'Force Size|Fleet') { Write-Host "turn $t : military unit in the cycle: sleep"; Click-Game '621 166'; $guard++; continue }
     $s = Selected; Write-Host "turn $t : order $s"
     Order-Unit $s; Start-Sleep -Milliseconds 700
     $n2 = Needs; if ($n2 -ge $n) { $guard += 3 }; $n = $n2; $guard++

@@ -39,6 +39,9 @@ foreach ($raw in $Steps.Split(';')) {
   switch ($t[0]) {
     'g'      { Send-Click (Game-Handle) ([int]$t[1]) ([int]$t[2]) }      # synchronous: do NOT use on a click that opens a modal popup (it blocks until the popup closes)
     'gp'     { Post-Click (Game-Handle) ([int]$t[1]) ([int]$t[2]) }      # posted (returns at once): use for clicks that open a construction/report popup, then close it with 'dcancel'
+    # hc X Y: SHIM TEST HOOK. The shim itself clicks game pixel X,Y exactly like a real mouse (no focus, no cursor), so it also works on modal popups' buttons.
+    # Needs the shim built with the hook and [test_hook] enabled=1 (harness/textlog.ps1 does that). Posted to the mirror window (WM_APP+0x40 = 0x8040).
+    'hc'     { [GW]::PostMessage((Mirror), 0x8040, [IntPtr]0, (Lparam ([int]$t[1]) ([int]$t[2]))) | Out-Null; Start-Sleep -Milliseconds 600 }
     'd'      { Send-Click (Dialog-Handle) ([int]$t[1] - 3) ([int]$t[2] - 26) }
     'dp'     { Post-Click (Dialog-Handle) ([int]$t[1] - 3) ([int]$t[2] - 26); Start-Sleep -Milliseconds 400 }   # posted click in a dialog (position from the window's top-left): use for MODAL popups (Civilian Report: Confirm (228,153), Rescind (95,153) in the 300x200 window)
     'dcancel' { Post-Click (Dialog-Handle) 43 24; Start-Sleep -Milliseconds 400 }   # Cancel of the 328x70 empty "Construction Options" popup: window position (46,50) minus the (3,26) offset; posted, never SC_CLOSE. Other popup sizes have the buttons elsewhere (untested)

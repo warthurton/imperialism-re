@@ -5,7 +5,7 @@ param([switch]$All)
 $pidFile = Join-Path (Split-Path $PSScriptRoot) 'results\game.pid'
 $ours = if (Test-Path $pidFile) { [int](Get-Content $pidFile) } else { 0 }
 Get-Process Imperialism -ErrorAction SilentlyContinue | Where-Object { -not $_.HasExited -and ($All -or $_.Id -eq $ours) } | Stop-Process -Force
-. "$PSScriptRoot\textlog.ps1"; Restore-TextLog      # put the user's [text_log] enabled= value back
+. "$PSScriptRoot\textlog.ps1"; Restore-TextLog; Restore-TestHook      # put the user's [text_log] enabled= value back
 if (Test-Path $pidFile) { Set-Content -Path $pidFile -Value 0 }      # (Remove-Item on C:\GOG paths is blocked; 0 = no game of ours)
 $left = @(Get-Process Imperialism -ErrorAction SilentlyContinue | Where-Object { -not $_.HasExited })
 if ($left.Count) { "note: $($left.Count) other Imperialism process(es) still running (not started by this harness): $($left.Id -join ', ')" }
