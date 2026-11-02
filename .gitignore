@@ -64,3 +64,5 @@ docs/manual/
 tools/ocr.local.json
 results/game.pid
 results/textlog.orig
+results/testhook.orig
+results/shimbuild/
