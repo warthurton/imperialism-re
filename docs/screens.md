@@ -49,6 +49,17 @@ a global key press (`keybd_event`) stopped reaching the game partway through a s
 game frame and the `AmbitGameWindow` worked every time. `prod_do.ps1 "go industry|transport|trade|diplomacy|tech|map"` uses that and
 `readview.py id` to confirm: transport 2014, industry 2011, trade 2009, diplomacy 2008, tech 2300, map 2013.
 
+## Clicking by window messages (`harness/msgclick.ps1`, spike 2026-11-01)
+
+Mouse clicks can be sent straight to the game's own windows, in game pixels, with no focus, no mirror scaling, no cursor movement, and **with the game minimized** (checked: the Trade School plus/minus
+charged and refunded $100 while both the game frame and the mirror were minimized). The Compat shim relays real clicks with `SendMessage` (WM_MOUSEMOVE, WM_LBUTTONDOWN with MK_LBUTTON, WM_LBUTTONUP) to the
+deepest visible child window under the pointer, in that window's **client** coordinates (`compat/src/input.c`, `resolve_target`); `msgclick.ps1` does the same.
+* **Map, toolbar, screens**: target the 640x480 `AmbitGameWindow` with game pixels (mirror = 10.4 + 1.993 x). Example: factory icon (563,131) opens the Industry screen, back arrow (23,50).
+* **Dialogs** are `AmbitMcWindow` children of the frame. Their window rect includes a 3 px border and 26 px caption, so a control position measured from the window's top-left (the `$script:DLG` numbers in `fast.ps1`) must have **(3,26) subtracted** for the message. Wrong offsets simply do nothing.
+* **Choose the dialog by size** (`Get-Dialog`): a second visible `AmbitMcWindow` (a side panel, 182x329) can come first when enumerating. Handles change every time a dialog opens, so look them up per click.
+* **Closing a dialog**: post `WM_SYSCOMMAND` `SC_CLOSE` (0xF060) to it (what the shim does for the title-bar X).
+* Not needed: hovering the real cursor, `Ensure-Focus`, the mirror. Not yet tried: slider drags (WM_MOUSEMOVE with MK_LBUTTON between down and up), right-click, the construction popups, the Civilian Report/advice popups.
+
 ## Reading what is on screen
 
 Screenshots are the slow way. The display shim can log every string the game draws (it hooks `TextOutA`, `ExtTextOutA`, `TabbedTextOutA`, `DrawTextA`)
