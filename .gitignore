@@ -63,3 +63,4 @@ results/idle*
 docs/manual/
 tools/ocr.local.json
 results/game.pid
+results/textlog.orig
